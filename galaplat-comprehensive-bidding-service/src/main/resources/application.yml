@@ -1,0 +1,90 @@
+server:
+  id: 0409
+  port: 8046
+  tomcat:
+    accept-count: 500 # Maximum queue length for incoming connection requests when all possible request processing threads are in use.
+    max-connections: 500 # Maximum number of connections that the server will accept and process at any given time.
+    max-threads: 500 # Maximum amount of worker threads.
+    min-spare-threads: 200  # Minimum amount of worker threads.
+
+http:
+  mappers:
+    json-pretty-print: false  # pretty print JSON  
+    json-sort-keys: false  # sort keys  
+endpoints:
+  health:
+    sensitive: false
+
+# Expose MBeans from Spring
+spring:
+  jackson:
+    time-zone: GMT+8 # 部署服务器时间区域
+    date-format: yyyyMMddHHmmss
+    joda-date-time-format: yyyyMMddHHmmss
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB # MULTIPART (MultipartProperties)
+      max-request-size: 5MB  # Max request size. Values can use the suffixed "MB" or "KB" to indicate a Megabyte or Kilobyte size.
+  application: 
+    name: galaplat-comprehensive-reservation
+  redis:
+    host: ser03.dev.esr.local
+    port: 6379
+    password: Esr16888
+  session:
+    store-type: redis
+    redis:
+      flush-mode: on_save
+  mail:
+    host: smtp.yeqee.com
+    username: usercentre@yeqee.com
+    password: y72aNjEGC8LkfDkh
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  main:
+    allow-bean-definition-overriding: true
+
+
+management:
+  security:
+    enabled: false
+    context-path: /manage
+#    role: SUPERUSER
+ 
+#security:
+#  user:
+#    name: admin
+#    password: 123456
+
+datasource:
+    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_reservation?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: Esr16888
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 8
+      min-idle: 5
+      max-active: 100
+      query-timeout: 6000
+      transaction-query-timeout: 6000
+      remove-abandoned-timeout: 1800
+      filters: stat,config
+# 钉钉配置
+dingtalk:
+  app-key: dingvzited6gmdgfgwww
+  app-secret: fA9ZImCf7aso2y5jFzo6qOzHdGAxjNYuFCSmTQEEldKzFSgOJjRb06RxwfvepMnl
+  agent-id: 787739856
+  corp-id: ding93375f885bdf549635c2f4657eb6378f
+
+
+
+
+
+
