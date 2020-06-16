@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.reservation.dao.config;
+package com.galaplat.comprehensive.bidding.dao.config;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -26,7 +26,7 @@ import com.github.pagehelper.PageInterceptor;
 @Component
 @Configuration
 @EnableTransactionManagement
-@MapperScan(basePackages = { "com.galaplat.comprehensive.reservation.dao.mappers.**",
+@MapperScan(basePackages = { "com.galaplat.comprehensive.bidding.dao.mappers.**",
 		"com.galaplat.baseplatform.permissions.dao.mappers.**","com.galaplat.baseplatform.serialnumber.plugin2.dao.mappers.**" }, sqlSessionFactoryRef = "mySqlSessionFactory", sqlSessionTemplateRef = "mySqlSessionTemplate")
 public class MysqlDataSourceBase {
 

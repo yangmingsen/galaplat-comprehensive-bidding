@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.reservation.config;
+package com.galaplat.comprehensive.bidding.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;

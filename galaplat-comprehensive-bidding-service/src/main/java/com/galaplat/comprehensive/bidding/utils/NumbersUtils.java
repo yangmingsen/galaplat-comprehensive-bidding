@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.reservation.utils;
+package com.galaplat.comprehensive.bidding.utils;
 
 public class NumbersUtils {
 	public static boolean isNumeric(String str){

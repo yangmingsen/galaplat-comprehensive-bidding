@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.reservation.controllers;
+package com.galaplat.comprehensive.bidding.controllers;
 
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.google.common.collect.Maps;

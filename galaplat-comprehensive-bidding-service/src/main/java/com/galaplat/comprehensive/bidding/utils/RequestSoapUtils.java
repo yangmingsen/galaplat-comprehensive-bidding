@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.reservation.utils;
+package com.galaplat.comprehensive.bidding.utils;
 
 import java.nio.charset.Charset;
 

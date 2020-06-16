@@ -1,24 +1,21 @@
-package com.galaplat.comprehensive.reservation.config;
+package com.galaplat.comprehensive.bidding.config;
 
 
-import com.galaplat.base.core.springboot.converts.WebMvcConfigurationSupportConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+
+import com.galaplat.base.core.springboot.converts.WebMvcConfigurationSupportConfigurer;
 import com.galaplat.baseplatform.permissions.interceptor.AppAccountInterceptor;
 import com.galaplat.baseplatform.permissions.interceptor.LoginSecurityInterceptor;
 import com.galaplat.baseplatform.permissions.interceptor.PermissionsInterceptor;
-import com.galaplat.comprehensive.reservation.interceptors.MobileInterceptor;
 
 @Configuration
 public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer {
 
-    @Bean
-    public MobileInterceptor getMobileInterceptor() {
-        return new MobileInterceptor();
-    }
 
-    @Bean
+
+   /* @Bean
     public PermissionsInterceptor getPermissionsInterceptor() {
         return new PermissionsInterceptor();
     }
@@ -31,7 +28,6 @@ public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-
         registry.addInterceptor(new LoginSecurityInterceptor()).addPathPatterns("/**")
                 .excludePathPatterns("/api/**").excludePathPatterns("/mobile/**");
 
@@ -42,10 +38,6 @@ public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer 
         registry.addInterceptor(getPermissionsInterceptor()).addPathPatterns("/**")
                 .excludePathPatterns("/sync/**", "/autoh/**").excludePathPatterns("/api/**").excludePathPatterns("/mobile/**");
 
-
-        registry.addInterceptor(getMobileInterceptor())
-                .addPathPatterns("/mobile/**")
-                .excludePathPatterns("/mobile/login");
-    }
+    }*/
 }
 

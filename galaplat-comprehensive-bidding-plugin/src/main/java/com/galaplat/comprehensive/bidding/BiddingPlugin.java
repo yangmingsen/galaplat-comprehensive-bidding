@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.reservation;
+package com.galaplat.comprehensive.bidding;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

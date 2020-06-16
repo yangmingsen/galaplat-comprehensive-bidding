@@ -1,9 +1,7 @@
-package com.galaplat.comprehensive.reservation;
+package com.galaplat.comprehensive.bidding;
 
 import org.galaplat.baseplatform.file.plugin.FilePlugin;
-import org.galaplat.baseplatform.file.upload.UploadPlugin;
 import org.slf4j.MDC;
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
@@ -29,13 +27,13 @@ import com.galaplat.baseplatform.serialnumber.plugin2.SerialnumberPlugin2;
 @EnableAsync
 @EnableFeignClients
 @org.springframework.context.annotation.Import({com.galaplat.base.core.springboot.CommonConfig.class, PermissionPlugin.class,
-        ReservationPlugin.class, SerialnumberPlugin2.class, FilePlugin.class})
+	SerialnumberPlugin2.class, FilePlugin.class})
 @EnableMBeanExport(registration = org.springframework.jmx.support.RegistrationPolicy.IGNORE_EXISTING)
 public class GalaplatComprehensiveBiddingApp implements CommandLineRunner {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(GalaplatComprehensiveReservationApp.class, args);
+        SpringApplication.run(GalaplatComprehensiveBiddingApp.class, args);
     }
 
     public void run(String... args) throws Exception {
