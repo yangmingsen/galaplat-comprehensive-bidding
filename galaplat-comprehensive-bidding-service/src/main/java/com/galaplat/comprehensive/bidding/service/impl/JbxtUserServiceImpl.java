@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 
+import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.BeanCopyUtils;
-import com.galaplat.base.core.common.utils.HttpResultUtils;
 
 
 import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
@@ -25,7 +25,9 @@ import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 
- /**
+import javax.servlet.http.HttpServletRequest;
+
+/**
  * 用户表ServiceImpl
  * @author esr
  * @date: 2020年06月17日
@@ -33,11 +35,31 @@ import com.google.common.collect.Lists;
  @Service
 public  class JbxtUserServiceImpl implements IJbxtUserService  {
 
+ 	Logger LOGGER = LoggerFactory.getLogger(JbxtUserServiceImpl.class);
+
+	@Autowired
+	private HttpServletRequest httpServletRequest;
 
 	@Autowired
 	IJbxtUserDao jbxtuserDao;
-	
-    @Override
+
+	 @Override
+	 public boolean handlerLogin(String username, String password) {
+
+		 JbxtUserDO jud = jbxtuserDao.getJbxtUserByUsername(username);
+		 if (jud != null) {
+		 	if (jud.getPassword().equals(password)) {
+		 		LOGGER.info("LoginInfo: "+username+" login");
+				//存入session中
+				httpServletRequest.getSession().setAttribute(SessionConstant.SESSION_USER,jud);
+
+		 		return true;
+			}
+		 }
+		 return false;
+	 }
+
+	 @Override
 	public int insertJbxtUser(JbxtUserVO jbxtuserVO){
 	       JbxtUserDO jbxtuserDO = BeanCopyUtils.copyProperties(JbxtUserDO.class, jbxtuserVO);
 	       return jbxtuserDao.insertJbxtUser(jbxtuserDO );
@@ -64,4 +86,6 @@ public  class JbxtUserServiceImpl implements IJbxtUserService  {
        JbxtUserParam jbxtuserParam = BeanCopyUtils.copyProperties(JbxtUserParam.class, jbxtuserQuery);
 		return jbxtuserDao.getJbxtUser(jbxtuserParam);
     }
+
+
 }

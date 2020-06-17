@@ -1,6 +1,8 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -10,6 +12,8 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+
+import java.util.List;
 
 public interface JbxtBiddingDOMapper {
     @Delete({
@@ -77,4 +81,29 @@ public interface JbxtBiddingDOMapper {
         "where code = #{code,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKey(JbxtBiddingDO record);
+
+    List<JbxtBiddingDVO> getJbxtBiddingList(JbxtBiddingParam jbxtbiddingParam);
+
+
+    @Select({
+            "select",
+            "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
+            "creator, company_code, sys_code",
+            "from t_jbxt_bidding",
+            "where goods_id = #{goodsId,jdbcType=INTEGER} ORDER BY bid ASC LIMIT 0,1000"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER),
+            @Result(column="user_code", property="userCode", jdbcType=JdbcType.INTEGER),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid", property="bid", jdbcType=JdbcType.DECIMAL),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+    })
+    List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId);
 }

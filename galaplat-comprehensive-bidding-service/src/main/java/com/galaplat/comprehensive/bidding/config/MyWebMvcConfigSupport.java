@@ -39,5 +39,19 @@ public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer 
                 .excludePathPatterns("/sync/**", "/autoh/**").excludePathPatterns("/api/**").excludePathPatterns("/mobile/**");
 
     }*/
+
+   @Bean
+    public MyInterceptor getMyInterceptor() {
+       return new MyInterceptor();
+   }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(getMyInterceptor())
+                .addPathPatterns("/**") //必须使用 /** 才能拦截所有
+                .excludePathPatterns("/user/login");
+    }
+
+
 }
 

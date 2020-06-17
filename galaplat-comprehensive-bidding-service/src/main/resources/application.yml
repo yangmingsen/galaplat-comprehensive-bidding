@@ -1,12 +1,13 @@
 server:
   id: 0409
-  port: 8048
+  port: 8848
   tomcat:
     accept-count: 500 # Maximum queue length for incoming connection requests when all possible request processing threads are in use.
     max-connections: 500 # Maximum number of connections that the server will accept and process at any given time.
     max-threads: 500 # Maximum amount of worker threads.
     min-spare-threads: 200  # Minimum amount of worker threads.
-
+  servlet:
+    context-path: /jbxt
 http:
   mappers:
     json-pretty-print: false  # pretty print JSON  

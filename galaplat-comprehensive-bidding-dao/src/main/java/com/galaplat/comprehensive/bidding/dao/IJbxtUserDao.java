@@ -34,4 +34,10 @@ public interface IJbxtUserDao{
 	
     
     JbxtUserDO getJbxtUser(JbxtUserParam jbxtuserParam);
+
+
+	 JbxtUserDO getJbxtUserByUsername(String  username);
+
+
+
 }

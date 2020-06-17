@@ -42,6 +42,6 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	
     @Override
     public JbxtActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam){
-		return mapper.selectByPrimaryKey(jbxtactivityParam);
+		return mapper.selectByPrimaryKey(jbxtactivityParam.getCode());
     }
 }

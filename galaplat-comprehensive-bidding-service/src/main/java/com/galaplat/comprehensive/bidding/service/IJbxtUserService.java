@@ -18,6 +18,8 @@ import com.github.pagehelper.PageInfo;
 public interface IJbxtUserService{
 
 
+	boolean handlerLogin(String username, String password);
+
     /**
 	 * 添加用户表
 	 */

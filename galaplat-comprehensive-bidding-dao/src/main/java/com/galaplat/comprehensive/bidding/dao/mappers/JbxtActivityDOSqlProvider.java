@@ -25,11 +25,11 @@ public class JbxtActivityDOSqlProvider {
         }
         
         if (record.getStartTime() != null) {
-            VALUES("start_time", "#{startTime,jdbcType=INTEGER}");
+            VALUES("start_time", "#{startTime,jdbcType=TIMESTAMP}");
         }
         
         if (record.getEndTime() != null) {
-            VALUES("end_time", "#{endTime,jdbcType=VARCHAR}");
+            VALUES("end_time", "#{endTime,jdbcType=TIMESTAMP}");
         }
         
         if (record.getCreatedTime() != null) {
@@ -68,11 +68,11 @@ public class JbxtActivityDOSqlProvider {
         }
         
         if (record.getStartTime() != null) {
-            SET("start_time = #{startTime,jdbcType=INTEGER}");
+            SET("start_time = #{startTime,jdbcType=TIMESTAMP}");
         }
         
         if (record.getEndTime() != null) {
-            SET("end_time = #{endTime,jdbcType=VARCHAR}");
+            SET("end_time = #{endTime,jdbcType=TIMESTAMP}");
         }
         
         if (record.getCreatedTime() != null) {

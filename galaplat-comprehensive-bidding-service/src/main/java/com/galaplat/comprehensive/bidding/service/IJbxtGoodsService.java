@@ -8,6 +8,9 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.querys.JbxtGoodsQuery;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import com.github.pagehelper.PageInfo;
 
  /**
@@ -16,6 +19,25 @@ import com.github.pagehelper.PageInfo;
  * @date: 2020年06月17日
  */
 public interface IJbxtGoodsService{
+
+
+	 /***
+	  * 给客户端
+	  * @param activityCode
+	  * @return
+	  */
+	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode);
+
+	 /**
+	  * 给管理端使用
+	  * @param activityCode
+	  * @return
+	  */
+	 public List<SimpleGoodsVO> findAll(String activityCode);
+
+
+
+	 public CustomBidVO findBidVOByGoodsId(Integer goodsId);
 
 
     /**
@@ -39,4 +61,6 @@ public interface IJbxtGoodsService{
 	 *
 	 */
     JbxtGoodsDO getJbxtGoods(JbxtGoodsQuery jbxtgoodsQuery);
+
+
 }

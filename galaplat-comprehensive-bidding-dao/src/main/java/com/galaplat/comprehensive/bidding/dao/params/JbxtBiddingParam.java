@@ -18,7 +18,7 @@ public class JbxtBiddingParam extends Param {
     /*竞品id*/
     private Integer goodsId;
     /*用户code*/
-    private Integer userCode;
+    private String userCode;
     /*竞标活动code*/
     private String activityCode;
     /*用户出价(保留2位小数)*/
@@ -50,10 +50,10 @@ public class JbxtBiddingParam extends Param {
         this.goodsId = goodsId;
     }
 
-    public Integer getUserCode() {
+    public String getUserCode() {
         return userCode;
     }
-    public void setUserCode(Integer userCode) {
+    public void setUserCode(String userCode) {
         this.userCode = userCode;
     }
 

@@ -17,7 +17,7 @@ public class JbxtUserDVO implements Serializable {
     /*用户名*/
     private String username;
     /*密码*/
-    private Integer password;
+    private String password;
     /*是否为admin(0，普通成员；1，管理员)*/
     private String admin;
     /*创建时间*/
@@ -47,10 +47,10 @@ public class JbxtUserDVO implements Serializable {
         this.username = username;
     }
 
-    public Integer getPassword() {
+    public String getPassword() {
         return password;
     }
-    public void setPassword(Integer password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 

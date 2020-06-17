@@ -1,5 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
+import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
+import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -11,6 +13,8 @@ import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+
+import java.util.List;
 
 public interface JbxtActivityDOMapper {
     @Delete({
@@ -26,7 +30,7 @@ public interface JbxtActivityDOMapper {
         "updator, creator, ",
         "company_code, sys_code)",
         "values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
-        "#{startTime,jdbcType=INTEGER}, #{endTime,jdbcType=VARCHAR}, ",
+        "#{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, ",
         "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
         "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
         "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})"
@@ -46,8 +50,8 @@ public interface JbxtActivityDOMapper {
     @Results({
         @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
         @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
-        @Result(column="start_time", property="startTime", jdbcType=JdbcType.INTEGER),
-        @Result(column="end_time", property="endTime", jdbcType=JdbcType.VARCHAR),
+        @Result(column="start_time", property="startTime", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="end_time", property="endTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
@@ -63,8 +67,8 @@ public interface JbxtActivityDOMapper {
     @Update({
         "update t_jbxt_activity",
         "set name = #{name,jdbcType=VARCHAR},",
-          "start_time = #{startTime,jdbcType=INTEGER},",
-          "end_time = #{endTime,jdbcType=VARCHAR},",
+          "start_time = #{startTime,jdbcType=TIMESTAMP},",
+          "end_time = #{endTime,jdbcType=TIMESTAMP},",
           "created_time = #{createdTime,jdbcType=TIMESTAMP},",
           "updated_time = #{updatedTime,jdbcType=TIMESTAMP},",
           "updator = #{updator,jdbcType=VARCHAR},",
@@ -74,4 +78,6 @@ public interface JbxtActivityDOMapper {
         "where code = #{code,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKey(JbxtActivityDO record);
+
+    List<JbxtActivityDVO> getJbxtActivityList(JbxtActivityParam jbxtactivityParam);
 }

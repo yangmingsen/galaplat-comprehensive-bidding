@@ -24,7 +24,7 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
  */
 @RestController
 @RequestMapping("/jbxtbidding")
-public  class JbxtBiddingController extends BaseController {
+public  class JbxtBiddingController {
 
 
 	@Autowired
@@ -69,17 +69,5 @@ public  class JbxtBiddingController extends BaseController {
 		return jbxtbiddingService.updateJbxtBidding(jbxtbiddingVO);
 	}
 
-    /**
-	 * 获取上架单详情
-	 * @param jbxtbiddingQuery
-	 * @return
-	 */
-	@GetMapping()
-	@RestfulResult
-    public JbxtBiddingDO getJbxtBidding(JbxtBiddingQuery jbxtbiddingQuery) throws BaseException {
-    
-		jbxtbiddingQuery.setCompanyCode(getCompanyCode() == null ? "" : getCompanyCode());
-		jbxtbiddingQuery.setSysCode(getSysCode() == null ? "" : getSysCode());
-		return jbxtbiddingService.getJbxtBidding(jbxtbiddingQuery);
-    }
+
 }

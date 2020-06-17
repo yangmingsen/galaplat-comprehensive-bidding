@@ -43,6 +43,11 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	
     @Override
     public JbxtBiddingDO getJbxtBidding(JbxtBiddingParam jbxtbiddingParam){
-		return mapper.selectByPrimaryKey(jbxtbiddingParam);
+		return mapper.selectByPrimaryKey(jbxtbiddingParam.getCode());
     }
+
+	 @Override
+	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId) {
+    	return mapper.getJbxtListBiddingByGoodsId(goodsId);
+	 }
 }

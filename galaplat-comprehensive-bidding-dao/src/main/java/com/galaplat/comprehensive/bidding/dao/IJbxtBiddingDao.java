@@ -34,4 +34,11 @@ public interface IJbxtBiddingDao{
 	
     
     JbxtBiddingDO getJbxtBidding(JbxtBiddingParam jbxtbiddingParam);
+
+	 /***
+	  * 根据goodsId 获取所有相关联的竞价数据
+	  * @param goodsId
+	  * @return
+	  */
+	 List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId);
 }
