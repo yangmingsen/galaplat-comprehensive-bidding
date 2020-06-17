@@ -39,8 +39,16 @@ public interface IJbxtGoodsService{
 
 	 public CustomBidVO findBidVOByGoodsId(Integer goodsId);
 
+	 /***
+	  * 通用获取当前用户排名情况方法
+	  * @param userCode
+	  * @param goodsId
+	  * @return
+	  */
+	 public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId);
 
-    /**
+
+	 /**
 	 * 添加竞品表
 	 */
 	int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO);

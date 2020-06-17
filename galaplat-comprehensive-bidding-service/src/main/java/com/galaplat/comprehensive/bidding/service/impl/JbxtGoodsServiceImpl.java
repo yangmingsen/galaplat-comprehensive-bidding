@@ -14,6 +14,7 @@ import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
+import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +109,7 @@ public  class JbxtGoodsServiceImpl implements IJbxtGoodsService  {
 				 cgv.setGoodsId(x.getGoodsId());
 				 cgv.setGoodsCode(x.getCode());
 				 cgv.setGoodsNum(x.getNum());
+				 cgv.setGoodsName(x.getName());
 				 cgv.setGoodsPrice(new BigDecimal("0.000"));
 				 cgv.setUserRank(-1);
 				 cgv.setIsActive(x.getStatus());
@@ -149,16 +151,19 @@ public  class JbxtGoodsServiceImpl implements IJbxtGoodsService  {
 
 		JbxtUserDO userInfo = (JbxtUserDO)httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
 		LOGGER.info("userInfo: "+userInfo);
+		String userCode = userInfo.getCode();
 
 		JbxtGoodsDO relaseActiveGoods = jbxtgoodsDao.selectActiveGoods();
 		if (goodsId != relaseActiveGoods.getGoodsId()) { //如果与传入的goodsId不一致，说明要更新了
 			goodsId = relaseActiveGoods.getGoodsId();
 			LOGGER.info("relaseActiveGoodsId: "+goodsId);
 		}
+		return handlerFindCustomBidVO(userCode,goodsId);
+	}
 
+	public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId) {
 		List<JbxtBiddingDVO> jbgs = jbxtBiddingDao.getJbxtListBiddingByGoodsId(goodsId);
 
-		String userCode = userInfo.getCode();
 		CustomBidVO cbv = new CustomBidVO();
 		int idx = -1;
 		for (int i = 0; i < jbgs.size(); i++) {
@@ -180,6 +185,8 @@ public  class JbxtGoodsServiceImpl implements IJbxtGoodsService  {
 
 		return cbv;
 	}
+
+
 
 	@Override
 	public int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO){

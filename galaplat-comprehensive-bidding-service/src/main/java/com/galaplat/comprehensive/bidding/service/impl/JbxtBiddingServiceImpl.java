@@ -5,6 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 
+import com.galaplat.comprehensive.bidding.constants.SessionConstant;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +28,9 @@ import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 
- /**
+import javax.servlet.http.HttpServletRequest;
+
+/**
  * 竞价表ServiceImpl
  * @author esr
  * @date: 2020年06月17日
@@ -36,9 +41,24 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
 	@Autowired
 	IJbxtBiddingDao jbxtbiddingDao;
+
+	@Autowired
+	private HttpServletRequest httpServletRequest;
+
+	 @Autowired
+	 private IdWorker idWorker;
 	
     @Override
 	public int insertJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
+
+
+    		//设置code userCode activityCode   createdTime updateTime
+			jbxtbiddingVO.setCode(idWorker.nextId());
+
+			jbxtbiddingVO.setCreatedTime(new Date());
+			jbxtbiddingVO.setUpdatedTime(new Date());
+
+
 	       JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, jbxtbiddingVO);
 	       return jbxtbiddingDao.insertJbxtBidding(jbxtbiddingDO );
 	}

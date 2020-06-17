@@ -1,5 +1,12 @@
 package com.galaplat.comprehensive.bidding.controllers;
 
+import com.galaplat.comprehensive.bidding.constants.SessionConstant;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
+import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,20 +23,67 @@ import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
- /**
+
+/**
  * 竞价表Controller
  * @author esr
  * @date: 2020年06月17日
  */
 @RestController
-@RequestMapping("/jbxtbidding")
+@RequestMapping("/bid")
 public  class JbxtBiddingController {
 
 
 	@Autowired
 	IJbxtBiddingService jbxtbiddingService;
-	
+
+	@Autowired
+	IJbxtGoodsService jbxtGoodsService;
+
+	@Autowired
+	private HttpServletRequest httpServletRequest;
+
+
+	Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsController.class);
+
+	 @PostMapping("/submit")
+	 @RestfulResult
+	 public Object submit(BigDecimal bid, Integer goodsId) {
+		LOGGER.info("JbxtBiddingController(submit): bid="+bid+" goodsId="+goodsId);
+
+		if (bid !=null && goodsId!=null) {
+
+			JbxtUserDO userInfo = (JbxtUserDO)httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
+
+			JbxtBiddingVO jbv = new JbxtBiddingVO();
+			jbv.setBid(bid);
+			jbv.setUserCode(userInfo.getCode());
+			jbv.setGoodsId(goodsId);
+			jbv.setActivityCode("1"); //设置当前活动id
+
+			//add to db
+			jbxtbiddingService.insertJbxtBidding(jbv);
+
+			//获取当前用户的当前竞品的最新排名
+			CustomBidVO cbv = jbxtGoodsService.handlerFindCustomBidVO(userInfo.getCode(), goodsId);
+			Map<String, String> map  = new HashMap();
+			map.put("userRank", cbv.getUserRank().toString());
+
+			//业务处理
+			return new MyResult(true, "提交成功", map);
+		}
+		 return new MyResult(false, "提交失败", null);
+	 }
+
+
+
+
+
 	
 	/**
 	 * 分页获取竞价表列表
