@@ -20,7 +20,7 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
  /**
  * 竞价表Controller
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 @RestController
 @RequestMapping("/jbxtbidding")
@@ -39,8 +39,9 @@ public  class JbxtBiddingController extends BaseController {
 	@GetMapping("/list")
 	@RestfulResult
 	public Object getJbxtBiddingPage(JbxtBiddingQuery jbxtbiddingQuery) throws BaseException{
-
+	
 		  return jbxtbiddingService.getJbxtBiddingPage( jbxtbiddingQuery);
+	
 	}
 	
 	
@@ -52,7 +53,7 @@ public  class JbxtBiddingController extends BaseController {
    	@PostMapping
 	@RestfulResult
 	public Object insertJbxtBidding(JbxtBiddingVO jbxtbiddingVO) throws BaseException {
-
+	
 	   return jbxtbiddingService.insertJbxtBidding(jbxtbiddingVO);
 	}
 
@@ -77,6 +78,8 @@ public  class JbxtBiddingController extends BaseController {
 	@RestfulResult
     public JbxtBiddingDO getJbxtBidding(JbxtBiddingQuery jbxtbiddingQuery) throws BaseException {
     
+		jbxtbiddingQuery.setCompanyCode(getCompanyCode() == null ? "" : getCompanyCode());
+		jbxtbiddingQuery.setSysCode(getSysCode() == null ? "" : getSysCode());
 		return jbxtbiddingService.getJbxtBidding(jbxtbiddingQuery);
     }
 }

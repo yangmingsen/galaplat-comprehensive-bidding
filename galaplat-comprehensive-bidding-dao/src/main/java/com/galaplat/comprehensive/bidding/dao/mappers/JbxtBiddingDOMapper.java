@@ -19,13 +19,13 @@ public interface JbxtBiddingDOMapper {
     int deleteByPrimaryKey(String code);
 
     @Insert({
-        "insert into t_jbxt_bidding (code, goods_code, ",
+        "insert into t_jbxt_bidding (code, goods_id, ",
         "user_code, activity_code, ",
         "bid, created_time, ",
         "updated_time, updator, ",
         "creator, company_code, ",
         "sys_code)",
-        "values (#{code,jdbcType=VARCHAR}, #{goodsCode,jdbcType=VARCHAR}, ",
+        "values (#{code,jdbcType=VARCHAR}, #{goodsId,jdbcType=INTEGER}, ",
         "#{userCode,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
         "#{bid,jdbcType=DECIMAL}, #{createdTime,jdbcType=TIMESTAMP}, ",
         "#{updatedTime,jdbcType=TIMESTAMP}, #{updator,jdbcType=VARCHAR}, ",
@@ -39,14 +39,14 @@ public interface JbxtBiddingDOMapper {
 
     @Select({
         "select",
-        "code, goods_code, user_code, activity_code, bid, created_time, updated_time, ",
-        "updator, creator, company_code, sys_code",
+        "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
+        "creator, company_code, sys_code",
         "from t_jbxt_bidding",
         "where code = #{code,jdbcType=VARCHAR}"
     })
     @Results({
         @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
-        @Result(column="goods_code", property="goodsCode", jdbcType=JdbcType.VARCHAR),
+        @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER),
         @Result(column="user_code", property="userCode", jdbcType=JdbcType.INTEGER),
         @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="bid", property="bid", jdbcType=JdbcType.DECIMAL),
@@ -64,7 +64,7 @@ public interface JbxtBiddingDOMapper {
 
     @Update({
         "update t_jbxt_bidding",
-        "set goods_code = #{goodsCode,jdbcType=VARCHAR},",
+        "set goods_id = #{goodsId,jdbcType=INTEGER},",
           "user_code = #{userCode,jdbcType=INTEGER},",
           "activity_code = #{activityCode,jdbcType=VARCHAR},",
           "bid = #{bid,jdbcType=DECIMAL},",

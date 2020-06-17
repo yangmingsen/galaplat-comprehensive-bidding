@@ -7,9 +7,9 @@ import java.util.Date;
  /**
  * 活动表DVO
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
-public class JbxtAtivityDVO implements Serializable {
+public class JbxtActivityDVO implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/

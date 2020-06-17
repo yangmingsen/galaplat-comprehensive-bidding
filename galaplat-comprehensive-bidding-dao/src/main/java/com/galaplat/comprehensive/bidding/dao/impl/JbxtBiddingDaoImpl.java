@@ -16,7 +16,7 @@ import com.github.pagehelper.PageInfo;
  /**
  * 竞价表DaoImpl
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
  @Repository
 public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {

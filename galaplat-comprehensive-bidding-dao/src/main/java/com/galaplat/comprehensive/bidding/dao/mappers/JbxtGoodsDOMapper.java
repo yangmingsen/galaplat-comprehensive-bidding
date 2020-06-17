@@ -14,21 +14,23 @@ import org.apache.ibatis.type.JdbcType;
 public interface JbxtGoodsDOMapper {
     @Delete({
         "delete from t_jbxt_goods",
-        "where code = #{code,jdbcType=VARCHAR}"
+        "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
-    int deleteByPrimaryKey(String code);
+    int deleteByPrimaryKey(Integer goodsId);
 
     @Insert({
-        "insert into t_jbxt_goods (code, name, ",
-        "num, activity_code, ",
+        "insert into t_jbxt_goods (goods_id, code, ",
+        "name, num, activity_code, ",
         "created_time, updated_time, ",
         "updator, creator, ",
-        "company_code, sys_code)",
-        "values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
-        "#{num,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
+        "company_code, sys_code, ",
+        "status)",
+        "values (#{goodsId,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, ",
+        "#{name,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
         "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
         "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
-        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})"
+        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR}, ",
+        "#{status,jdbcType=VARCHAR})"
     })
     int insert(JbxtGoodsDO record);
 
@@ -37,13 +39,14 @@ public interface JbxtGoodsDOMapper {
 
     @Select({
         "select",
-        "code, name, num, activity_code, created_time, updated_time, updator, creator, ",
-        "company_code, sys_code",
+        "goods_id, code, name, num, activity_code, created_time, updated_time, updator, ",
+        "creator, company_code, sys_code, status",
         "from t_jbxt_goods",
-        "where code = #{code,jdbcType=VARCHAR}"
+        "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
     @Results({
-        @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+        @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER, id=true),
+        @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR),
         @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
         @Result(column="num", property="num", jdbcType=JdbcType.INTEGER),
         @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
@@ -52,16 +55,18 @@ public interface JbxtGoodsDOMapper {
         @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+        @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR)
     })
-    JbxtGoodsDO selectByPrimaryKey(String code);
+    JbxtGoodsDO selectByPrimaryKey(Integer goodsId);
 
     @UpdateProvider(type=JbxtGoodsDOSqlProvider.class, method="updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(JbxtGoodsDO record);
 
     @Update({
         "update t_jbxt_goods",
-        "set name = #{name,jdbcType=VARCHAR},",
+        "set code = #{code,jdbcType=VARCHAR},",
+          "name = #{name,jdbcType=VARCHAR},",
           "num = #{num,jdbcType=INTEGER},",
           "activity_code = #{activityCode,jdbcType=VARCHAR},",
           "created_time = #{createdTime,jdbcType=TIMESTAMP},",
@@ -69,8 +74,9 @@ public interface JbxtGoodsDOMapper {
           "updator = #{updator,jdbcType=VARCHAR},",
           "creator = #{creator,jdbcType=VARCHAR},",
           "company_code = #{companyCode,jdbcType=VARCHAR},",
-          "sys_code = #{sysCode,jdbcType=VARCHAR}",
-        "where code = #{code,jdbcType=VARCHAR}"
+          "sys_code = #{sysCode,jdbcType=VARCHAR},",
+          "status = #{status,jdbcType=VARCHAR}",
+        "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(JbxtGoodsDO record);
 }

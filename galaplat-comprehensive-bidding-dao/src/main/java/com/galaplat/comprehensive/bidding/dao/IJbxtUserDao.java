@@ -11,7 +11,7 @@ import com.github.pagehelper.PageInfo;
  /**
  * 用户表Dao
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 public interface IJbxtUserDao{
 

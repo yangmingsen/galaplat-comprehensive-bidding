@@ -16,6 +16,10 @@ public class JbxtGoodsDOSqlProvider {
         BEGIN();
         INSERT_INTO("t_jbxt_goods");
         
+        if (record.getGoodsId() != null) {
+            VALUES("goods_id", "#{goodsId,jdbcType=INTEGER}");
+        }
+        
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
@@ -56,12 +60,20 @@ public class JbxtGoodsDOSqlProvider {
             VALUES("sys_code", "#{sysCode,jdbcType=VARCHAR}");
         }
         
+        if (record.getStatus() != null) {
+            VALUES("status", "#{status,jdbcType=VARCHAR}");
+        }
+        
         return SQL();
     }
 
     public String updateByPrimaryKeySelective(JbxtGoodsDO record) {
         BEGIN();
         UPDATE("t_jbxt_goods");
+        
+        if (record.getCode() != null) {
+            SET("code = #{code,jdbcType=VARCHAR}");
+        }
         
         if (record.getName() != null) {
             SET("name = #{name,jdbcType=VARCHAR}");
@@ -99,7 +111,11 @@ public class JbxtGoodsDOSqlProvider {
             SET("sys_code = #{sysCode,jdbcType=VARCHAR}");
         }
         
-        WHERE("code = #{code,jdbcType=VARCHAR}");
+        if (record.getStatus() != null) {
+            SET("status = #{status,jdbcType=VARCHAR}");
+        }
+        
+        WHERE("goods_id = #{goodsId,jdbcType=INTEGER}");
         
         return SQL();
     }

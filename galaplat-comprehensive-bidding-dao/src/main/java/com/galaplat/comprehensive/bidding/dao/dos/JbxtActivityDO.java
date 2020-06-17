@@ -1,15 +1,15 @@
-package com.galaplat.comprehensive.bidding.querys;
+package com.galaplat.comprehensive.bidding.dao.dos;
 import java.io.Serializable;
 import java.util.Date;
 
 
 
  /**
- * 活动表Query
+ * 活动表DO
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
-public class JbxtAtivityQuery implements Serializable {
+public class JbxtActivityDO implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/

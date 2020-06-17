@@ -1,15 +1,15 @@
-package com.galaplat.comprehensive.bidding.dao.params;
-import com.galaplat.base.core.common.params.Param;
+package com.galaplat.comprehensive.bidding.querys;
+import java.io.Serializable;
 import java.util.Date;
 
 
 
  /**
- * 活动表Param
+ * 活动表Query
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
-public class JbxtAtivityParam extends Param {
+public class JbxtActivityQuery implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/

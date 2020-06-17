@@ -6,7 +6,7 @@ import java.util.Date;
  /**
  * 用户表VO
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 public class JbxtUserVO implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -17,6 +17,8 @@ public class JbxtUserVO implements Serializable {
     private String username;
     /*密码*/
     private Integer password;
+    /*是否为admin(0，普通成员；1，管理员)*/
+    private String admin;
     /*创建时间*/
     private Date createdTime;
     /*更新时间如果没有默认创建时间，修改数据必须更新*/
@@ -49,6 +51,13 @@ public class JbxtUserVO implements Serializable {
     }
     public void setPassword(Integer password) {
         this.password = password;
+    }
+
+    public String getAdmin() {
+        return admin;
+    }
+    public void setAdmin(String admin) {
+        this.admin = admin;
     }
 
     public Date getCreatedTime() {

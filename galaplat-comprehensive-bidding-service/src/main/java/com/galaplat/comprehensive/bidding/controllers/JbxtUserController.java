@@ -6,21 +6,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
-import com.github.pagehelper.PageInfo;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.querys.JbxtUserQuery;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 
 
  /**
  * 用户表Controller
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 @RestController
 @RequestMapping("/jbxtuser")
@@ -39,7 +38,7 @@ public  class JbxtUserController extends BaseController {
 	@GetMapping("/list")
 	@RestfulResult
 	public Object getJbxtUserPage(JbxtUserQuery jbxtuserQuery) throws BaseException{
-	
+
 		  return jbxtuserService.getJbxtUserPage( jbxtuserQuery);
 	
 	}

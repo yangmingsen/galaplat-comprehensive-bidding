@@ -8,15 +8,15 @@ import java.util.Date;
  /**
  * 竞价表DO
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 public class JbxtBiddingDO implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/
     private String code;
-    /*竞品code*/
-    private String goodsCode;
+    /*竞品id*/
+    private Integer goodsId;
     /*用户code*/
     private Integer userCode;
     /*竞标活动code*/
@@ -43,11 +43,11 @@ public class JbxtBiddingDO implements Serializable {
         this.code = code;
     }
 
-    public String getGoodsCode() {
-        return goodsCode;
+    public Integer getGoodsId() {
+        return goodsId;
     }
-    public void setGoodsCode(String goodsCode) {
-        this.goodsCode = goodsCode;
+    public void setGoodsId(Integer goodsId) {
+        this.goodsId = goodsId;
     }
 
     public Integer getUserCode() {

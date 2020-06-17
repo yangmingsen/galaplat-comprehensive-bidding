@@ -20,8 +20,8 @@ public class JbxtBiddingDOSqlProvider {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
         
-        if (record.getGoodsCode() != null) {
-            VALUES("goods_code", "#{goodsCode,jdbcType=VARCHAR}");
+        if (record.getGoodsId() != null) {
+            VALUES("goods_id", "#{goodsId,jdbcType=INTEGER}");
         }
         
         if (record.getUserCode() != null) {
@@ -67,8 +67,8 @@ public class JbxtBiddingDOSqlProvider {
         BEGIN();
         UPDATE("t_jbxt_bidding");
         
-        if (record.getGoodsCode() != null) {
-            SET("goods_code = #{goodsCode,jdbcType=VARCHAR}");
+        if (record.getGoodsId() != null) {
+            SET("goods_id = #{goodsId,jdbcType=INTEGER}");
         }
         
         if (record.getUserCode() != null) {

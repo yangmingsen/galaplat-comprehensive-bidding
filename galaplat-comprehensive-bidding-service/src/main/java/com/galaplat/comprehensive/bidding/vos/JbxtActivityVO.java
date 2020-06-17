@@ -1,15 +1,14 @@
-package com.galaplat.comprehensive.bidding.dao.dos;
+package com.galaplat.comprehensive.bidding.vos;
 import java.io.Serializable;
 import java.util.Date;
 
 
-
  /**
- * 活动表DO
+ * 活动表VO
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
-public class JbxtAtivityDO implements Serializable {
+public class JbxtActivityVO implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/

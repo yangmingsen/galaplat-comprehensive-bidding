@@ -28,6 +28,10 @@ public class JbxtUserDOSqlProvider {
             VALUES("password", "#{password,jdbcType=INTEGER}");
         }
         
+        if (record.getAdmin() != null) {
+            VALUES("admin", "#{admin,jdbcType=VARCHAR}");
+        }
+        
         if (record.getCreatedTime() != null) {
             VALUES("created_time", "#{createdTime,jdbcType=TIMESTAMP}");
         }
@@ -65,6 +69,10 @@ public class JbxtUserDOSqlProvider {
         
         if (record.getPassword() != null) {
             SET("password = #{password,jdbcType=INTEGER}");
+        }
+        
+        if (record.getAdmin() != null) {
+            SET("admin = #{admin,jdbcType=VARCHAR}");
         }
         
         if (record.getCreatedTime() != null) {

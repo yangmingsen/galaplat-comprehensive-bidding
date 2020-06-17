@@ -20,7 +20,7 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
  /**
  * 竞品表Controller
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 @RestController
 @RequestMapping("/jbxtgoods")
@@ -39,7 +39,7 @@ public  class JbxtGoodsController extends BaseController {
 	@GetMapping("/list")
 	@RestfulResult
 	public Object getJbxtGoodsPage(JbxtGoodsQuery jbxtgoodsQuery) throws BaseException{
-	
+
 		  return jbxtgoodsService.getJbxtGoodsPage( jbxtgoodsQuery);
 	
 	}
@@ -53,7 +53,7 @@ public  class JbxtGoodsController extends BaseController {
    	@PostMapping
 	@RestfulResult
 	public Object insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO) throws BaseException {
-
+	
 	   return jbxtgoodsService.insertJbxtGoods(jbxtgoodsVO);
 	}
 
@@ -65,7 +65,7 @@ public  class JbxtGoodsController extends BaseController {
 	@PutMapping
 	@RestfulResult
 	public Object updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO) throws BaseException {
-	
+
 		return jbxtgoodsService.updateJbxtGoods(jbxtgoodsVO);
 	}
 
@@ -77,7 +77,7 @@ public  class JbxtGoodsController extends BaseController {
 	@GetMapping()
 	@RestfulResult
     public JbxtGoodsDO getJbxtGoods(JbxtGoodsQuery jbxtgoodsQuery) throws BaseException {
-
+    
 		return jbxtgoodsService.getJbxtGoods(jbxtgoodsQuery);
     }
 }

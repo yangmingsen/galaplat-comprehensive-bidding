@@ -1,7 +1,5 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
-import java.util.List;
-
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -12,11 +10,9 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtAtivityDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtAtivityDVO;
-import com.galaplat.comprehensive.bidding.dao.params.JbxtAtivityParam;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 
-public interface JbxtAtivityDOMapper {
+public interface JbxtActivityDOMapper {
     @Delete({
         "delete from t_jbxt_activity",
         "where code = #{code,jdbcType=VARCHAR}"
@@ -35,10 +31,10 @@ public interface JbxtAtivityDOMapper {
         "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
         "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})"
     })
-    int insert(JbxtAtivityDO record);
+    int insert(JbxtActivityDO record);
 
-    @InsertProvider(type=JbxtAtivityDOSqlProvider.class, method="insertSelective")
-    int insertSelective(JbxtAtivityDO record);
+    @InsertProvider(type=JbxtActivityDOSqlProvider.class, method="insertSelective")
+    int insertSelective(JbxtActivityDO record);
 
     @Select({
         "select",
@@ -59,34 +55,10 @@ public interface JbxtAtivityDOMapper {
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
     })
-    JbxtAtivityDO selectByPrimaryKey(JbxtAtivityParam jbxtativityParam);
-    
-    
-    @Select({
-        "select",
-        "code, name, start_time, end_time, created_time, updated_time, updator, creator, ",
-        "company_code, sys_code",
-        "from t_jbxt_activity",
-        "where code = #{code,jdbcType=VARCHAR}"
-    })
-    @Results({
-        @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
-        @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
-        @Result(column="start_time", property="startTime", jdbcType=JdbcType.INTEGER),
-        @Result(column="end_time", property="endTime", jdbcType=JdbcType.VARCHAR),
-        @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
-        @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
-        @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
-        @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
-        @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
-    })
-    List<JbxtAtivityDVO> getJbxtAtivityList(JbxtAtivityParam jbxtativityParam);
-    
-    
+    JbxtActivityDO selectByPrimaryKey(String code);
 
-    @UpdateProvider(type=JbxtAtivityDOSqlProvider.class, method="updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(JbxtAtivityDO record);
+    @UpdateProvider(type=JbxtActivityDOSqlProvider.class, method="updateByPrimaryKeySelective")
+    int updateByPrimaryKeySelective(JbxtActivityDO record);
 
     @Update({
         "update t_jbxt_activity",
@@ -101,5 +73,5 @@ public interface JbxtAtivityDOMapper {
           "sys_code = #{sysCode,jdbcType=VARCHAR}",
         "where code = #{code,jdbcType=VARCHAR}"
     })
-    int updateByPrimaryKey(JbxtAtivityDO record);
+    int updateByPrimaryKey(JbxtActivityDO record);
 }

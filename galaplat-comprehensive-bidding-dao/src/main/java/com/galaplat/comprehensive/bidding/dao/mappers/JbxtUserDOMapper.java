@@ -20,15 +20,15 @@ public interface JbxtUserDOMapper {
 
     @Insert({
         "insert into t_jbxt_user (code, username, ",
-        "password, created_time, ",
-        "updated_time, updator, ",
-        "creator, company_code, ",
-        "sys_code)",
+        "password, admin, ",
+        "created_time, updated_time, ",
+        "updator, creator, ",
+        "company_code, sys_code)",
         "values (#{code,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, ",
-        "#{password,jdbcType=INTEGER}, #{createdTime,jdbcType=TIMESTAMP}, ",
-        "#{updatedTime,jdbcType=TIMESTAMP}, #{updator,jdbcType=VARCHAR}, ",
-        "#{creator,jdbcType=VARCHAR}, #{companyCode,jdbcType=VARCHAR}, ",
-        "#{sysCode,jdbcType=VARCHAR})"
+        "#{password,jdbcType=INTEGER}, #{admin,jdbcType=VARCHAR}, ",
+        "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
+        "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
+        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})"
     })
     int insert(JbxtUserDO record);
 
@@ -37,8 +37,8 @@ public interface JbxtUserDOMapper {
 
     @Select({
         "select",
-        "code, username, password, created_time, updated_time, updator, creator, company_code, ",
-        "sys_code",
+        "code, username, password, admin, created_time, updated_time, updator, creator, ",
+        "company_code, sys_code",
         "from t_jbxt_user",
         "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -46,6 +46,7 @@ public interface JbxtUserDOMapper {
         @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
         @Result(column="username", property="username", jdbcType=JdbcType.VARCHAR),
         @Result(column="password", property="password", jdbcType=JdbcType.INTEGER),
+        @Result(column="admin", property="admin", jdbcType=JdbcType.VARCHAR),
         @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
@@ -62,6 +63,7 @@ public interface JbxtUserDOMapper {
         "update t_jbxt_user",
         "set username = #{username,jdbcType=VARCHAR},",
           "password = #{password,jdbcType=INTEGER},",
+          "admin = #{admin,jdbcType=VARCHAR},",
           "created_time = #{createdTime,jdbcType=TIMESTAMP},",
           "updated_time = #{updatedTime,jdbcType=TIMESTAMP},",
           "updator = #{updator,jdbcType=VARCHAR},",

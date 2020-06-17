@@ -13,7 +13,7 @@ import com.github.pagehelper.PageInfo;
  /**
  * 竞品表Service
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 public interface IJbxtGoodsService{
 

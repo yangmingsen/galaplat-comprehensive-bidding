@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
  /**
  * 竞价表ServiceImpl
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
  @Service
 public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {

@@ -7,7 +7,7 @@ import java.util.Date;
  /**
  * 竞品表Query
  * @author esr
- * @date: 2020年06月16日
+ * @date: 2020年06月17日
  */
 public class JbxtGoodsQuery implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -32,6 +32,10 @@ public class JbxtGoodsQuery implements Serializable {
     private String companyCode;
     /*系统唯一编码*/
     private String sysCode;
+    /*商品唯一ID*/
+    private Integer goodsId;
+    /*是否过期(0表示未过期，1表示为进行中, 2表示过期)*/
+    private String status;
 
     public String getCode() {
         return code;
@@ -101,6 +105,20 @@ public class JbxtGoodsQuery implements Serializable {
     }
     public void setSysCode(String sysCode) {
         this.sysCode = sysCode;
+    }
+
+    public Integer getGoodsId() {
+        return goodsId;
+    }
+    public void setGoodsId(Integer goodsId) {
+        this.goodsId = goodsId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 
