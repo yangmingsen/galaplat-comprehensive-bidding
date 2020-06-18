@@ -1,7 +1,9 @@
 package com.galaplat.comprehensive.bidding.dao.impl;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -47,7 +49,29 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
     }
 
 	 @Override
-	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId) {
-    	return mapper.getJbxtListBiddingByGoodsId(goodsId);
+	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( String userCode, Integer goodsId, String activityCode) {
+
+		 List<JbxtBiddingDVO> list = mapper.getAllBidUserInfo(goodsId, activityCode);
+		Map<String, String> map = new HashMap<>();
+		list.stream().forEach(x -> {
+			map.put(x.getUserCode(),"1");
+		});
+		List<JbxtBiddingDVO> res = new ArrayList<>();
+		 for(String key:map.keySet()) {
+			 res.add(getUserMinBid(key, goodsId, activityCode));
+		 }
+
+		 return res.stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());
 	 }
+
+
+
+	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode) {
+    	return mapper.getUserMinBid(userCode,goodsId,activityCode);
+	 }
+
+	 public JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode) {
+    	return mapper.gerCurrentGoodsMinSubmitPrice(goodsId,activityCode);
+	 }
+
 }

@@ -24,20 +24,28 @@ public interface IJbxtGoodsService{
 	 /***
 	  * 给客户端
 	  * @param activityCode
-	  * @return
+	  * @return  List CustomGoodsVO
 	  */
 	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode);
 
 	 /**
 	  * 给管理端使用
 	  * @param activityCode
-	  * @return
+	  * @return List SimpleGoodsVO
 	  */
 	 public List<SimpleGoodsVO> findAll(String activityCode);
 
 
+	 public CustomBidVO findBidVOByGoodsId(Integer goodsId, String activityCode);
 
-	 public CustomBidVO findBidVOByGoodsId(Integer goodsId);
+
+	 /***
+	  * 获取所有的GoodsDVO
+	  * @param activityCode
+	  * @return List JbxtGoodsDVO
+	  */
+	 public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
+
 
 	 /***
 	  * 通用获取当前用户排名情况方法
@@ -45,7 +53,7 @@ public interface IJbxtGoodsService{
 	  * @param goodsId
 	  * @return
 	  */
-	 public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId);
+	 public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode);
 
 
 	 /**
@@ -69,6 +77,8 @@ public interface IJbxtGoodsService{
 	 *
 	 */
     JbxtGoodsDO getJbxtGoods(JbxtGoodsQuery jbxtgoodsQuery);
+
+	 public JbxtGoodsDO selectActiveGoods(String activityCode);
 
 
 }

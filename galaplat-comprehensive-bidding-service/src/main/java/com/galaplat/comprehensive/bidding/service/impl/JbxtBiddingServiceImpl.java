@@ -27,6 +27,7 @@ import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -49,6 +50,7 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	 private IdWorker idWorker;
 	
     @Override
+	@Transactional(rollbackFor = Exception.class)
 	public int insertJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 
 
@@ -62,6 +64,13 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	       JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, jbxtbiddingVO);
 	       return jbxtbiddingDao.insertJbxtBidding(jbxtbiddingDO );
 	}
+
+
+
+	public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.getUserMinBid(userCode,goodsId,activityCode);
+	}
+
 
 	@Override
 	public int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
@@ -84,4 +93,10 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
        JbxtBiddingParam jbxtbiddingParam = BeanCopyUtils.copyProperties(JbxtBiddingParam.class, jbxtbiddingQuery);
 		return jbxtbiddingDao.getJbxtBidding(jbxtbiddingParam);
     }
+
+	public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode) {
+    	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(goodsId,activityCode);
+	}
+
+
 }

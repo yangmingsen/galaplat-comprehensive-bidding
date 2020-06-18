@@ -91,7 +91,7 @@ public interface JbxtGoodsDOMapper {
             "goods_id, code, name, num, activity_code, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, status",
             "from t_jbxt_goods",
-            "where activity_code = #{activityCode,jdbcType=VARCHAR} LIMIT 0,1000"
+            "where activity_code = #{activityCode,jdbcType=VARCHAR} ORDER BY goods_id ASC LIMIT 0,1000"
     })
     @Results({
             @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER, id=true),
@@ -116,7 +116,7 @@ public interface JbxtGoodsDOMapper {
             "goods_id, code, name, num, activity_code, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, status",
             "from t_jbxt_goods",
-            "where status = 1"
+            "where status = 1 AND activity_code=#{activityCode,jdbcType=VARCHAR} "
     })
     @Results({
             @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER, id=true),
@@ -132,7 +132,7 @@ public interface JbxtGoodsDOMapper {
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR)
     })
-    public JbxtGoodsDO selectActiveGoods();
+    public JbxtGoodsDO selectActiveGoods(String activityCode);
 
 
 }

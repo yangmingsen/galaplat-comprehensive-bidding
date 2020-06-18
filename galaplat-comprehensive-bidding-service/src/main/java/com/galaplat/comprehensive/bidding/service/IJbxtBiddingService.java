@@ -39,4 +39,17 @@ public interface IJbxtBiddingService{
 	 *
 	 */
     JbxtBiddingDO getJbxtBidding(JbxtBiddingQuery jbxtbiddingQuery);
+
+
+	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
+
+
+	 /**
+	  * 获取当前竞品的最小提交价
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode);
+
 }

@@ -40,5 +40,26 @@ public interface IJbxtBiddingDao{
 	  * @param goodsId
 	  * @return
 	  */
-	 List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId);
+	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( String userCode, Integer goodsId, String activityCode);
+
+
+
+
+	 /***
+	  * 获取当前用户当前竞品最小竞价
+	  * @param userCode
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
+
+	 /**
+	  * 获取当前竞品的最小提交价
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode);
+
 }

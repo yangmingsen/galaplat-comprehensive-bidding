@@ -1,6 +1,7 @@
 package com.galaplat.comprehensive.bidding.config;
 
 import com.galaplat.comprehensive.bidding.constants.SessionConstant;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,16 @@ public class MyInterceptor implements HandlerInterceptor {
             httpServletResponse.setHeader(SessionConstant.SESSION_STATE,SessionConstant.SESSION_TIME_OUT);
             return false;
         }
+
+        JbxtUserDO user = (JbxtUserDO)userExist;
+        String reqPath = httpServletRequest.getServletPath();
+        if (reqPath.startsWith("/admin")) { //拦截非管理员的请求
+            String isAdmin = user.getAdmin();
+            if (isAdmin.equals("0")) {
+                return false;
+            }
+        }
+
         return true;
     }
 

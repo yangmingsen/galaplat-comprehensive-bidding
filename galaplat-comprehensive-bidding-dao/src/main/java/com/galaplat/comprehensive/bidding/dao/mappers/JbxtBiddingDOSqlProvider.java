@@ -25,7 +25,7 @@ public class JbxtBiddingDOSqlProvider {
         }
         
         if (record.getUserCode() != null) {
-            VALUES("user_code", "#{userCode,jdbcType=INTEGER}");
+            VALUES("user_code", "#{userCode,jdbcType=VARCHAR}");
         }
         
         if (record.getActivityCode() != null) {
@@ -72,7 +72,7 @@ public class JbxtBiddingDOSqlProvider {
         }
         
         if (record.getUserCode() != null) {
-            SET("user_code = #{userCode,jdbcType=INTEGER}");
+            SET("user_code = #{userCode,jdbcType=VARCHAR}");
         }
         
         if (record.getActivityCode() != null) {

@@ -6,6 +6,7 @@ import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,7 +22,9 @@ import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -39,6 +42,8 @@ public  class JbxtGoodsController extends BaseController {
 
 	Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsController.class);
 
+	@Value("${my.activityCode}")
+	private String activityCode;
 
 	 /**
 	  * 获取竞品表列表
@@ -63,13 +68,22 @@ public  class JbxtGoodsController extends BaseController {
 	 */
 	@GetMapping("/findOne")
 	@RestfulResult
-	public Object findOne(Integer goodsId) throws BaseException{
+	public Object findOne(Integer goodsId, String activityCode) throws BaseException{
 		LOGGER.info("JbxtGoodsController(findOne): goodsId="+goodsId);
 
 		if (goodsId != null ) {
-			return new MyResult(true,"获取data成功", jbxtgoodsService.findBidVOByGoodsId(goodsId));
+			return new MyResult(true,"获取data成功", jbxtgoodsService.findBidVOByGoodsId(goodsId, activityCode));
+		} else { //获取当前
+			JbxtGoodsDO jbxtGoodsDO = jbxtgoodsService.selectActiveGoods(activityCode);
+			if (jbxtGoodsDO != null) { //如果存在正在进行的竞品
+				//返回当前竞品的用户排名
+				return new MyResult(true,"获取data成功", jbxtgoodsService.findBidVOByGoodsId(jbxtGoodsDO.getGoodsId(), activityCode));
+			} else { //不存在正在进行的竞品，意味着还未开始竞价活动
+				Map<String, String> map = new HashMap<>();
+				map.put("goodsId","-1");
+				return new MyResult(true,"当前还未开始活动或者已经结束了活动", map);
+			}
 		}
-		return new MyResult(true,"获取data失败", null);
 	}
 
 
@@ -94,7 +108,6 @@ public  class JbxtGoodsController extends BaseController {
    	@PostMapping
 	@RestfulResult
 	public Object insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO) throws BaseException {
-	
 	   return jbxtgoodsService.insertJbxtGoods(jbxtgoodsVO);
 	}
 

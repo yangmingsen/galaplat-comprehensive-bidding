@@ -37,7 +37,25 @@ public class JbxtGoodsDO implements Serializable {
     /*是否过期(0表示未过期，1表示为进行中, 2表示过期)*/
     private String status;
 
-    public String getCode() {
+     @Override
+     public String toString() {
+         return "JbxtGoodsDO{" +
+                 "code='" + code + '\'' +
+                 ", name='" + name + '\'' +
+                 ", num=" + num +
+                 ", activityCode='" + activityCode + '\'' +
+                 ", createdTime=" + createdTime +
+                 ", updatedTime=" + updatedTime +
+                 ", updator='" + updator + '\'' +
+                 ", creator='" + creator + '\'' +
+                 ", companyCode='" + companyCode + '\'' +
+                 ", sysCode='" + sysCode + '\'' +
+                 ", goodsId=" + goodsId +
+                 ", status='" + status + '\'' +
+                 '}';
+     }
+
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {
