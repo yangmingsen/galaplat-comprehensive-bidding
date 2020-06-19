@@ -48,10 +48,16 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 		return mapper.selectByPrimaryKey(jbxtbiddingParam.getCode());
     }
 
+	 /***
+	  *
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
 	 @Override
-	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( String userCode, Integer goodsId, String activityCode) {
+	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId, String activityCode) {
 
-		 List<JbxtBiddingDVO> list = mapper.getAllBidUserInfo(goodsId, activityCode);
+		 List<JbxtBiddingDVO> list = mapper.getAllBidUserInfo(goodsId, activityCode); //获取所有正在竞价的用户
 		Map<String, String> map = new HashMap<>();
 		list.stream().forEach(x -> {
 			map.put(x.getUserCode(),"1");
@@ -65,7 +71,13 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	 }
 
 
-
+	 /**
+	  * 获取当前用户最小竞价
+	  * @param userCode
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
 	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode) {
     	return mapper.getUserMinBid(userCode,goodsId,activityCode);
 	 }

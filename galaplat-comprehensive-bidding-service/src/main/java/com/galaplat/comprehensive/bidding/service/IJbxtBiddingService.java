@@ -28,18 +28,6 @@ public interface IJbxtBiddingService{
 	 */
 	int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO);
 
-	/**
-	 * 分页获取竞价表列表
-	 *
-	 */
-	public PageInfo<JbxtBiddingDVO> getJbxtBiddingPage(JbxtBiddingQuery jbxtbiddingQuery) throws BaseException;
-	
-    /**
-	 * 获取竞价表详情
-	 *
-	 */
-    JbxtBiddingDO getJbxtBidding(JbxtBiddingQuery jbxtbiddingQuery);
-
 
 	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 

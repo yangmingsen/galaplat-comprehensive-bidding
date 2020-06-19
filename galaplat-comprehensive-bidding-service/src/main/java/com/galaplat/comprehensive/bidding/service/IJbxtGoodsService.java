@@ -36,9 +36,6 @@ public interface IJbxtGoodsService{
 	 public List<SimpleGoodsVO> findAll(String activityCode);
 
 
-	 @Deprecated
-	 public CustomBidVO findBidVOByGoodsId(Integer goodsId, String activityCode);
-
 
 	 /***
 	  * 获取所有的GoodsDVO
@@ -67,17 +64,6 @@ public interface IJbxtGoodsService{
 	 */
 	int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO);
 
-	/**
-	 * 分页获取竞品表列表
-	 *
-	 */
-	public PageInfo<JbxtGoodsDVO> getJbxtGoodsPage(JbxtGoodsQuery jbxtgoodsQuery) throws BaseException;
-	
-    /**
-	 * 获取竞品表详情
-	 *
-	 */
-    JbxtGoodsDO getJbxtGoods(JbxtGoodsQuery jbxtgoodsQuery);
 
 	 public JbxtGoodsDO selectActiveGoods(String activityCode);
 

@@ -1,10 +1,8 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
@@ -39,24 +37,43 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 竞品表ServiceImpl
+ *
  * @author esr
  * @date: 2020年06月17日
  */
- @Service
-public  class JbxtGoodsServiceImpl implements IJbxtGoodsService  {
+@Service
+public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 
-	Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsServiceImpl.class);
+    Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsServiceImpl.class);
 
-	@Autowired
-	private HttpServletRequest httpServletRequest;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
-	@Autowired
-	IJbxtGoodsDao jbxtgoodsDao;
+    @Autowired
+    IJbxtGoodsDao jbxtgoodsDao;
 
-	@Autowired
-	IJbxtBiddingDao jbxtBiddingDao;
+    @Autowired
+    IJbxtBiddingDao jbxtBiddingDao;
 
+
+
+    public List<SimpleGoodsVO> findAll(String activityCode) {
+
+        List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+        List<SimpleGoodsVO> sgvs = new ArrayList<>();
+        jgdList.stream().forEach(x -> {
+            SimpleGoodsVO sgv = new SimpleGoodsVO();
+            sgv.setGoodsId(x.getGoodsId());
+            sgv.setGoodsCode(x.getCode());
+            sgv.setGoodsNum(x.getNum());
+            sgv.setGoodsName(x.getName());
+            sgv.setIsActive(x.getStatus());
+            sgvs.add(sgv);
+        });
+
+        return sgvs;
+    }
 
 
 	/***
@@ -69,177 +86,126 @@ public  class JbxtGoodsServiceImpl implements IJbxtGoodsService  {
 	 * @param activityCode
 	 * @return
 	 */
-	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode) {
-	 	LOGGER.info("goodsFindAll: activityCode="+activityCode);
+	public List<CustomGoodsVO> findAllByActivityCode(String activityCode) {
+		JbxtUserDO userInfo = (JbxtUserDO) httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
 
-		 JbxtUserDO userInfo = (JbxtUserDO)httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
-	 	LOGGER.info("userInfo(userCode): "+userInfo.getCode());
+		List<JbxtGoodsDVO> listGoods = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+		ArrayList<CustomGoodsVO> res = new ArrayList<>();
 
-	 	List<JbxtGoodsDVO> listGoods = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
-	 	LOGGER.info("listGoodsSize: "+listGoods.size());
+		String userCode = userInfo.getCode();
+		listGoods.stream().forEach(x -> {
 
-		 ArrayList<CustomGoodsVO> res = new ArrayList<>();
+			ComputedRes cr = computedCurrentUserSpecificGoodsRankInfo(userCode, x.getGoodsId(), activityCode);
 
+			CustomGoodsVO cgv = new CustomGoodsVO();
+			cgv.setGoodsId(x.getGoodsId());
+			cgv.setGoodsCode(x.getCode());
+			cgv.setGoodsNum(x.getNum());
+			cgv.setGoodsName(x.getName());
+			cgv.setGoodsPrice(cr.getBid());
+			cgv.setUserRank(cr.getRank());
+			cgv.setIsActive(x.getStatus());
 
-
-		 String userCode = userInfo.getCode();
-		 listGoods.stream().forEach( x -> {
-			 List<JbxtBiddingDVO> bidList = jbxtBiddingDao.getJbxtListBiddingByGoodsId(userCode, x.getGoodsId(), activityCode);
-			 int idx = -1;
-			 for (int i = 0; i < bidList.size(); i++) {
-				 JbxtBiddingDVO tbd = bidList.get(i);
-
-
-				 //如果存在竞价信息
-				 if (userCode.equals(tbd.getUserCode())) {
-					 CustomGoodsVO cgv = new CustomGoodsVO();
-					 cgv.setGoodsId(x.getGoodsId());
-					 cgv.setGoodsCode(x.getCode());
-					 cgv.setGoodsNum(x.getNum());
-					 cgv.setGoodsName(x.getName());
-					 cgv.setGoodsPrice(tbd.getBid());
-					 cgv.setUserRank(i+1);
-					 cgv.setIsActive(x.getStatus());
-
-					 res.add(cgv);
-
-					 idx = 1; //标记存在
-					 break;
-				 }
-			 }
-
-			 if (idx == -1) { //如果不存在竞价信息
-				 CustomGoodsVO cgv = new CustomGoodsVO();
-				 cgv.setGoodsId(x.getGoodsId());
-				 cgv.setGoodsCode(x.getCode());
-				 cgv.setGoodsNum(x.getNum());
-				 cgv.setGoodsName(x.getName());
-				 cgv.setGoodsPrice(new BigDecimal("0.000"));
-				 cgv.setUserRank(-1);
-				 cgv.setIsActive(x.getStatus());
-
-				 res.add(cgv);
-
-			 }
-
-		 });
-
-		 return res;
-	 }
-
-
-	public List<SimpleGoodsVO> findAll(String activityCode) {
-
-		List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
-		List<SimpleGoodsVO> sgvs = new ArrayList<>();
-		jgdList.stream().forEach(x -> {
-			SimpleGoodsVO sgv = new SimpleGoodsVO();
-			sgv.setGoodsId(x.getGoodsId());
-			sgv.setGoodsCode(x.getCode());
-			sgv.setGoodsNum(x.getNum());
-			sgv.setGoodsName(x.getName());
-			sgv.setIsActive(x.getStatus());
-			sgvs.add(sgv);
+			res.add(cgv);
 		});
 
-		return sgvs;
+		return res;
+	}
+
+	static class ComputedRes{
+    	private BigDecimal bid;
+    	private Integer rank;
+
+		public BigDecimal getBid() {
+			return bid;
+		}
+
+		public Integer getRank() {
+			return rank;
+		}
+
+		public ComputedRes(BigDecimal bid, Integer rank) {
+			this.bid = bid;
+			this.rank = rank;
+		}
 	}
 
 	/***
-	 * 业务流程：
-	 * <p>1.获取最新目前正在进行竞拍的竞品</p>
+	 * 计算当前用户的当前竞品的排名
+	 * @param userCode
 	 * @param goodsId
+	 * @param activityCode
 	 * @return
 	 */
-	@Override
-	public CustomBidVO findBidVOByGoodsId(Integer goodsId, String activityCode) {
+    private ComputedRes computedCurrentUserSpecificGoodsRankInfo(String userCode, Integer goodsId, String activityCode) {
+        //根据goods_id 返回正在竞价该竞品的用户排名信息
+        List<JbxtBiddingDVO> bidList = jbxtBiddingDao.getJbxtListBiddingByGoodsId(goodsId, activityCode);
 
-		JbxtUserDO userInfo = (JbxtUserDO)httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
-		LOGGER.info("userInfo: "+userInfo);
-		String userCode = userInfo.getCode();
 
-		JbxtGoodsDO relaseActiveGoods = jbxtgoodsDao.selectActiveGoods(activityCode);
+        Map<BigDecimal, String> map = new HashMap<>();
+        BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
+		Integer rank = -1;
+		boolean exsitUserRank = false;
 
-		if (relaseActiveGoods != null) {
-			if (goodsId.intValue() != relaseActiveGoods.getGoodsId().intValue()) { //如果与传入的goodsId不一致，说明要更新了
-				goodsId = relaseActiveGoods.getGoodsId();
-				LOGGER.info("relaseActiveGoodsId: "+goodsId);
+        for (int i = 0; i < bidList.size(); i++) {
+            JbxtBiddingDVO t1 = bidList.get(i);
+            if (t1.getUserCode().equals(userCode)) {
+                curUserBid = t1.getBid(); //获得当前竞价
+                exsitUserRank = true;
+            }
+            map.put(t1.getBid(), "");
+        }
+        if (exsitUserRank) {
+			List<BigDecimal> list = new ArrayList<>();
+			for (BigDecimal key : map.keySet()) {
+				list.add(key);
 			}
-			return handlerFindCustomBidVO(userCode,goodsId, activityCode);
-		} else {
-			CustomBidVO res = new CustomBidVO();
-			res.setGoodsId(goodsId);
-			res.setUserRank(-1);
-			res.setGoodsPrice(new BigDecimal("0.000"));
-			return res;
+			List<BigDecimal> sortList = list.stream().sorted(BigDecimal::compareTo).collect(Collectors.toList());
+
+			for (int i = 0; i < sortList.size(); i++) {
+				BigDecimal bd1 = sortList.get(i);
+				if (bd1.compareTo(curUserBid) == 0) {
+					rank = i + 1; //获得排名
+					break;
+				}
+			}
 		}
 
-	}
+        return new ComputedRes(curUserBid, rank);
+    }
 
 
 	public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode) {
-		List<JbxtBiddingDVO> jbgs = jbxtBiddingDao.getJbxtListBiddingByGoodsId(userCode, goodsId, activityCode);
+		ComputedRes cr = computedCurrentUserSpecificGoodsRankInfo(userCode, goodsId, activityCode);
 
 		CustomBidVO cbv = new CustomBidVO();
-		int idx = -1;
-		for (int i = 0; i < jbgs.size(); i++) {
-			JbxtBiddingDVO tjb = jbgs.get(i);
-
-			if (tjb.getUserCode().equals(userCode)) {
-				cbv.setGoodsId(goodsId);
-				cbv.setGoodsPrice(tjb.getBid());
-				cbv.setUserRank(i+1);
-
-				idx = 1;
-				break;
-			}
-		}
-		if (idx == -1) {
-			cbv.setGoodsId(goodsId);
-			cbv.setUserRank(-1);
-		}
+		cbv.setGoodsId(goodsId);
+		cbv.setUserRank(cr.getRank());
 
 		return cbv;
 	}
 
 
-
-	public JbxtGoodsDO selectActiveGoods(String activityCode) {
-		return jbxtgoodsDao.selectActiveGoods(activityCode);
-	}
-
-	public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
-		return jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
-	}
-
-
-
-
-	@Override
-	public int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO){
-	       JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class, jbxtgoodsVO);
-	       return jbxtgoodsDao.insertJbxtGoods(jbxtgoodsDO );
-	}
-
-	@Override
-	public int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO){
-	      JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class,jbxtgoodsVO);
-		  jbxtgoodsDO.setUpdatedTime(new Date());
-		  return jbxtgoodsDao.updateJbxtGoods(jbxtgoodsDO);
-	}
-
-	@Override
-	public PageInfo<JbxtGoodsDVO> getJbxtGoodsPage(JbxtGoodsQuery jbxtgoodsQuery) throws BaseException{
-	        JbxtGoodsParam jbxtgoodsParam = BeanCopyUtils.copyProperties(JbxtGoodsParam.class, jbxtgoodsQuery);
-			jbxtgoodsParam.setCompanyCode(jbxtgoodsQuery.getCompanyCode());
-			jbxtgoodsParam.setSysCode(jbxtgoodsQuery.getSysCode());
-		  return jbxtgoodsDao.getJbxtGoodsPage(jbxtgoodsParam);
-	
-	}
-	
-    @Override
-    public JbxtGoodsDO getJbxtGoods(JbxtGoodsQuery jbxtgoodsQuery){
-       JbxtGoodsParam jbxtgoodsParam = BeanCopyUtils.copyProperties(JbxtGoodsParam.class, jbxtgoodsQuery);
-		return jbxtgoodsDao.getJbxtGoods(jbxtgoodsParam);
+    public JbxtGoodsDO selectActiveGoods(String activityCode) {
+        return jbxtgoodsDao.selectActiveGoods(activityCode);
     }
+
+    public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
+        return jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+    }
+
+
+    @Override
+    public int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
+        JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class, jbxtgoodsVO);
+        return jbxtgoodsDao.insertJbxtGoods(jbxtgoodsDO);
+    }
+
+    @Override
+    public int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
+        JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class, jbxtgoodsVO);
+        jbxtgoodsDO.setUpdatedTime(new Date());
+        return jbxtgoodsDao.updateJbxtGoods(jbxtgoodsDO);
+    }
+
 }

@@ -18,89 +18,40 @@ import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
 
 
- /**
+/**
  * 用户表Controller
+ *
  * @author esr
  * @date: 2020年06月17日
  */
 @RestController
 @RequestMapping("/jbxt/user")
-public  class JbxtUserController {
+public class JbxtUserController {
 
 
-	@Autowired
-	IJbxtUserService jbxtuserService;
+    @Autowired
+    IJbxtUserService jbxtuserService;
 
-	Logger LOGGER = LoggerFactory.getLogger(JbxtUserController.class);
+    Logger LOGGER = LoggerFactory.getLogger(JbxtUserController.class);
 
-	@PostMapping("/login")
-	@RestfulResult
-	public Object login(String username, String password) {
-		LOGGER.info("JbxtUserController(login): username="+username+" password="+password);
+    @PostMapping("/login")
+    @RestfulResult
+    public Object login(String username, String password) {
+        LOGGER.info("JbxtUserController(login): username=" + username + " password=" + password);
 
-		//判断username和password非空非""
-		if (username != null && (!username.equals("")) ) {
-			if (password != null && (!password.equals(""))) {
-				//数据库查询
-				boolean res = jbxtuserService.handlerLogin(username, password);
-				if (res) {
-					return new MyResult(true, "登录成功", null);
-				} else {
-					return new MyResult(false, "账号或者密码不正确", null);
-				}
-			}
-		}
-		return new MyResult(false,"非法参数", null);
-	}
-
-	
-	/**
-	 * 分页获取用户表列表
-	 * @param jbxtuserQuery
-	 * @return
-	 */
-	@GetMapping("/list")
-	@RestfulResult
-	public Object getJbxtUserPage(JbxtUserQuery jbxtuserQuery) throws BaseException{
-
-		  return jbxtuserService.getJbxtUserPage( jbxtuserQuery);
-	
-	}
-	
-	
-	/**
-	 * 新增用户表
-	 * @param jbxtuserVO
-	 * @return
-	 */
-   	@PostMapping
-	@RestfulResult
-	public Object insertJbxtUser(JbxtUserVO jbxtuserVO) throws BaseException {
-
-	   return jbxtuserService.insertJbxtUser(jbxtuserVO);
-	}
-
-	/**
-	 * 修改用户表
-	 * @param jbxtuserVO
-	 * @return
-	 */
-	@PutMapping
-	@RestfulResult
-	public Object updateJbxtUser(JbxtUserVO jbxtuserVO) throws BaseException {
-
-		return jbxtuserService.updateJbxtUser(jbxtuserVO);
-	}
-
-    /**
-	 * 获取上架单详情
-	 * @param jbxtuserQuery
-	 * @return
-	 */
-	@GetMapping()
-	@RestfulResult
-    public JbxtUserDO getJbxtUser(JbxtUserQuery jbxtuserQuery) throws BaseException {
-    
-		return jbxtuserService.getJbxtUser(jbxtuserQuery);
+        //判断username和password非空非""
+        if (username != null && (!username.equals(""))) {
+            if (password != null && (!password.equals(""))) {
+                //数据库查询
+                boolean res = jbxtuserService.handlerLogin(username, password);
+                if (res) {
+                    return new MyResult(true, "登录成功", null);
+                } else {
+                    return new MyResult(false, "账号或者密码不正确", null);
+                }
+            }
+        }
+        return new MyResult(false, "非法参数", null);
     }
+
 }

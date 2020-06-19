@@ -40,7 +40,7 @@ public interface IJbxtBiddingDao{
 	  * @param goodsId
 	  * @return
 	  */
-	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( String userCode, Integer goodsId, String activityCode);
+	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId, String activityCode);
 
 
 

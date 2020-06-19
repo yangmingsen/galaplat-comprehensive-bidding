@@ -79,20 +79,6 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 		  return jbxtbiddingDao.updateJbxtBidding(jbxtbiddingDO);
 	}
 
-	@Override
-	public PageInfo<JbxtBiddingDVO> getJbxtBiddingPage(JbxtBiddingQuery jbxtbiddingQuery) throws BaseException{
-	        JbxtBiddingParam jbxtbiddingParam = BeanCopyUtils.copyProperties(JbxtBiddingParam.class, jbxtbiddingQuery);
-			jbxtbiddingParam.setCompanyCode(jbxtbiddingQuery.getCompanyCode());
-			jbxtbiddingParam.setSysCode(jbxtbiddingQuery.getSysCode());
-		  return jbxtbiddingDao.getJbxtBiddingPage(jbxtbiddingParam);
-	
-	}
-	
-    @Override
-    public JbxtBiddingDO getJbxtBidding(JbxtBiddingQuery jbxtbiddingQuery){
-       JbxtBiddingParam jbxtbiddingParam = BeanCopyUtils.copyProperties(JbxtBiddingParam.class, jbxtbiddingQuery);
-		return jbxtbiddingDao.getJbxtBidding(jbxtbiddingParam);
-    }
 
 	public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
     	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(userCode, goodsId,activityCode);
