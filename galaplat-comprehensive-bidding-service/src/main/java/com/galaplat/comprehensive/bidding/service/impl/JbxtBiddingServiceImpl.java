@@ -94,8 +94,8 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 		return jbxtbiddingDao.getJbxtBidding(jbxtbiddingParam);
     }
 
-	public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode) {
-    	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(goodsId,activityCode);
+	public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
+    	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(userCode, goodsId,activityCode);
 	}
 
 

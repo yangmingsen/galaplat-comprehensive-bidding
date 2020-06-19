@@ -133,7 +133,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code",
             "from t_jbxt_bidding",
-            "where goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
+            "where user_code=#{userCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
@@ -148,7 +148,7 @@ public interface JbxtBiddingDOMapper {
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
     })
-    JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode);
+    JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
 
 

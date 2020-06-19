@@ -1,6 +1,9 @@
 package com.galaplat.comprehensive.bidding.controllers;
 
+import com.galaplat.comprehensive.bidding.constants.SessionConstant;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.service.impl.JbxtGoodsServiceImpl;
+import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
 import org.slf4j.Logger;
@@ -22,6 +25,7 @@ import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +37,7 @@ import java.util.Map;
  * @date: 2020年06月17日
  */
 @RestController
-@RequestMapping("/goods")
+@RequestMapping("/jbxt/goods")
 public  class JbxtGoodsController extends BaseController {
 
 
@@ -41,6 +45,10 @@ public  class JbxtGoodsController extends BaseController {
 	IJbxtGoodsService jbxtgoodsService;
 
 	Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsController.class);
+
+
+	@Autowired
+	private HttpServletRequest httpServletRequest;
 
 	@Value("${my.activityCode}")
 	private String activityCode;
@@ -56,8 +64,10 @@ public  class JbxtGoodsController extends BaseController {
 	 	LOGGER.info("JbxtGoodsController(findAll): activityCode="+activityCode);
 	 	if (activityCode != null && (!activityCode.equals(""))) {
 			return new MyResult(true,"获取data成功", jbxtgoodsService.findAllByActivityCode(activityCode));
+		} else {
+			return new MyResult(true,"出错: activityCode不能为空哦(*￣︶￣)", null);
 		}
-		 return new MyResult(true,"获取data失败", null);
+
 	 }
 
 	/**
@@ -70,14 +80,25 @@ public  class JbxtGoodsController extends BaseController {
 	@RestfulResult
 	public Object findOne(Integer goodsId, String activityCode) throws BaseException{
 		LOGGER.info("JbxtGoodsController(findOne): goodsId="+goodsId);
+		if(activityCode == null || activityCode.equals("")) {
+			return new MyResult(false, "获取数据出错: activityCode不能为空哦^_^", null);
+		}
 
-		if (goodsId != null ) {
-			return new MyResult(true,"获取data成功", jbxtgoodsService.findBidVOByGoodsId(goodsId, activityCode));
-		} else { //获取当前
-			JbxtGoodsDO jbxtGoodsDO = jbxtgoodsService.selectActiveGoods(activityCode);
-			if (jbxtGoodsDO != null) { //如果存在正在进行的竞品
-				//返回当前竞品的用户排名
-				return new MyResult(true,"获取data成功", jbxtgoodsService.findBidVOByGoodsId(jbxtGoodsDO.getGoodsId(), activityCode));
+
+		//1 判断你是否有goodsId
+		//2 如果没有走3
+		//3 查看当前是否有正在进行的竞品活动
+		//4 如果存在 查看当前用户的排名
+
+		JbxtUserDO userInfo = (JbxtUserDO)httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
+		String userCode = userInfo.getCode();
+
+		if (goodsId != null) {
+			return new MyResult(true, "获取data成功",jbxtgoodsService.handlerFindCustomBidVO(userCode, goodsId, activityCode));
+		} else {
+			JbxtGoodsDO curActiveGoods = jbxtgoodsService.selectActiveGoods(activityCode);
+			if (curActiveGoods != null) { //如果存在正在进行的竞品
+				return new MyResult(true,"获取data成功", jbxtgoodsService.handlerFindCustomBidVO(userCode, curActiveGoods.getGoodsId(), activityCode));
 			} else { //不存在正在进行的竞品，意味着还未开始竞价活动
 				Map<String, String> map = new HashMap<>();
 				map.put("goodsId","-1");
@@ -85,6 +106,8 @@ public  class JbxtGoodsController extends BaseController {
 			}
 		}
 	}
+
+
 
 
 	/**

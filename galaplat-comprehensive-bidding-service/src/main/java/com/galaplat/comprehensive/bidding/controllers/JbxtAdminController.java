@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/jbxt/admin")
 public class JbxtAdminController {
 
     @Autowired
@@ -35,9 +35,9 @@ public class JbxtAdminController {
 
         if (activityCode != null && (!activityCode.equals(""))) {
             return new MyResult(true, "获取data成功", jbxtgoodsService.findAll(activityCode));
+        } else {
+            return new MyResult(false, "出错: activityCode不能为空哦(*￣︶￣)", null);
         }
-        return new MyResult(false, "获取data失败", null);
-
     }
 
 
@@ -50,6 +50,12 @@ public class JbxtAdminController {
     @RequestMapping("/goods/next")
     @RestfulResult
     public Object next(String activityCode) {
+        LOGGER.info("JbxtAdminController(next): activityCode="+activityCode);
+
+        if (activityCode == null || activityCode.equals("")) {
+            return new MyResult(false,"错误: activityCode不能为空哦(*￣︶￣)", null);
+        }
+
         //业务处理逻辑:
         // 1. 获取当前正在进行的竞品
         // 2.如果1.返回的结果存在 那么切换下一个

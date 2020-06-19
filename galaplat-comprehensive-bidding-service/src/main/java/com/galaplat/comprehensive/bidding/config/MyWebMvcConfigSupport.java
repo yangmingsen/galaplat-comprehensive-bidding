@@ -49,7 +49,7 @@ public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer 
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(getMyInterceptor())
                 .addPathPatterns("/**") //必须使用 /** 才能拦截所有
-                .excludePathPatterns("/user/login");
+                .excludePathPatterns("/jbxt/user/login");
     }
 
 

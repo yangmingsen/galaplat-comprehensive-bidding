@@ -24,7 +24,7 @@ import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
  * @date: 2020年06月17日
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/jbxt/user")
 public  class JbxtUserController {
 
 
@@ -45,10 +45,12 @@ public  class JbxtUserController {
 				boolean res = jbxtuserService.handlerLogin(username, password);
 				if (res) {
 					return new MyResult(true, "登录成功", null);
+				} else {
+					return new MyResult(false, "账号或者密码不正确", null);
 				}
 			}
 		}
-		return new MyResult(false,"登录失败", null);
+		return new MyResult(false,"非法参数", null);
 	}
 
 	

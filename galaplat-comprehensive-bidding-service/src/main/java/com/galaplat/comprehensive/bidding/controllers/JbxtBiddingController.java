@@ -38,7 +38,7 @@ import java.util.Map;
  * @date: 2020年06月17日
  */
 @RestController
-@RequestMapping("/bid")
+@RequestMapping("/jbxt/bid")
 public class JbxtBiddingController {
 
 
@@ -62,44 +62,62 @@ public class JbxtBiddingController {
     @RestfulResult
     public Object submit(BigDecimal bid, Integer goodsId, String activityCode) {
         LOGGER.info("JbxtBiddingController(submit): bid=" + bid + " goodsId=" + goodsId);
+        if(bid == null) {
+            return new MyResult(false, "提交失败: bid不能为空哦^_^", null);
+        }
+        if(goodsId == null) {
+            return new MyResult(false, "提交失败: goodsId不能为空哦^_^", null);
+        }
+        if(activityCode == null || activityCode.equals("")) {
+            return new MyResult(false, "提交失败: activityCode不能为空哦^_^", null);
+        }
 
-        if (bid != null && goodsId != null && activityCode != null) {
-
-            JbxtUserDO userInfo = (JbxtUserDO) httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
-
-            JbxtBiddingDVO curBidInfo = jbxtbiddingService.getCurrentGoodsMinSubmitPrice(goodsId, activityCode);
+        JbxtUserDO userInfo = (JbxtUserDO) httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
+        JbxtBiddingDVO curBidInfo = jbxtbiddingService.getCurrentGoodsMinSubmitPrice(userInfo.getCode(), goodsId, activityCode); //获取当前用户对该竞品的最低报价
+        if (curBidInfo != null) {
             if (bid.compareTo(curBidInfo.getBid()) == -1) {
-                try {
-					JbxtBiddingVO jbv = new JbxtBiddingVO();
-					jbv.setBid(bid);
-					jbv.setUserCode(userInfo.getCode());
-					jbv.setGoodsId(goodsId);
-					jbv.setActivityCode(activityCode); //设置当前活动id
-
-                    //add to db
-                    jbxtbiddingService.insertJbxtBidding(jbv);
-
-                    //获取当前用户的当前竞品的最新排名
-                    CustomBidVO cbv = jbxtGoodsService.handlerFindCustomBidVO(userInfo.getCode(), goodsId, activityCode);
-                    Map<String, String> map = new HashMap();
-                    map.put("userRank", cbv.getUserRank().toString());
-
-                    //业务处理
-                    return new MyResult(true, "提交成功", map);
-                } catch (Exception e) {
-                    return new MyResult(false, "提交失败", null);
-                }
+                return handlerBidDataToDB(userInfo.getCode(), bid, goodsId);
             } else {
-
                 Map<String, String> map = new HashMap();
                 map.put("curMinPrice",curBidInfo.getBid().toString());
-
-                return new MyResult(false, "提交失败: 您当前提交的竞价高于最低价", map);
+                return new MyResult(false, "提交失败: 您当前提交的竞价高于您之前提交的竞价("+curBidInfo.getBid().toString()+")哦^_^", map);
             }
-
+        } else { //如果没有最低报价(意味着数据库中没有该竞品的提交数据) 那么直接插入
+            return handlerBidDataToDB(userInfo.getCode(), bid, goodsId);
         }
-        return new MyResult(false, "提交失败", null);
     }
+
+
+    /**
+     * 保存数据到 db
+     * @param userCode
+     * @param bid
+     * @param goodsId
+     * @return
+     */
+    private Object handlerBidDataToDB(String userCode, BigDecimal bid,  Integer goodsId) {
+
+        try {
+            JbxtBiddingVO jbv = new JbxtBiddingVO();
+            jbv.setBid(bid);
+            jbv.setUserCode(userCode);
+            jbv.setGoodsId(goodsId);
+            jbv.setActivityCode(activityCode); //设置当前活动id
+
+            //add to db
+            jbxtbiddingService.insertJbxtBidding(jbv);
+
+            //获取当前用户的当前竞品的最新排名
+            CustomBidVO cbv = jbxtGoodsService.handlerFindCustomBidVO(userCode, goodsId, activityCode);
+            Map<String, String> map = new HashMap();
+            map.put("userRank", cbv.getUserRank().toString());
+
+            //业务处理
+            return new MyResult(true, "提交成功", map);
+        } catch (Exception e) {
+            return new MyResult(false, "提交失败: 保存失败", null);
+        }
+}
 
 
     /**

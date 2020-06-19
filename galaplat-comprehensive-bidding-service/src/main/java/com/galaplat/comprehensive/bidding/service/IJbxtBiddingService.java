@@ -50,6 +50,6 @@ public interface IJbxtBiddingService{
 	  * @param activityCode
 	  * @return
 	  */
-	 public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode);
+	 public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
 }

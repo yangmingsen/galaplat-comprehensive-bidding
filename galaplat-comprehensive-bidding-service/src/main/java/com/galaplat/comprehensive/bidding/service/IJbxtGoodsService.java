@@ -36,6 +36,7 @@ public interface IJbxtGoodsService{
 	 public List<SimpleGoodsVO> findAll(String activityCode);
 
 
+	 @Deprecated
 	 public CustomBidVO findBidVOByGoodsId(Integer goodsId, String activityCode);
 
 

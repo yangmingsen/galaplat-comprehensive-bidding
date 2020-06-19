@@ -70,8 +70,8 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
     	return mapper.getUserMinBid(userCode,goodsId,activityCode);
 	 }
 
-	 public JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode) {
-    	return mapper.gerCurrentGoodsMinSubmitPrice(goodsId,activityCode);
+	 public JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
+    	return mapper.gerCurrentGoodsMinSubmitPrice(userCode,goodsId,activityCode);
 	 }
 
 }

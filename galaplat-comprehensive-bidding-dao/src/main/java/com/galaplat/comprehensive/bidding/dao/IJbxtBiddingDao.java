@@ -55,11 +55,11 @@ public interface IJbxtBiddingDao{
 	 JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 
 	 /**
-	  * 获取当前竞品的最小提交价
+	  * 获取当前用户竞品的最小提交价
 	  * @param goodsId
 	  * @param activityCode
 	  * @return
 	  */
-	 JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( Integer goodsId, String activityCode);
+	 JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( String userCode,Integer goodsId, String activityCode);
 
 }

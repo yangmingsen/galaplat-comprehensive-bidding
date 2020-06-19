@@ -23,8 +23,10 @@ public class MyInterceptor implements HandlerInterceptor {
         Object userExist = httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
         LOGGER.info("user: "+userExist);
 
+        LOGGER.info("requestPath="+httpServletRequest.getServletPath());
+
         if (userExist == null) {
-            httpServletResponse.setHeader(SessionConstant.ACCESS_CONTROL_EXPOSE_HEADERS, SessionConstant.SESSION_STATE);
+//            httpServletResponse.setHeader(SessionConstant.ACCESS_CONTROL_EXPOSE_HEADERS, SessionConstant.SESSION_STATE);
             httpServletResponse.setHeader(SessionConstant.SESSION_STATE,SessionConstant.SESSION_TIME_OUT);
             return false;
         }
