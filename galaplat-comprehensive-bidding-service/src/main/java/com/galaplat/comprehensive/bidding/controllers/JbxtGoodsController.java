@@ -57,12 +57,10 @@ public class JbxtGoodsController extends BaseController {
     @GetMapping("/findAll")
     @RestfulResult
     public Object findAll(String activityCode) throws BaseException {
-        LOGGER.info("JbxtGoodsController(findAll): activityCode=" + activityCode);
-
         if (activityCode != null && (!activityCode.equals(""))) {
             return new MyResult(true, "获取data成功", jbxtgoodsService.findAllByActivityCode(activityCode));
         } else {
-            return new MyResult(true, "出错: activityCode不能为空哦(*￣︶￣)", null);
+            return new MyResult(false, "出错: activityCode不能为空哦(*￣︶￣)", null);
         }
 
     }
@@ -77,8 +75,6 @@ public class JbxtGoodsController extends BaseController {
     @GetMapping("/findOne")
     @RestfulResult
     public Object findOne(Integer goodsId, String activityCode) throws BaseException {
-        LOGGER.info("JbxtGoodsController(findOne): goodsId=" + goodsId + " activityCode=" + activityCode);
-
         if (activityCode == null || activityCode.equals("")) {
             return new MyResult(false, "获取数据出错: activityCode不能为空哦^_^", null);
         }

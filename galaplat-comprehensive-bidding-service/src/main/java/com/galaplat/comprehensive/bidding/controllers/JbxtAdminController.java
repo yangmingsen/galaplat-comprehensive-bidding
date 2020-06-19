@@ -122,7 +122,6 @@ public class JbxtAdminController {
     @RestfulResult
     @Transactional(rollbackFor = Exception.class)
     public Object next(String activityCode) {
-
         //业务处理逻辑:
         // 1. 获取当前正在进行的竞品
         // 2.如果1.返回的结果存在 那么切换下一个
@@ -134,10 +133,6 @@ public class JbxtAdminController {
             // 3.1 查询根据活动code查询所有竞品 => list
             // 3.2 如果 list(0)的status为0则表示竞品都还没有开始 置数据库第一个竞品为当前进行竞价竞品 返回它的id
             // 3.3 如果 list(0)的status为2则表示竞品都已经结束  返回goodsId为-1
-
-
-        LOGGER.info("JbxtAdminController(next): activityCode="+activityCode);
-
         if (activityCode == null || activityCode.equals("")) {
             return new MyResult(false,"错误: activityCode不能为空哦(*￣︶￣)", null);
         }

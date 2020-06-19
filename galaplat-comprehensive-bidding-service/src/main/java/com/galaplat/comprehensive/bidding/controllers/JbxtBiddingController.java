@@ -64,8 +64,6 @@ public class JbxtBiddingController {
         //4. 如果3不成立 走6
         //5. 如果2 返回 null 走6
         //6. 那么直接insert 到db
-
-        LOGGER.info("JbxtBiddingController(submit): bid=" + bid + " goodsId=" + goodsId);
         if (bid == null) {
             return new MyResult(false, "提交失败: bid不能为空哦^_^", null);
         }
