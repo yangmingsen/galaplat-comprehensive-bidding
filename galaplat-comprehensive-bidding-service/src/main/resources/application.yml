@@ -80,7 +80,9 @@ datasource:
 
 my:
   activityCode: 1
-  corsStr: http://test.esrcloud.com
+  corsStr: http://apitest.esrcloud.com
+#  corsStr: http://192.168.17.6:8850
+#  corsStr: http://test.esrcloud.com
 
 
 

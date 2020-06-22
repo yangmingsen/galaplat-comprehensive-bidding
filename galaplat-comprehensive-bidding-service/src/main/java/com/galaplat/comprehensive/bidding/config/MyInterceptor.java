@@ -20,7 +20,7 @@ public class MyInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
 
         LOGGER.info("from session: "+httpServletRequest.getSession().getId());
-        Object userExist = httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
+        JbxtUserDO userExist = (JbxtUserDO)httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
         LOGGER.info("user: "+userExist);
 
         LOGGER.info("requestPath="+httpServletRequest.getServletPath());
@@ -30,6 +30,9 @@ public class MyInterceptor implements HandlerInterceptor {
             httpServletResponse.setHeader(SessionConstant.SESSION_STATE,SessionConstant.SESSION_TIME_OUT);
             return false;
         }
+
+        LOGGER.info("requestUser="+userExist.getUsername()+" Code="+userExist.getCode());
+
 
         JbxtUserDO user = (JbxtUserDO)userExist;
         String reqPath = httpServletRequest.getServletPath();
