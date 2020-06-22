@@ -25,7 +25,7 @@ public class GlobalCorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         //1) 允许的域,不要写*，否则cookie就无法使用了
-        config.addAllowedOrigin("http://apitest.esrcloud.com/jbxt");
+        config.addAllowedOrigin("*");
 //        config.addAllowedOrigin("http://test.esrcloud.com");
 //        config.addAllowedOrigin("http://192.168.17.6:8850");
 
