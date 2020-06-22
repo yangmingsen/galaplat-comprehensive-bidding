@@ -34,4 +34,28 @@ public interface IJbxtGoodsDao{
 	
     
     JbxtGoodsDO getJbxtGoods(JbxtGoodsParam jbxtgoodsParam);
+
+
+	 /**
+	  * 根据活动Code 获取所有的竞品
+	  * @param activityCode
+	  * @return res => ASC（id）
+	  */
+	 List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
+
+	 public JbxtGoodsDO selectActiveGoods(String activityCode);
+
+
+
+
+	 /**
+	  * 根据 goodsId获取一个竞品信息
+	  * @param goodsId
+	  * @return
+	  */
+	 public JbxtGoodsDO selectByGoodsId(Integer goodsId);
+
+
+
+
 }

@@ -43,6 +43,11 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 	
     @Override
     public JbxtUserDO getJbxtUser(JbxtUserParam jbxtuserParam){
-		return mapper.selectByPrimaryKey(jbxtuserParam);
+		return mapper.selectByPrimaryKey(jbxtuserParam.getCode());
     }
+
+
+	 public JbxtUserDO getJbxtUserByUsername(String username){
+		 return mapper.selectByUsernameKey(username);
+	 }
 }

@@ -25,7 +25,7 @@ public class JbxtUserDOSqlProvider {
         }
         
         if (record.getPassword() != null) {
-            VALUES("password", "#{password,jdbcType=INTEGER}");
+            VALUES("password", "#{password,jdbcType=VARCHAR}");
         }
         
         if (record.getAdmin() != null) {
@@ -68,7 +68,7 @@ public class JbxtUserDOSqlProvider {
         }
         
         if (record.getPassword() != null) {
-            SET("password = #{password,jdbcType=INTEGER}");
+            SET("password = #{password,jdbcType=VARCHAR}");
         }
         
         if (record.getAdmin() != null) {

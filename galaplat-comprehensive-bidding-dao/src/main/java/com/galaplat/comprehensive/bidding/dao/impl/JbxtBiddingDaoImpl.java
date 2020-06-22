@@ -1,7 +1,9 @@
 package com.galaplat.comprehensive.bidding.dao.impl;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -43,6 +45,45 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	
     @Override
     public JbxtBiddingDO getJbxtBidding(JbxtBiddingParam jbxtbiddingParam){
-		return mapper.selectByPrimaryKey(jbxtbiddingParam);
+		return mapper.selectByPrimaryKey(jbxtbiddingParam.getCode());
     }
+
+	 /***
+	  *
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 @Override
+	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId, String activityCode) {
+
+		 List<JbxtBiddingDVO> list = mapper.getAllBidUserInfo(goodsId, activityCode); //获取所有正在竞价的用户
+		Map<String, String> map = new HashMap<>();
+		list.stream().forEach(x -> {
+			map.put(x.getUserCode(),"1");
+		});
+		List<JbxtBiddingDVO> res = new ArrayList<>();
+		 for(String key:map.keySet()) {
+			 res.add(getUserMinBid(key, goodsId, activityCode));
+		 }
+
+		 return res.stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());
+	 }
+
+
+	 /**
+	  * 获取当前用户最小竞价
+	  * @param userCode
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode) {
+    	return mapper.getUserMinBid(userCode,goodsId,activityCode);
+	 }
+
+	 public JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
+    	return mapper.gerCurrentGoodsMinSubmitPrice(userCode,goodsId,activityCode);
+	 }
+
 }

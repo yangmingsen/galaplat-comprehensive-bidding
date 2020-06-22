@@ -17,9 +17,9 @@ public class JbxtActivityDVO implements Serializable {
     /*活动名称*/
     private String name;
     /*开始时间*/
-    private Integer startTime;
+    private Date startTime;
     /*结束时间*/
-    private String endTime;
+    private Date endTime;
     /*创建时间*/
     private Date createdTime;
     /*更新时间如果没有默认创建时间，修改数据必须更新*/
@@ -47,17 +47,17 @@ public class JbxtActivityDVO implements Serializable {
         this.name = name;
     }
 
-    public Integer getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
-    public void setStartTime(Integer startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 

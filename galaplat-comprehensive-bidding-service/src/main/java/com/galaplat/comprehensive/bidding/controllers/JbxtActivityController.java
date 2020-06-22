@@ -8,29 +8,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
-import com.galaplat.baseplatform.permissions.controllers.BaseController;
-import com.github.pagehelper.PageInfo;
 import com.galaplat.comprehensive.bidding.querys.JbxtActivityQuery;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.vos.JbxtActivityVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
 
 
- /**
+/**
  * 活动表Controller
  * @author esr
  * @date: 2020年06月17日
  */
 @RestController
 @RequestMapping("/jbxtactivity")
-public  class JbxtActivityController extends BaseController {
+public  class JbxtActivityController  {
 
 
 	@Autowired
 	IJbxtActivityService jbxtactivityService;
 	
-	
+
 	/**
 	 * 分页获取活动表列表
 	 * @param jbxtactivityQuery

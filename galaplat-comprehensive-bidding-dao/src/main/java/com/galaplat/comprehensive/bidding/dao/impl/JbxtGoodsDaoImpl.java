@@ -31,7 +31,7 @@ public   class JbxtGoodsDaoImpl implements IJbxtGoodsDao  {
 
 	@Override
 	public int updateJbxtGoods(JbxtGoodsDO entity){
-	        return mapper.updateByPrimaryKey(entity);
+	        return mapper.updateByPrimaryKeySelective(entity);
 	}
 
 	@Override
@@ -43,6 +43,20 @@ public   class JbxtGoodsDaoImpl implements IJbxtGoodsDao  {
 	
     @Override
     public JbxtGoodsDO getJbxtGoods(JbxtGoodsParam jbxtgoodsParam){
-		return mapper.selectByPrimaryKey(jbxtgoodsParam);
+		return mapper.selectByPrimaryKey(jbxtgoodsParam.getGoodsId());
     }
+
+    //---------------------------my--------------------
+	 public JbxtGoodsDO selectByGoodsId(Integer goodsId){
+		 return mapper.selectByPrimaryKey(goodsId);
+	 }
+
+    @Override
+	 public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
+    	return mapper.getListJbxtGoodsByActivityCode(activityCode);
+	 }
+
+	 public JbxtGoodsDO selectActiveGoods(String activityCode) {
+		return mapper.selectActiveGoods(activityCode);
+	 }
 }

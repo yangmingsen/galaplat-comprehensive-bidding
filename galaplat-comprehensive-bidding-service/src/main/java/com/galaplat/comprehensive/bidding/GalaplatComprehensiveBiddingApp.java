@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding;
 
+import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import org.galaplat.baseplatform.file.plugin.FilePlugin;
 import org.slf4j.MDC;
 import org.springframework.boot.CommandLineRunner;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -41,6 +43,10 @@ public class GalaplatComprehensiveBiddingApp implements CommandLineRunner {
         MDC.put("IP", InetAddressUtils.getHostAddress());
     }
 
+    @Bean
+    public IdWorker idWorker() {
+        return new IdWorker(0, 0);
+    }
 
 }
 

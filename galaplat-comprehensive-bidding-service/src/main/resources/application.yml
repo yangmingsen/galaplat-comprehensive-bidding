@@ -1,12 +1,13 @@
 server:
   id: 0409
-  port: 8048
+  port: 8848
   tomcat:
     accept-count: 500 # Maximum queue length for incoming connection requests when all possible request processing threads are in use.
     max-connections: 500 # Maximum number of connections that the server will accept and process at any given time.
     max-threads: 500 # Maximum amount of worker threads.
     min-spare-threads: 200  # Minimum amount of worker threads.
-
+  servlet:
+    context-path: /
 http:
   mappers:
     json-pretty-print: false  # pretty print JSON  
@@ -63,7 +64,7 @@ management:
 #    password: 123456
 
 datasource:
-    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: Esr16888
     driver-class-name: com.mysql.jdbc.Driver
@@ -77,7 +78,8 @@ datasource:
       remove-abandoned-timeout: 1800
       filters: stat,config
 
-
+my:
+  activityCode: 1
 
 
 

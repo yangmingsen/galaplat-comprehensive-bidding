@@ -8,6 +8,9 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.querys.JbxtGoodsQuery;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import com.github.pagehelper.PageInfo;
 
  /**
@@ -18,7 +21,40 @@ import com.github.pagehelper.PageInfo;
 public interface IJbxtGoodsService{
 
 
-    /**
+	 /***
+	  * 给客户端
+	  * @param activityCode
+	  * @return  List CustomGoodsVO
+	  */
+	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode);
+
+	 /**
+	  * 给管理端使用
+	  * @param activityCode
+	  * @return List SimpleGoodsVO
+	  */
+	 public List<SimpleGoodsVO> findAll(String activityCode);
+
+
+
+	 /***
+	  * 获取所有的GoodsDVO
+	  * @param activityCode
+	  * @return List JbxtGoodsDVO
+	  */
+	 public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
+
+
+	 /***
+	  * 通用获取当前用户排名情况方法
+	  * @param userCode
+	  * @param goodsId
+	  * @return
+	  */
+	 public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode);
+
+
+	 /**
 	 * 添加竞品表
 	 */
 	int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO);
@@ -28,15 +64,8 @@ public interface IJbxtGoodsService{
 	 */
 	int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO);
 
-	/**
-	 * 分页获取竞品表列表
-	 *
-	 */
-	public PageInfo<JbxtGoodsDVO> getJbxtGoodsPage(JbxtGoodsQuery jbxtgoodsQuery) throws BaseException;
-	
-    /**
-	 * 获取竞品表详情
-	 *
-	 */
-    JbxtGoodsDO getJbxtGoods(JbxtGoodsQuery jbxtgoodsQuery);
+
+	 public JbxtGoodsDO selectActiveGoods(String activityCode);
+
+
 }
