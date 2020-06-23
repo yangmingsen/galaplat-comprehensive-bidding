@@ -32,7 +32,7 @@ public interface JbxtGoodsDOMapper {
         "values (#{goodsId,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, ",
         "#{name,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
         "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
-        "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
+        "#{firstPrice,jdbcType=DECIMAL}, #{creator,jdbcType=VARCHAR}, ",
         "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR}, ",
         "#{status,jdbcType=VARCHAR})"
     })
@@ -43,7 +43,7 @@ public interface JbxtGoodsDOMapper {
 
     @Select({
         "select",
-        "goods_id, code, name, num, activity_code, created_time, updated_time, updator, ",
+        "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
         "creator, company_code, sys_code, status",
         "from t_jbxt_goods",
         "where goods_id = #{goodsId,jdbcType=INTEGER}"
@@ -56,7 +56,7 @@ public interface JbxtGoodsDOMapper {
         @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
-        @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+        @Result(column="first_price", property="firstPrice", jdbcType=JdbcType.DECIMAL),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
@@ -75,7 +75,7 @@ public interface JbxtGoodsDOMapper {
           "activity_code = #{activityCode,jdbcType=VARCHAR},",
           "created_time = #{createdTime,jdbcType=TIMESTAMP},",
           "updated_time = #{updatedTime,jdbcType=TIMESTAMP},",
-          "updator = #{updator,jdbcType=VARCHAR},",
+          "first_price = #{firstPrice,jdbcType=DECIMAL},",
           "creator = #{creator,jdbcType=VARCHAR},",
           "company_code = #{companyCode,jdbcType=VARCHAR},",
           "sys_code = #{sysCode,jdbcType=VARCHAR},",
@@ -88,7 +88,7 @@ public interface JbxtGoodsDOMapper {
 
     @Select({
             "select",
-            "goods_id, code, name, num, activity_code, created_time, updated_time, updator, ",
+            "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
             "creator, company_code, sys_code, status",
             "from t_jbxt_goods",
             "where activity_code = #{activityCode,jdbcType=VARCHAR} ORDER BY goods_id ASC LIMIT 0,1000"
@@ -101,7 +101,7 @@ public interface JbxtGoodsDOMapper {
             @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
             @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
-            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="first_price", property="firstPrice", jdbcType=JdbcType.DECIMAL),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
@@ -113,7 +113,7 @@ public interface JbxtGoodsDOMapper {
 
     @Select({
             "select",
-            "goods_id, code, name, num, activity_code, created_time, updated_time, updator, ",
+            "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
             "creator, company_code, sys_code, status",
             "from t_jbxt_goods",
             "where status = 1 AND activity_code=#{activityCode,jdbcType=VARCHAR} "
@@ -126,7 +126,7 @@ public interface JbxtGoodsDOMapper {
             @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
             @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
-            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="first_price", property="firstPrice", jdbcType=JdbcType.DECIMAL),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),

@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.dao.dvos;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -24,8 +25,8 @@ public class JbxtGoodsDVO implements Serializable {
     private Date createdTime;
     /*更新时间如果没有默认创建时间，修改数据必须更新*/
     private Date updatedTime;
-    /*更新人*/
-    private String updator;
+
+    private BigDecimal firstPrice;
     /*创建人*/
     private String creator;
     /*公司唯一编码*/
@@ -79,14 +80,15 @@ public class JbxtGoodsDVO implements Serializable {
         this.updatedTime = updatedTime;
     }
 
-    public String getUpdator() {
-        return updator;
-    }
-    public void setUpdator(String updator) {
-        this.updator = updator;
-    }
+     public BigDecimal getFirstPrice() {
+         return firstPrice;
+     }
 
-    public String getCreator() {
+     public void setFirstPrice(BigDecimal firstPrice) {
+         this.firstPrice = firstPrice;
+     }
+
+     public String getCreator() {
         return creator;
     }
     public void setCreator(String creator) {

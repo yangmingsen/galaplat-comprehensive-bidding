@@ -69,6 +69,8 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
             sgv.setGoodsNum(x.getNum());
             sgv.setGoodsName(x.getName());
             sgv.setIsActive(x.getStatus());
+            sgv.setFirstPrice(x.getFirstPrice());
+
             sgvs.add(sgv);
         });
 
@@ -105,6 +107,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 			cgv.setGoodsPrice(cr.getBid());
 			cgv.setUserRank(cr.getRank());
 			cgv.setIsActive(x.getStatus());
+			cgv.setFirstPrice(x.getFirstPrice());
 
 			res.add(cgv);
 		});
