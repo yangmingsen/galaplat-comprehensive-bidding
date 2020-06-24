@@ -15,10 +15,19 @@ public class CustomGoodsVO {
 
     private BigDecimal goodsPrice;
 
+    private BigDecimal firstPrice;
+
     private Integer userRank;
 
     private String isActive;
 
+    public BigDecimal getFirstPrice() {
+        return firstPrice;
+    }
+
+    public void setFirstPrice(BigDecimal firstPrice) {
+        this.firstPrice = firstPrice;
+    }
 
     public String getGoodsCode() {
         return goodsCode;

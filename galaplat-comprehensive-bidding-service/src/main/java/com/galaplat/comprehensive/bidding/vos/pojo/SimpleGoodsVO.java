@@ -12,7 +12,17 @@ public class SimpleGoodsVO {
     /*竞标数量*/
     private Integer goodsNum;
 
+    private BigDecimal firstPrice;
+
     private String isActive;
+
+    public BigDecimal getFirstPrice() {
+        return firstPrice;
+    }
+
+    public void setFirstPrice(BigDecimal firstPrice) {
+        this.firstPrice = firstPrice;
+    }
 
     public int getGoodsId() {
         return goodsId;

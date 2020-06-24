@@ -37,8 +37,6 @@ public class JbxtUserController {
     @PostMapping("/login")
     @RestfulResult
     public Object login(String username, String password) {
-        LOGGER.info("JbxtUserController(login): username=" + username + " password=" + password);
-
         //判断username和password非空非""
         if (username != null && (!username.equals(""))) {
             if (password != null && (!password.equals(""))) {
@@ -49,9 +47,12 @@ public class JbxtUserController {
                 } else {
                     return new MyResult(false, "账号或者密码不正确", null);
                 }
+            } else {
+                return new MyResult(false, "非法参数: 密码不能为空哦(*￣︶￣)", null);
             }
+        } else {
+            return new MyResult(false, "非法参数: 账号不能为空哦(*￣︶￣)", null);
         }
-        return new MyResult(false, "非法参数", null);
     }
 
 }

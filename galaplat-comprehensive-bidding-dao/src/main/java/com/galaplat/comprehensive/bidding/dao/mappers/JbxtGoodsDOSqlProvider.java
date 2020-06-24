@@ -44,8 +44,8 @@ public class JbxtGoodsDOSqlProvider {
             VALUES("updated_time", "#{updatedTime,jdbcType=TIMESTAMP}");
         }
         
-        if (record.getUpdator() != null) {
-            VALUES("updator", "#{updator,jdbcType=VARCHAR}");
+        if (record.getFirstPrice() != null) {
+            VALUES("first_price", "#{firstPrice,jdbcType=DECIMAL}");
         }
         
         if (record.getCreator() != null) {
@@ -95,8 +95,8 @@ public class JbxtGoodsDOSqlProvider {
             SET("updated_time = #{updatedTime,jdbcType=TIMESTAMP}");
         }
         
-        if (record.getUpdator() != null) {
-            SET("updator = #{updator,jdbcType=VARCHAR}");
+        if (record.getFirstPrice() != null) {
+            SET("first_price = #{firstPrice,jdbcType=DECIMAL}");
         }
         
         if (record.getCreator() != null) {

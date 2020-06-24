@@ -69,6 +69,8 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
             sgv.setGoodsNum(x.getNum());
             sgv.setGoodsName(x.getName());
             sgv.setIsActive(x.getStatus());
+            sgv.setFirstPrice(x.getFirstPrice());
+
             sgvs.add(sgv);
         });
 
@@ -105,6 +107,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 			cgv.setGoodsPrice(cr.getBid());
 			cgv.setUserRank(cr.getRank());
 			cgv.setIsActive(x.getStatus());
+			cgv.setFirstPrice(x.getFirstPrice());
 
 			res.add(cgv);
 		});
@@ -141,34 +144,24 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
         //根据goods_id 返回正在竞价该竞品的用户排名信息
         List<JbxtBiddingDVO> bidList = jbxtBiddingDao.getJbxtListBiddingByGoodsId(goodsId, activityCode);
 
-
-        Map<BigDecimal, String> map = new HashMap<>();
+        Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
         BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
-		Integer rank = -1;
+		Integer rank = -1; //价格排名
 		boolean exsitUserRank = false;
-
         for (int i = 0; i < bidList.size(); i++) {
             JbxtBiddingDVO t1 = bidList.get(i);
             if (t1.getUserCode().equals(userCode)) {
                 curUserBid = t1.getBid(); //获得当前竞价
                 exsitUserRank = true;
             }
-            map.put(t1.getBid(), "");
+
+			Integer tIdx = map.get(t1.getBid());
+            if (tIdx == null) { //存在
+				map.put(t1.getBid(), i+1); //存入当前价格的索引idx
+			}
         }
         if (exsitUserRank) {
-			List<BigDecimal> list = new ArrayList<>();
-			for (BigDecimal key : map.keySet()) {
-				list.add(key);
-			}
-			List<BigDecimal> sortList = list.stream().sorted(BigDecimal::compareTo).collect(Collectors.toList());
-
-			for (int i = 0; i < sortList.size(); i++) {
-				BigDecimal bd1 = sortList.get(i);
-				if (bd1.compareTo(curUserBid) == 0) {
-					rank = i + 1; //获得排名
-					break;
-				}
-			}
+        	rank = map.get(curUserBid);
 		}
 
         return new ComputedRes(curUserBid, rank);
