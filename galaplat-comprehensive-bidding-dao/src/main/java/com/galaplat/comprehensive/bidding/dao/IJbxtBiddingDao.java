@@ -15,7 +15,7 @@ import com.github.pagehelper.PageInfo;
  */
 public interface IJbxtBiddingDao{
 
-	//----------------
+	//---------v2.0 最小竞价表API-------
 
 	 /***
 	  * insert
@@ -25,7 +25,7 @@ public interface IJbxtBiddingDao{
 	 int insertMinBidTableSelective(JbxtBiddingDO record);
 
 	 /***
-	  * 获取当前用户最小竞价
+	  * 获取当前用户对该竞品的最小竞价
 	  * @param userCode
 	  * @param goodsId
 	  * @param activityCode
@@ -95,5 +95,6 @@ public interface IJbxtBiddingDao{
 	  * @return
 	  */
 	 JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( String userCode,Integer goodsId, String activityCode);
+
 
 }

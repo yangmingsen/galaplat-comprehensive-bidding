@@ -24,7 +24,7 @@ import com.github.pagehelper.PageInfo;
 public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	 @Override
 	 public int insertMinBidTableSelective(JbxtBiddingDO record) {
-		 return mapper.insert(record);
+		 return mapper.insertMinBidTableSelective(record);
 	 }
 
 	 @Override
@@ -85,7 +85,7 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 		});
 		List<JbxtBiddingDVO> res = new ArrayList<>();
 		 for(String key:map.keySet()) {
-			 res.add(getUserMinBid(key, goodsId, activityCode));
+			 res.add(getUserMinBid(key, goodsId, activityCode)); //
 		 }
 
 		 return res.stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());

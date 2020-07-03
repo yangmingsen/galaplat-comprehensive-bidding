@@ -39,7 +39,12 @@ import javax.servlet.http.HttpServletRequest;
  @Service
 public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public int insertMinBidTableSelective(JbxtBiddingVO record) {
+		record.setCode(idWorker.nextId());
+
+		record.setCreatedTime(new Date());
+		record.setUpdatedTime(new Date());
 
 		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
 
@@ -58,6 +63,7 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	}
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record) {
 		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
 		return jbxtbiddingDao.updateMinBidTableByPrimaryKeySelective(jbxtbiddingDO);
@@ -77,6 +83,7 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	 private IdWorker idWorker;
 	
     @Override
+	@Transactional(rollbackFor = Exception.class)
 	public int insertJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 
 
@@ -99,6 +106,7 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 	      JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class,jbxtbiddingVO);
 		  jbxtbiddingDO.setUpdatedTime(new Date());

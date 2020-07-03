@@ -22,6 +22,8 @@ public interface IJbxtUserService{
 
 	 JbxtUserDO getJbxtUserByUsername(String  username);
 
+	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+
     /**
 	 * 添加用户表
 	 */

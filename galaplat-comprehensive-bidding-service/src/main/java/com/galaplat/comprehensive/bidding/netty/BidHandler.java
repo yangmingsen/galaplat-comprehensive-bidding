@@ -32,19 +32,15 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         // 获取客户端发送过来的文本消息
         String text = msg.text();
         System.out.println("接收到消息数据为：" + text);
-
         RequestMessage message = JSON.parseObject(text, RequestMessage.class);
-
-        // 通过SpringUtil工具类获取Spring上下文容器
-        //ChatRecordService chatRecordService = SpringUtil.getBean(ChatRecordService.class);
-
-
 
         switch (message.getType()) {
             // 建立供应商客户端连接的消息
             case 101: {
                 String userCode = message.getData().get("userCode");
+                String focusActivity = message.getData().get("activityCode");
                 userChannelMapBean.put(userCode, ctx.channel());
+                userChannelMapBean.put(userCode,focusActivity);
                 System.out.println("建立用户:" + userCode + "与通道" + ctx.channel().id() + "的关联");
                 userChannelMapBean.print();
             }
@@ -53,7 +49,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
             // 建立管理员客户端连接的消息
             case 102: {
                 String adminCode = message.getData().get("adminCode");
-                String focusActivity = "";
+                String focusActivity = "1275271189644222464";
                 AdminInfo adminInfo = new AdminInfo(focusActivity,ctx.channel());
                 adminChannelMap.put(adminCode, adminInfo);
                 System.out.println("建立（admin）用户:" + adminCode + "与通道" + ctx.channel().id() + "的关联");

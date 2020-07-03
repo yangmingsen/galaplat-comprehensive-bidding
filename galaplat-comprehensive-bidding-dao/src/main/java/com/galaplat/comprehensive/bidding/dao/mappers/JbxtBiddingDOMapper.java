@@ -25,7 +25,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code",
+            "creator, company_code, sys_code, bid_time",
             "from t_jbxt_minbid",
             "where user_code=#{userCode,jdbcType=VARCHAR} and goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR}"
     })
@@ -40,7 +40,8 @@ public interface JbxtBiddingDOMapper {
             @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     JbxtBiddingDO selectMinBidTableByOne(String userCode, Integer goodsId, String activityCode);
 
@@ -48,7 +49,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code",
+            "creator, company_code, sys_code, bid_time",
             "from t_jbxt_minbid",
             "where goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR}"
     })
@@ -63,7 +64,8 @@ public interface JbxtBiddingDOMapper {
             @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     List<JbxtBiddingDVO> selectMinBidTableByList(Integer goodsId, String activityCode);
 
@@ -88,13 +90,13 @@ public interface JbxtBiddingDOMapper {
         "bid, created_time, ",
         "updated_time, updator, ",
         "creator, company_code, ",
-        "sys_code)",
+        "sys_code, bid_time)",
         "values (#{code,jdbcType=VARCHAR}, #{goodsId,jdbcType=INTEGER}, ",
         "#{userCode,jdbcType=VARCHAR}, #{activityCode,jdbcType=VARCHAR}, ",
         "#{bid,jdbcType=DECIMAL}, #{createdTime,jdbcType=TIMESTAMP}, ",
         "#{updatedTime,jdbcType=TIMESTAMP}, #{updator,jdbcType=VARCHAR}, ",
         "#{creator,jdbcType=VARCHAR}, #{companyCode,jdbcType=VARCHAR}, ",
-        "#{sysCode,jdbcType=VARCHAR})"
+        "#{sysCode,jdbcType=VARCHAR},#{bidTime,jdbcType=VARCHAR})"
     })
     int insert(JbxtBiddingDO record);
 
@@ -104,7 +106,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
         "select",
         "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-        "creator, company_code, sys_code",
+        "creator, company_code, sys_code, bid_time",
         "from t_jbxt_bidding",
         "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -119,7 +121,8 @@ public interface JbxtBiddingDOMapper {
         @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     JbxtBiddingDO selectByPrimaryKey(String code);
 
@@ -137,7 +140,8 @@ public interface JbxtBiddingDOMapper {
           "updator = #{updator,jdbcType=VARCHAR},",
           "creator = #{creator,jdbcType=VARCHAR},",
           "company_code = #{companyCode,jdbcType=VARCHAR},",
-          "sys_code = #{sysCode,jdbcType=VARCHAR}",
+          "sys_code = #{sysCode,jdbcType=VARCHAR},",
+            "bid_time = #{bidTime,jdbcType=VARCHAR}",
         "where code = #{code,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKey(JbxtBiddingDO record);
@@ -148,7 +152,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code",
+            "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
             "where goods_id = #{goodsId,jdbcType=INTEGER} ORDER BY bid ASC LIMIT 0,1000"
     })
@@ -163,7 +167,8 @@ public interface JbxtBiddingDOMapper {
             @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId);
 
@@ -174,7 +179,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code",
+            "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
             "where user_code=#{userCode,jdbcType=VARCHAR} and goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
@@ -189,7 +194,8 @@ public interface JbxtBiddingDOMapper {
             @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 
@@ -198,7 +204,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code",
+            "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
             "where user_code=#{userCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
@@ -213,7 +219,8 @@ public interface JbxtBiddingDOMapper {
             @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
@@ -223,7 +230,7 @@ public interface JbxtBiddingDOMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code",
+            "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
             "where goods_id = #{goodsId,jdbcType=INTEGER} and activity_code = #{activityCode}"
     })
@@ -238,7 +245,8 @@ public interface JbxtBiddingDOMapper {
             @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     List<JbxtBiddingDVO> getAllBidUserInfo( Integer goodsId, String activityCode);
 

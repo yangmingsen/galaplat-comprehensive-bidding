@@ -86,9 +86,11 @@ public class UserChannelMap {
 
     // 打印所有的用户与通道的关联数据
     public  void print() {
+        System.out.println("----------------");
         for (String s : userChannelMap.keySet()) {
             System.out.println("用户id:" + s + " 通道:" + userChannelMap.get(s).id());
         }
+        System.out.println("----------------");
     }
 
     /**

@@ -8,11 +8,11 @@ public class CustomBidVO {
     private Integer userRank;
 
 
-    public int getGoodsId() {
+    public Integer getGoodsId() {
         return goodsId;
     }
 
-    public void setGoodsId(int goodsId) {
+    public void setGoodsId(Integer goodsId) {
         this.goodsId = goodsId;
     }
 

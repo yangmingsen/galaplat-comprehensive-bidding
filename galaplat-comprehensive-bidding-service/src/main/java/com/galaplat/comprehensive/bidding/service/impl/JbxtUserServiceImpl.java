@@ -60,6 +60,11 @@ public  class JbxtUserServiceImpl implements IJbxtUserService  {
 		 return false;
 	 }
 
+	public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
+	 	return jbxtuserDao.selectByuserCodeAndActivityCode(userCode,activityCode);
+	}
+
+
 	@Override
 	public JbxtUserDO getJbxtUserByUsername(String username) {
 		return jbxtuserDao.getJbxtUserByUsername(username);

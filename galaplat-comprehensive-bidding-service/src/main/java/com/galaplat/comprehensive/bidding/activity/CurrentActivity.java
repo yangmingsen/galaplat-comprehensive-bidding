@@ -40,6 +40,13 @@ public class CurrentActivity extends Thread {
         return remainingTime;
     }
 
+    /***
+     *
+     * @param currentActivityCode
+     * @param currentGoodsId
+     * @param initTime 秒
+     * @param status 1 进行 2暂停  3重置
+     */
     public CurrentActivity(String currentActivityCode, String currentGoodsId,
                            int initTime, int status) {
         this.currentActivityCode = currentActivityCode;
@@ -93,6 +100,14 @@ public class CurrentActivity extends Thread {
                     channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
                 }
             }
+
+            adminChannel.getAllAdmin().forEach(admin -> {
+                if (adminChannel.get(admin).getFocusActivity().equals(this.currentActivityCode)) {
+                    adminChannel.get(admin).getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+                }
+            });
+
+
 
             Thread.sleep(1*1000);
             remainingTime --;

@@ -167,13 +167,77 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
         return new ComputedRes(curUserBid, rank);
     }
 
+	/***
+	 * v2.0
+	 * @return
+	 */
+	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
+		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode);
+
+		Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
+		BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
+		Integer rank = -1; //价格排名
+		boolean exsitUserRank = false;
+		for (int i = 0; i < bidList.size(); i++) {
+			JbxtBiddingDVO t1 = bidList.get(i);
+			if (t1.getUserCode().equals(userCode)) {
+				curUserBid = t1.getBid(); //获得当前竞价
+				exsitUserRank = true;
+			}
+
+			Integer tIdx = map.get(t1.getBid());
+			if (tIdx == null) { //存在
+				map.put(t1.getBid(), i+1); //存入当前价格的索引idx
+			}
+		}
+		if (exsitUserRank) {
+			rank = map.get(curUserBid);
+		}
+
+		return new ComputedRes(curUserBid, rank);
+
+	}
+
+	/***
+	 * v2.0
+	 * @param goodsId
+	 * @param userCode
+	 * @param activityCode
+	 * @return
+	 */
+	public CustomBidVO getUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
+		ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity( goodsId, userCode, activityCode);
+
+		CustomBidVO cbv = new CustomBidVO();
+		//是否更换goodsId
+		JbxtGoodsDO activeGoods = jbxtgoodsService.selectActiveGoods(activityCode);
+		if (activeGoods != null) {
+			Integer gid1 = activeGoods.getGoodsId();
+			if (gid1.intValue() != goodsId.intValue()) {
+				cbv.setGoodsId(gid1); //更换为新的goodsId
+			} else {
+				cbv.setGoodsId(goodsId); //返回原来的goodsId
+			}
+		} else {
+			cbv.setGoodsId(-1); //表示当前正在进行竞品的竞品不存在
+		}
+
+		cbv.setUserRank(cr.getRank());
+		cbv.setGoodsPrice(cr.getBid());
+
+		return cbv;
+	}
+
+	@Autowired
+	IJbxtGoodsService jbxtgoodsService;
+
 
 	public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode) {
 		ComputedRes cr = computedCurrentUserSpecificGoodsRankInfo(userCode, goodsId, activityCode);
 
 		CustomBidVO cbv = new CustomBidVO();
-		cbv.setGoodsId(goodsId);
 		cbv.setUserRank(cr.getRank());
+		cbv.setGoodsPrice(cr.getBid());
 
 		return cbv;
 	}

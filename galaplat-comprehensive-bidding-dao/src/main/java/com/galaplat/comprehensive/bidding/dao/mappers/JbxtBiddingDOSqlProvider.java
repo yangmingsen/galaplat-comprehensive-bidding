@@ -28,6 +28,10 @@ public class JbxtBiddingDOSqlProvider {
             VALUES("user_code", "#{userCode,jdbcType=VARCHAR}");
         }
 
+        if (record.getBidTime() != null) {
+            VALUES("bid_time", "#{bidTime,jdbcType=VARCHAR}");
+        }
+
         if (record.getActivityCode() != null) {
             VALUES("activity_code", "#{activityCode,jdbcType=VARCHAR}");
         }
@@ -78,6 +82,10 @@ public class JbxtBiddingDOSqlProvider {
             SET("activity_code = #{activityCode,jdbcType=VARCHAR}");
         }
 
+        if (record.getBidTime() != null) {
+            SET("bid_time = #{bidTime,jdbcType=VARCHAR}");
+        }
+
         if (record.getBid() != null) {
             SET("bid = #{bid,jdbcType=DECIMAL}");
         }
@@ -120,7 +128,11 @@ public class JbxtBiddingDOSqlProvider {
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
-        
+
+        if (record.getBidTime() != null) {
+            VALUES("bid_time", "#{bidTime,jdbcType=VARCHAR}");
+        }
+
         if (record.getGoodsId() != null) {
             VALUES("goods_id", "#{goodsId,jdbcType=INTEGER}");
         }
@@ -171,7 +183,11 @@ public class JbxtBiddingDOSqlProvider {
         if (record.getGoodsId() != null) {
             SET("goods_id = #{goodsId,jdbcType=INTEGER}");
         }
-        
+
+        if (record.getBidTime() != null) {
+            SET("bid_time = #{bidTime,jdbcType=VARCHAR}");
+        }
+
         if (record.getUserCode() != null) {
             SET("user_code = #{userCode,jdbcType=VARCHAR}");
         }

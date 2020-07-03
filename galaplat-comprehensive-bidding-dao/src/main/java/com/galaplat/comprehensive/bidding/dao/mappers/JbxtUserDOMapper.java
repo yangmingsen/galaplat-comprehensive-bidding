@@ -85,6 +85,33 @@ public interface JbxtUserDOMapper {
     })
     JbxtUserDO selectByUsernameKey(String username);
 
+
+
+    @Select({
+            "select",
+            "code, username, password, admin, created_time, updated_time, updator, creator, ",
+            "company_code, sys_code, activity_code, supplier_name, code_name",
+            "from t_jbxt_user",
+            "where code = #{userCode,jdbcType=VARCHAR} AND activity_code = #{activityCode,jdbcType=VARCHAR}"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="username", property="username", jdbcType=JdbcType.VARCHAR),
+            @Result(column="password", property="password", jdbcType=JdbcType.VARCHAR),
+            @Result(column="admin", property="admin", jdbcType=JdbcType.VARCHAR),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
+            @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
+    })
+    JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+
+
     @UpdateProvider(type=JbxtUserDOSqlProvider.class, method="updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(JbxtUserDO record);
 

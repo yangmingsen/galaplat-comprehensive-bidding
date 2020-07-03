@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.galaplat.base.core.common.exception.BaseException;
+import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.querys.JbxtGoodsQuery;
@@ -68,4 +69,13 @@ public interface IJbxtGoodsService{
 	 public JbxtGoodsDO selectActiveGoods(String activityCode);
 
 
-}
+	 /***
+	  * v2.0 获取当前用户对当前竞品的排名
+	  * @param goodsId
+	  * @param userCode
+	  * @param activityCode
+	  * @return
+	  */
+	 public CustomBidVO getUserBidRankInfoByUserCodeAndActivity(Integer goodsId, String userCode, String activityCode);
+
+ }

@@ -35,6 +35,16 @@ public class JbxtBiddingVO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
+     private String bidTime;
+
+     public String getBidTime() {
+         return bidTime;
+     }
+
+     public void setBidTime(String bidTime) {
+         this.bidTime = bidTime;
+     }
+
     public String getCode() {
         return code;
     }

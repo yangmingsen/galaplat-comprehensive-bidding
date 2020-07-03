@@ -50,4 +50,8 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 	 public JbxtUserDO getJbxtUserByUsername(String username){
 		 return mapper.selectByUsernameKey(username);
 	 }
+
+	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
+    	return mapper.selectByuserCodeAndActivityCode(userCode,activityCode);
+	 }
 }
