@@ -55,6 +55,15 @@ public class JbxtActivityDOSqlProvider {
         if (record.getSysCode() != null) {
             VALUES("sys_code", "#{sysCode,jdbcType=VARCHAR}");
         }
+
+        if (record.getSupplierNum() != null) {
+            VALUES("supplier_num", "#{supplierNum,jdbcType=INTEGER}");
+        }
+
+        if (record.getStatus() != null) {
+            VALUES("status", "#{status,jdbcType=INTEGER}");
+        }
+
         
         return SQL();
     }
@@ -62,7 +71,16 @@ public class JbxtActivityDOSqlProvider {
     public String updateByPrimaryKeySelective(JbxtActivityDO record) {
         BEGIN();
         UPDATE("t_jbxt_activity");
-        
+
+        if (record.getSupplierNum() != null) {
+            SET("supplier_num = #{supplierNum,jdbcType=INTEGER}");
+        }
+
+        if (record.getStatus() != null) {
+            SET("status = #{status,jdbcType=INTEGER}");
+        }
+
+
         if (record.getName() != null) {
             SET("name = #{name,jdbcType=VARCHAR}");
         }
@@ -98,6 +116,9 @@ public class JbxtActivityDOSqlProvider {
         if (record.getSysCode() != null) {
             SET("sys_code = #{sysCode,jdbcType=VARCHAR}");
         }
+
+
+
         
         WHERE("code = #{code,jdbcType=VARCHAR}");
         

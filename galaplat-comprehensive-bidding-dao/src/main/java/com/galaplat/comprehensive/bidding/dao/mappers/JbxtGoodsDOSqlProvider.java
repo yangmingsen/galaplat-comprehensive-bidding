@@ -63,6 +63,9 @@ public class JbxtGoodsDOSqlProvider {
         if (record.getStatus() != null) {
             VALUES("status", "#{status,jdbcType=VARCHAR}");
         }
+        if (record.getTimeNum() != null) {
+            VALUES("time_num", "#{timeNum,jdbcType=INTEGER}");
+        }
         
         return SQL();
     }
@@ -70,7 +73,12 @@ public class JbxtGoodsDOSqlProvider {
     public String updateByPrimaryKeySelective(JbxtGoodsDO record) {
         BEGIN();
         UPDATE("t_jbxt_goods");
-        
+
+        if (record.getTimeNum() != null) {
+            SET("time_num = #{timeNum,jdbcType=INTEGER}");
+        }
+
+
         if (record.getCode() != null) {
             SET("code = #{code,jdbcType=VARCHAR}");
         }

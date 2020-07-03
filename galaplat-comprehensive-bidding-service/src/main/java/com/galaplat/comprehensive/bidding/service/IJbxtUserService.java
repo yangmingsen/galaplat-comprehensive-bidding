@@ -20,6 +20,8 @@ public interface IJbxtUserService{
 
 	boolean handlerLogin(String username, String password);
 
+	 JbxtUserDO getJbxtUserByUsername(String  username);
+
     /**
 	 * 添加用户表
 	 */

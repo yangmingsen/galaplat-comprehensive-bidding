@@ -8,6 +8,7 @@ public class MyResult {
     public MyResult(boolean success, String message) {
         this.success = success;
         this.message = message;
+        this.result = null;
     }
 
     public MyResult(boolean success, String message, Object result) {

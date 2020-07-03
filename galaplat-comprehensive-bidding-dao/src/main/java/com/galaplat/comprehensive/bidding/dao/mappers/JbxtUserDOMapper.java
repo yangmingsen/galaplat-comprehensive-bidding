@@ -27,12 +27,13 @@ public interface JbxtUserDOMapper {
         "password, admin, ",
         "created_time, updated_time, ",
         "updator, creator, ",
-        "company_code, sys_code)",
+        "company_code, sys_code, activity_code, supplier_name, code_name)",
         "values (#{code,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, ",
         "#{password,jdbcType=VARCHAR}, #{admin,jdbcType=VARCHAR}, ",
         "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
         "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
-        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})"
+        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})",
+            "#{activityCode,jdbcType=VARCHAR}, #{supplierName,jdbcType=VARCHAR}, #{codeName,jdbcType=VARCHAR})"
     })
     int insert(JbxtUserDO record);
 
@@ -42,7 +43,7 @@ public interface JbxtUserDOMapper {
     @Select({
         "select",
         "code, username, password, admin, created_time, updated_time, updator, creator, ",
-        "company_code, sys_code",
+        "company_code, sys_code,  activity_code, supplier_name, code_name",
         "from t_jbxt_user",
         "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -56,14 +57,17 @@ public interface JbxtUserDOMapper {
         @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
+            @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
     })
     JbxtUserDO selectByPrimaryKey(String code);
 
     @Select({
             "select",
             "code, username, password, admin, created_time, updated_time, updator, creator, ",
-            "company_code, sys_code",
+            "company_code, sys_code, activity_code, supplier_name, code_name",
             "from t_jbxt_user",
             "where username = #{username,jdbcType=VARCHAR}"
     })
@@ -97,6 +101,7 @@ public interface JbxtUserDOMapper {
           "sys_code = #{sysCode,jdbcType=VARCHAR}",
         "where code = #{code,jdbcType=VARCHAR}"
     })
+    @Deprecated
     int updateByPrimaryKey(JbxtUserDO record);
 
     List<JbxtUserDVO> getJbxtUserList(JbxtUserParam jbxtuserParam);

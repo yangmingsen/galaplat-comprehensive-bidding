@@ -9,6 +9,73 @@ import org.apache.ibatis.type.JdbcType;
 import java.util.List;
 
 public interface JbxtBiddingDOMapper {
+    //最低竞价表操作
+    @Delete({
+            "delete from t_jbxt_minbid",
+            "where code = #{code,jdbcType=VARCHAR}"
+    })
+    int deleteMinbidTableByPrimaryKey(String code);
+
+
+    @InsertProvider(type=JbxtBiddingDOSqlProvider.class, method="insertMinBidTableSelective")
+    int insertMinBidTableSelective(JbxtBiddingDO record);
+
+
+    //获取当前用户最小竞价
+    @Select({
+            "select",
+            "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
+            "creator, company_code, sys_code",
+            "from t_jbxt_minbid",
+            "where user_code=#{userCode,jdbcType=VARCHAR} and goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR}"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER),
+            @Result(column="user_code", property="userCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid", property="bid", jdbcType=JdbcType.DECIMAL),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+    })
+    JbxtBiddingDO selectMinBidTableByOne(String userCode, Integer goodsId, String activityCode);
+
+    //获取当前竞品所有用户最小竞价
+    @Select({
+            "select",
+            "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
+            "creator, company_code, sys_code",
+            "from t_jbxt_minbid",
+            "where goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR}"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER),
+            @Result(column="user_code", property="userCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid", property="bid", jdbcType=JdbcType.DECIMAL),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+    })
+    List<JbxtBiddingDVO> selectMinBidTableByList(Integer goodsId, String activityCode);
+
+
+    @UpdateProvider(type=JbxtBiddingDOSqlProvider.class, method="updateMinBidTableByPrimaryKeySelective")
+    int updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record);
+
+    //end of  最低竞价表操作 code
+
+
+
+
     @Delete({
         "delete from t_jbxt_bidding",
         "where code = #{code,jdbcType=VARCHAR}"

@@ -39,4 +39,7 @@ public interface IJbxtActivityService{
 	 *
 	 */
     JbxtActivityDO getJbxtActivity(JbxtActivityQuery jbxtactivityQuery);
+
+    public List<JbxtActivityDVO> findAll();
+
 }

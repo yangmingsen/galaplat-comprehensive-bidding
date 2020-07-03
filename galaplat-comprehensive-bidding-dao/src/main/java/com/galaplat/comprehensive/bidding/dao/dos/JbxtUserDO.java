@@ -33,7 +33,55 @@ public class JbxtUserDO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
-    public String getCode() {
+    private String activityCode;
+    private String supplierName;
+    private String codeName;
+
+
+     @Override
+     public String toString() {
+         return "JbxtUserDO{" +
+                 "code='" + code + '\'' +
+                 ", username='" + username + '\'' +
+                 ", password='" + password + '\'' +
+                 ", admin='" + admin + '\'' +
+                 ", createdTime=" + createdTime +
+                 ", updatedTime=" + updatedTime +
+                 ", updator='" + updator + '\'' +
+                 ", creator='" + creator + '\'' +
+                 ", companyCode='" + companyCode + '\'' +
+                 ", sysCode='" + sysCode + '\'' +
+                 ", activityCode='" + activityCode + '\'' +
+                 ", supplierName='" + supplierName + '\'' +
+                 ", codeName='" + codeName + '\'' +
+                 '}';
+     }
+
+     public String getActivityCode() {
+         return activityCode;
+     }
+
+     public void setActivityCode(String activityCode) {
+         this.activityCode = activityCode;
+     }
+
+     public String getSupplierName() {
+         return supplierName;
+     }
+
+     public void setSupplierName(String supplierName) {
+         this.supplierName = supplierName;
+     }
+
+     public String getCodeName() {
+         return codeName;
+     }
+
+     public void setCodeName(String codeName) {
+         this.codeName = codeName;
+     }
+
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {

@@ -22,6 +22,27 @@ import com.github.pagehelper.PageInfo;
  */
  @Repository
 public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
+	 @Override
+	 public int insertMinBidTableSelective(JbxtBiddingDO record) {
+		 return mapper.insert(record);
+	 }
+
+	 @Override
+	 public JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode) {
+		 return mapper.selectMinBidTableByOne(userCode,goodsId,activityCode);
+	 }
+
+	 @Override
+	 public List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode) {
+		 return mapper.selectMinBidTableByList(goodsId,activityCode);
+	 }
+
+	 @Override
+	 public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record) {
+		 return mapper.updateMinBidTableByPrimaryKeySelective(record);
+	 }
+
+	 //--------------------------
 
 	@Autowired
 	private JbxtBiddingDOMapper mapper;

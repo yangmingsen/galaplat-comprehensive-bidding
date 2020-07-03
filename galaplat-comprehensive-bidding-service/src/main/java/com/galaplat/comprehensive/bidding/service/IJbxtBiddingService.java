@@ -18,6 +18,40 @@ import com.github.pagehelper.PageInfo;
 public interface IJbxtBiddingService{
 
 
+	 /***
+	  * insert
+	  * @param record
+	  * @return
+	  */
+	 int insertMinBidTableSelective(JbxtBiddingVO record);
+
+	 /***
+	  * 获取当前用户最小竞价
+	  * @param userCode
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode);
+
+	 /***
+	  * 获取当前竞品所有用户最小竞价
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode);
+
+	 /***
+	  * update
+	  * @param record
+	  * @return
+	  */
+	 int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record);
+
+	//---------------------
+
+
     /**
 	 * 添加竞价表
 	 */

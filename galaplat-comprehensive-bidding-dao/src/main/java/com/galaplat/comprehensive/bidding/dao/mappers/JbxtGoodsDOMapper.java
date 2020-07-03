@@ -28,13 +28,13 @@ public interface JbxtGoodsDOMapper {
         "created_time, updated_time, ",
         "updator, creator, ",
         "company_code, sys_code, ",
-        "status)",
+        "status, time_num)",
         "values (#{goodsId,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, ",
         "#{name,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
         "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
         "#{firstPrice,jdbcType=DECIMAL}, #{creator,jdbcType=VARCHAR}, ",
         "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR}, ",
-        "#{status,jdbcType=VARCHAR})"
+        "#{status,jdbcType=VARCHAR}, #{timeNum,jdbcType=INTEGER})"
     })
     int insert(JbxtGoodsDO record);
 
@@ -44,7 +44,7 @@ public interface JbxtGoodsDOMapper {
     @Select({
         "select",
         "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-        "creator, company_code, sys_code, status",
+        "creator, company_code, sys_code, status, time_num",
         "from t_jbxt_goods",
         "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
@@ -60,7 +60,8 @@ public interface JbxtGoodsDOMapper {
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
         @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR)
+        @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
     })
     JbxtGoodsDO selectByPrimaryKey(Integer goodsId);
 
@@ -82,6 +83,7 @@ public interface JbxtGoodsDOMapper {
           "status = #{status,jdbcType=VARCHAR}",
         "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
+   @Deprecated
     int updateByPrimaryKey(JbxtGoodsDO record);
 
     List<JbxtGoodsDVO> getJbxtGoodsList(JbxtGoodsParam jbxtgoodsParam);
@@ -89,7 +91,7 @@ public interface JbxtGoodsDOMapper {
     @Select({
             "select",
             "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-            "creator, company_code, sys_code, status",
+            "creator, company_code, sys_code, status, time_num",
             "from t_jbxt_goods",
             "where activity_code = #{activityCode,jdbcType=VARCHAR} ORDER BY goods_id ASC LIMIT 0,1000"
     })
@@ -105,7 +107,8 @@ public interface JbxtGoodsDOMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR)
+            @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
@@ -114,7 +117,7 @@ public interface JbxtGoodsDOMapper {
     @Select({
             "select",
             "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-            "creator, company_code, sys_code, status",
+            "creator, company_code, sys_code, status, time_num",
             "from t_jbxt_goods",
             "where status = 1 AND activity_code=#{activityCode,jdbcType=VARCHAR} "
     })
@@ -130,7 +133,8 @@ public interface JbxtGoodsDOMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR)
+            @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
     })
     public JbxtGoodsDO selectActiveGoods(String activityCode);
 

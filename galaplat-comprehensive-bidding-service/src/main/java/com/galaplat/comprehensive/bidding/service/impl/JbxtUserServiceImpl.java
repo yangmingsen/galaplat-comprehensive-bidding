@@ -60,7 +60,12 @@ public  class JbxtUserServiceImpl implements IJbxtUserService  {
 		 return false;
 	 }
 
-	 @Override
+	@Override
+	public JbxtUserDO getJbxtUserByUsername(String username) {
+		return jbxtuserDao.getJbxtUserByUsername(username);
+	}
+
+	@Override
 	public int insertJbxtUser(JbxtUserVO jbxtuserVO){
 	       JbxtUserDO jbxtuserDO = BeanCopyUtils.copyProperties(JbxtUserDO.class, jbxtuserVO);
 	       return jbxtuserDao.insertJbxtUser(jbxtuserDO );

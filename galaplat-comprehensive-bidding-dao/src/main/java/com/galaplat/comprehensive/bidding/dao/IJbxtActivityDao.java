@@ -21,6 +21,8 @@ public interface IJbxtActivityDao{
 	 */
 	int insertJbxtActivity(JbxtActivityDO entity);
 
+	 public List<JbxtActivityDVO> findAll();
+
 	/**
 	 * 更新活动表信息
 	 */

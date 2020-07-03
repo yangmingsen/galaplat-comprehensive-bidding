@@ -28,12 +28,13 @@ public interface JbxtActivityDOMapper {
         "start_time, end_time, ",
         "created_time, updated_time, ",
         "updator, creator, ",
-        "company_code, sys_code)",
+        "company_code, sys_code, supplier_num, status)",
         "values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
         "#{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, ",
         "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
         "#{updator,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, ",
-        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR})"
+        "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR}, " +
+        "#{supplierNum,jdbcType=INTEGER}, #{status,jdbcType=INTEGER})"
     })
     int insert(JbxtActivityDO record);
 
@@ -43,7 +44,7 @@ public interface JbxtActivityDOMapper {
     @Select({
         "select",
         "code, name, start_time, end_time, created_time, updated_time, updator, creator, ",
-        "company_code, sys_code",
+        "company_code, sys_code, supplier_num, status",
         "from t_jbxt_activity",
         "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -57,9 +58,36 @@ public interface JbxtActivityDOMapper {
         @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
         @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
         @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
+        @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="supplier_num", property="supplierNum", jdbcType=JdbcType.INTEGER),
+            @Result(column="status", property="status", jdbcType=JdbcType.INTEGER)
+
     })
     JbxtActivityDO selectByPrimaryKey(String code);
+
+    @Select({
+            "select",
+            "code, name, start_time, end_time, created_time, updated_time, updator, creator, ",
+            "company_code, sys_code, supplier_num, status",
+            "from t_jbxt_activity"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+            @Result(column="start_time", property="startTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="end_time", property="endTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="supplier_num", property="supplierNum", jdbcType=JdbcType.INTEGER),
+            @Result(column="status", property="status", jdbcType=JdbcType.INTEGER)
+
+    })
+    List<JbxtActivityDVO> selectAll();
+
 
     @UpdateProvider(type=JbxtActivityDOSqlProvider.class, method="updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(JbxtActivityDO record);
@@ -77,6 +105,7 @@ public interface JbxtActivityDOMapper {
           "sys_code = #{sysCode,jdbcType=VARCHAR}",
         "where code = #{code,jdbcType=VARCHAR}"
     })
+    @Deprecated
     int updateByPrimaryKey(JbxtActivityDO record);
 
     List<JbxtActivityDVO> getJbxtActivityList(JbxtActivityParam jbxtactivityParam);

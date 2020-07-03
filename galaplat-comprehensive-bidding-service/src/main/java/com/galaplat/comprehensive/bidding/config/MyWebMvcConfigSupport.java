@@ -14,8 +14,8 @@ import com.galaplat.baseplatform.permissions.interceptor.PermissionsInterceptor;
 public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer {
 
 
-
-   /* @Bean
+    /*
+    @Bean
     public PermissionsInterceptor getPermissionsInterceptor() {
         return new PermissionsInterceptor();
     }
@@ -40,17 +40,17 @@ public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer 
 
     }*/
 
-   @Bean
-    public MyInterceptor getMyInterceptor() {
-       return new MyInterceptor();
-   }
+//   @Bean
+//    public MyInterceptor getMyInterceptor() {
+//       return new MyInterceptor();
+//   }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(getMyInterceptor())
-                .addPathPatterns("/**") //必须使用 /** 才能拦截所有
-                .excludePathPatterns("/jbxt/user/login");
-    }
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(getMyInterceptor())
+//                .addPathPatterns("/**") //必须使用 /** 才能拦截所有
+//                .excludePathPatterns("/jbxt/user/login");
+//    }
 
 
 }

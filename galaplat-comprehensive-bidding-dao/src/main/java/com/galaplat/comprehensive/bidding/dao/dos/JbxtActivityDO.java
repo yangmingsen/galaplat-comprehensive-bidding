@@ -33,7 +33,31 @@ public class JbxtActivityDO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
-    public String getCode() {
+    private Integer supplierNum;
+
+    private Integer status;
+
+     public static long getSerialVersionUID() {
+         return serialVersionUID;
+     }
+
+     public Integer getSupplierNum() {
+         return supplierNum;
+     }
+
+     public void setSupplierNum(Integer supplierNum) {
+         this.supplierNum = supplierNum;
+     }
+
+     public Integer getStatus() {
+         return status;
+     }
+
+     public void setStatus(Integer status) {
+         this.status = status;
+     }
+
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {

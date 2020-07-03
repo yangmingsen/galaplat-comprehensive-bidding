@@ -38,6 +38,33 @@ import javax.servlet.http.HttpServletRequest;
  */
  @Service
 public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
+	@Override
+	public int insertMinBidTableSelective(JbxtBiddingVO record) {
+
+		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
+
+		return jbxtbiddingDao.insertMinBidTableSelective(jbxtbiddingDO);
+	}
+
+	@Override
+	public JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.selectMinBidTableBy(userCode,goodsId,activityCode);
+	}
+
+	@Override
+	public List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.selectMinBidTableBy(goodsId,activityCode);
+
+	}
+
+	@Override
+	public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record) {
+		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
+		return jbxtbiddingDao.updateMinBidTableByPrimaryKeySelective(jbxtbiddingDO);
+	}
+
+
+	//--------------------
 
 
 	@Autowired
@@ -50,7 +77,6 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	 private IdWorker idWorker;
 	
     @Override
-	@Transactional(rollbackFor = Exception.class)
 	public int insertJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 
 

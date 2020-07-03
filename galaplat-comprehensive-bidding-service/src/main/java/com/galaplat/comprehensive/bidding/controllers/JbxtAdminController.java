@@ -1,6 +1,11 @@
 package com.galaplat.comprehensive.bidding.controllers;
 
+import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
+import com.galaplat.baseplatform.permissions.controllers.BaseController;
+import com.galaplat.baseplatform.permissions.vos.UserVO;
+import com.galaplat.comprehensive.bidding.activity.ActivityMap;
+import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
@@ -22,12 +27,47 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/jbxt/admin")
-public class JbxtAdminController {
+public class JbxtAdminController extends BaseController {
 
     @Autowired
     IJbxtGoodsService jbxtgoodsService;
 
     Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsController.class);
+
+   @Autowired
+    private ActivityMap activityMap;
+
+
+    @RequestMapping("/hello")
+    @RestfulResult
+    public Object hello() throws BaseException {
+
+        UserVO user = this.getUser();
+        System.out.println("userCode="+user.getCode());
+        System.out.println("getName="+user.getName());
+
+        return "helloWorld";
+    }
+
+
+    @RequestMapping("/activity/goodsStatus")
+    @RestfulResult
+    public Object updateCurrentBidActivityStatus(String activityCode, Integer status) {
+
+        try {
+            CurrentActivity currentActivity = activityMap.get(activityCode);
+            currentActivity.setStatus(status);
+
+            return new MyResult(true, "更新成功");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new MyResult(false, "更新faild");
+        }
+
+    }
+
+
 
     @RequestMapping("/goods/findAll")
     @RestfulResult
