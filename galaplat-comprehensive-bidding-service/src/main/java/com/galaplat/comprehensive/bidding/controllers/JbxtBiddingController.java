@@ -68,6 +68,9 @@ public class JbxtBiddingController {
     @Autowired
     private ActivityMap activityMap;
 
+    @Autowired
+    private PushQueue pushQueue;
+
     public MyResult checkSubmit(BigDecimal bid, Integer goodsId, String activityCode) {
         if (bid == null) {
             return new MyResult(false, "提交失败: bid不能为空哦^_^", null);
@@ -102,125 +105,6 @@ public class JbxtBiddingController {
 
         return new MyResult(true,"",map);
     }
-
-
-    public Object submit2(BigDecimal bid, Integer goodsId, String activityCode) {
-        //业务描述：
-        //1. 要求3个传入参数不能为空
-        //2. 检查数据库中当前用户提交的最低价(db_bid)
-        //3. 如果传入的bid大于数据库中db_bid 那么返回告诉用户 竞价失败....
-        //4. 如果3不成立 走6
-        //5. 如果2 返回 null 走6
-        //6. 那么直接insert 到db
-
-        MyResult myResult = checkSubmit(bid, goodsId, activityCode);
-        if (myResult.isSuccess() == false) {
-            return myResult;
-        }
-
-        JbxtUserDO userInfo = (JbxtUserDO) httpServletRequest.getSession().getAttribute(SessionConstant.SESSION_USER);
-        //处理用户提交的bid
-
-        JbxtBiddingDO curBidInfo = jbxtbiddingService.selectMinBidTableBy(userInfo.getCode(), goodsId, activityCode);  //获取当前用户对该竞品的最低报价(V2.0)
-                //jbxtbiddingService.getCurrentGoodsMinSubmitPrice(userInfo.getCode(), goodsId, activityCode); //获取当前用户对该竞品的最低报价(V1.0)
-
-        if (curBidInfo != null) {
-            if (bid.compareTo(curBidInfo.getBid()) == -1) { //如果1 < 2 => -1
-                return handlerBidDataToDB(activityCode, userInfo.getCode(), bid, goodsId, 2, curBidInfo.getCode());
-            } else {
-                Map<String, String> map = new HashMap();
-                map.put("curMinPrice", curBidInfo.getBid().toString());
-                return new MyResult(false, "提交失败: 您当前提交的竞价高于您之前提交的竞价(" + curBidInfo.getBid().toString() + ")哦^_^", map);
-            }
-        } else { //如果没有最低报价(意味着数据库中没有该竞品的提交数据) 那么直接插入
-            return handlerBidDataToDB(activityCode, userInfo.getCode(), bid, goodsId,1);
-        }
-    }
-
-
-    private Object handlerBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
-        return handlerBidDataToDB(activityCode,userCode,bid,goodsId,status,null);
-    }
-
-
-    @Autowired
-    private PushQueue pushQueue;
-
-    /**
-     * 保存数据到 db
-     *
-     * @param userCode
-     * @param bid
-     * @param goodsId
-     * @param status 1表示插入minbidTable；2表示更新minBidTable
-     * @return
-     */
-    private Object handlerBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, String minbidTableCode) {
-
-        try {
-            JbxtBiddingVO jbv = new JbxtBiddingVO();
-            jbv.setBid(bid);
-            jbv.setUserCode(userCode);
-            jbv.setGoodsId(goodsId);
-            jbv.setActivityCode(activityCode); //设置当前活动id
-
-            //add to db
-            jbxtbiddingService.insertJbxtBidding(jbv);
-
-            if (status == 1) { //插入
-                jbxtbiddingService.insertMinBidTableSelective(jbv);
-            } else if (status == 2) { //更新
-                JbxtBiddingDO minbidE = jbxtbiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
-
-                JbxtBiddingVO var1 = new JbxtBiddingVO();
-                var1.setCode(minbidE.getCode());
-                var1.setBid(bid);
-                var1.setUpdatedTime(new Date());
-                jbxtbiddingService.updateMinBidTableByPrimaryKeySelective(var1);
-            }
-
-
-            //获取当前用户的当前竞品的最新排名
-            CustomBidVO cbv = jbxtGoodsService.handlerFindCustomBidVO(userCode, goodsId, activityCode);
-            Map<String, String> map200 = new HashMap();
-            map200.put("userRank", cbv.getUserRank().toString());
-
-            //v2.0 -------------start---------
-            map200.put("goodsPrice", cbv.getGoodsPrice().toString());
-            map200.put("activityCode", activityCode);
-            int gId1 = cbv.getGoodsId();
-            Integer tgid = gId1;
-            map200.put("goodsId", tgid.toString());
-
-            pushQueue.offer(new QueueMessage(200,map200));
-
-            Map<String, String> map301 = new HashMap();
-            CurrentActivity currentActivity = activityMap.get(activityCode);
-            int se = currentActivity.getRemainingTime();
-            String bidTime = (se/60)+":"+(se%60);
-            map301.put("bidTime",bidTime);
-            map301.put("bid",bid.toString());
-            map301.put("activityCode", activityCode);
-
-            JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, activityCode);
-            map301.put("supplierCode",jbxtUserDO.getCode());
-            map301.put("CodeName", jbxtUserDO.getCodeName());
-            map301.put("supplierName", jbxtUserDO.getSupplierName());
-            //v2.0------------end-------
-
-            pushQueue.offer(new QueueMessage(301, map301));
-
-            //业务处理
-            return new MyResult(true, "提交成功", map200);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new MyResult(false, "提交失败: 保存失败", null);
-        }
-    }
-
-
-
-
 
 
     @PostMapping("/submit")

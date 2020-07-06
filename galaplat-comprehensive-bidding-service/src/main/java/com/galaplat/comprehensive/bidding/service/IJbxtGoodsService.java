@@ -29,12 +29,15 @@ public interface IJbxtGoodsService{
 	  */
 	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode);
 
+
+
 	 /**
 	  * 给管理端使用
 	  * @param activityCode
 	  * @return List SimpleGoodsVO
 	  */
 	 public List<SimpleGoodsVO> findAll(String activityCode);
+
 
 
 
@@ -67,6 +70,8 @@ public interface IJbxtGoodsService{
 
 
 	 public JbxtGoodsDO selectActiveGoods(String activityCode);
+
+	 public JbxtGoodsDO selectByGoodsId(Integer goodsId);
 
 
 	 /***

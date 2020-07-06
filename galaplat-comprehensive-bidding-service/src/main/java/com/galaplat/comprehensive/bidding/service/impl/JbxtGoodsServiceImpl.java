@@ -247,6 +247,11 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
         return jbxtgoodsDao.selectActiveGoods(activityCode);
     }
 
+
+	public JbxtGoodsDO selectByGoodsId(Integer goodsId) {
+		return jbxtgoodsDao.selectByGoodsId(goodsId);
+	}
+
     public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
         return jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
     }

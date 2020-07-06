@@ -77,6 +77,13 @@ public interface IJbxtBiddingDao{
 	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId, String activityCode);
 
 
+	 /***
+	  * 根据userCode和activityCode获取对应的竞价信息(也就是该用户的竞价记录)
+	  * @param userCode
+	  * @param activityCode
+	  * @return
+	  */
+	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
 
 	 /***

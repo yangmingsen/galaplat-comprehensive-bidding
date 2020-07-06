@@ -72,8 +72,6 @@ public class JbxtAdminController extends BaseController {
     @RequestMapping("/goods/findAll")
     @RestfulResult
     public Object findAll(String activityCode) {
-        LOGGER.info("JbxtAdminController(findAll): activityCode=" + activityCode);
-
         if (activityCode != null && (!activityCode.equals(""))) {
             return new MyResult(true, "获取data成功", jbxtgoodsService.findAll(activityCode));
         } else {
@@ -86,7 +84,8 @@ public class JbxtAdminController extends BaseController {
     private IJbxtGoodsService iJbxtGoodsService;
 
 
-    private Object handlerTheExistActiveGoods(List<JbxtGoodsDVO> jgbacs) {
+
+    private Object handlerTheExistActiveGoods(List<JbxtGoodsDVO> jgbacs, String activityCode) {
         Integer oldGoodsId = -1;
         Integer newGoodsId = -1;
 
@@ -101,33 +100,64 @@ public class JbxtAdminController extends BaseController {
                 break;
             }
         }
-        LOGGER.info("JbxtAdminController(next): oldGoodsId=" + oldGoodsId + " newGoodsId=" + newGoodsId);
 
         try {
-            if (oldGoodsId.intValue() != -1) {
-                JbxtGoodsVO tj = new JbxtGoodsVO();
-                tj.setGoodsId(oldGoodsId);
-                tj.setStatus("2");
-                jbxtgoodsService.updateJbxtGoods(tj);
+
+            JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(newGoodsId);
+            boolean isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
+            if (isStart) {
+                if (oldGoodsId.intValue() != -1) {
+                    JbxtGoodsVO tj = new JbxtGoodsVO();
+                    tj.setGoodsId(oldGoodsId);
+                    tj.setStatus("2");
+                    jbxtgoodsService.updateJbxtGoods(tj);
+                }
+
+                if (newGoodsId.intValue() != -1) {
+                    JbxtGoodsVO tj = new JbxtGoodsVO();
+                    tj.setGoodsId(newGoodsId);
+                    tj.setStatus("1");
+                    jbxtgoodsService.updateJbxtGoods(tj);
+                }
+
+                Map<String, String> map = new HashMap<>();
+                map.put("goodsId", newGoodsId.toString());
+
+                return new MyResult(true, "切换成功", map);
+            } else {
+                return new MyResult(false, "切换失败", null);
             }
 
-            if (newGoodsId.intValue() != -1) {
-                JbxtGoodsVO tj = new JbxtGoodsVO();
-                tj.setGoodsId(newGoodsId);
-                tj.setStatus("1");
-                jbxtgoodsService.updateJbxtGoods(tj);
-            }
-
-            Map<String, String> map = new HashMap<>();
-            map.put("goodsId", newGoodsId.toString());
-
-            return new MyResult(true, "切换成功", map);
         } catch (Exception e) {
             return new MyResult(false, "切换失败", null);
         }
     }
 
-    private Object handlerTheNotExistActiveGoods(List<JbxtGoodsDVO> jgbacs) {
+    private void closeLastActivity(String activityCode) {
+        CurrentActivity currentActivity = activityMap.get(activityCode);
+        if (currentActivity != null) { //停止上一个goods的活动
+            currentActivity.setStatus(1);
+            currentActivity.setRemainingTime(0);
+        }
+    }
+
+    private boolean startActivity(String activityCode, String goodsId, int initTime) {
+        try {
+            closeLastActivity(activityCode);
+
+            CurrentActivity ca1 = new CurrentActivity(activityCode, goodsId, initTime * 60, 1);
+            activityMap.put(activityCode, ca1);
+            ca1.start();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    private Object handlerTheNotExistActiveGoods(List<JbxtGoodsDVO> jgbacs, String activityCode) {
         JbxtGoodsDVO tjgd = jgbacs.get(0);
         String status = tjgd.getStatus();
 
@@ -137,12 +167,17 @@ public class JbxtAdminController extends BaseController {
             tj.setStatus("1");
 
             try {
-                jbxtgoodsService.updateJbxtGoods(tj);
+                JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(tj.getGoodsId());
+                boolean isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
+                if (isStart) {
+                    jbxtgoodsService.updateJbxtGoods(tj);
 
-                Map<String, String> map = new HashMap<>();
-                map.put("goodsId", tjgd.getGoodsId().toString());
-
-                return new MyResult(true, "切换成功", map);
+                    Map<String, String> map = new HashMap<>();
+                    map.put("goodsId", tjgd.getGoodsId().toString());
+                    return new MyResult(true, "切换成功", map);
+                } else {
+                    return new MyResult(false, "切换失败", null);
+                }
             } catch (Exception e) {
                 return new MyResult(false, "切换失败", null);
             }
@@ -181,9 +216,9 @@ public class JbxtAdminController extends BaseController {
         List<JbxtGoodsDVO> jgbacs = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
 
         if (jbxtGoodsDO != null) {
-            return handlerTheExistActiveGoods(jgbacs);
+            return handlerTheExistActiveGoods(jgbacs, activityCode);
         } else {
-            return handlerTheNotExistActiveGoods(jgbacs);
+            return handlerTheNotExistActiveGoods(jgbacs, activityCode);
         }
     }
 

@@ -38,8 +38,10 @@ public interface IJbxtUserDao{
 
 	 JbxtUserDO getJbxtUserByUsername(String  username);
 
+
 	 JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
 
+	 JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
-
-}
+	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+ }

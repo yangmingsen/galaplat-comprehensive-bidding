@@ -23,8 +23,13 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 
 	@Autowired
 	private JbxtUserDOMapper mapper;
-	
-    @Override
+
+	 @Override
+	 public List<JbxtUserDVO> findAllByActivityCode(String activityCode) {
+		 return mapper.findAllByActivityCode(activityCode);
+	 }
+
+	 @Override
 	public int insertJbxtUser(JbxtUserDO entity){
 	       return mapper.insert(entity);
 	}
@@ -53,5 +58,9 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 
 	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
     	return mapper.selectByuserCodeAndActivityCode(userCode,activityCode);
+	 }
+
+	 public JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode) {
+	 	return mapper.selectByUsernameAndActivityCode(username,activityCode);
 	 }
 }

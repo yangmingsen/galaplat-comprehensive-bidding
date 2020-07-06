@@ -1,6 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity;
 
 import com.alibaba.fastjson.JSON;
+import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
@@ -27,6 +28,10 @@ public class CurrentActivity extends Thread {
     private int status;//1 进行 2暂停  3//重置
     private int remainingTime;  //秒
     private List<String> userList;
+
+    public void setRemainingTime(int remainingTime) {
+        this.remainingTime = remainingTime;
+    }
 
     public String getCurrentActivityCode() {
         return currentActivityCode;
@@ -55,17 +60,17 @@ public class CurrentActivity extends Thread {
         this.status = status;
         this.remainingTime = initTime;
 
-        initUser();
+        initUser(currentActivityCode);
     }
 
-    private void initUser() {
+    private void initUser(String currentActivityCode) {
         userList = new ArrayList<>();
         IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
 
-        userList.add("esr1");
-        userList.add("esr2");
-        userList.add("esr3");
-        userList.add("esr4");
+        List<JbxtUserDVO> userLists = iJbxtUserService.findAllByActivityCode(currentActivityCode);
+        userLists.forEach(user -> {
+            this.userList.add(user.getCode());
+        });
     }
 
 
@@ -106,8 +111,6 @@ public class CurrentActivity extends Thread {
                     adminChannel.get(admin).getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
                 }
             });
-
-
 
             Thread.sleep(1*1000);
             remainingTime --;
