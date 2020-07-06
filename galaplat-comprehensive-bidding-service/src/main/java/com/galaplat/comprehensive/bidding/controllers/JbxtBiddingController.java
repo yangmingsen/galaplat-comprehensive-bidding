@@ -103,10 +103,8 @@ public class JbxtBiddingController {
         return new MyResult(true,"",map);
     }
 
-    @PostMapping("/submit")
-    @RestfulResult
-    @Transactional(rollbackFor = Exception.class)
-    public Object submit(BigDecimal bid, Integer goodsId, String activityCode) {
+
+    public Object submit2(BigDecimal bid, Integer goodsId, String activityCode) {
         //业务描述：
         //1. 要求3个传入参数不能为空
         //2. 检查数据库中当前用户提交的最低价(db_bid)
@@ -225,8 +223,10 @@ public class JbxtBiddingController {
 
 
 
-
-    public Object submit2(BigDecimal bid, Integer goodsId, String activityCode) {
+    @PostMapping("/submit")
+    @RestfulResult
+    @Transactional(rollbackFor = Exception.class)
+    public Object submit(BigDecimal bid, Integer goodsId, String activityCode) {
         MyResult myResult = checkSubmit(bid, goodsId, activityCode);
         if (myResult.isSuccess() == false) {
             return myResult;

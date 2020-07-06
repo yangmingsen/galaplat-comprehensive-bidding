@@ -70,6 +70,11 @@ public  class JbxtUserServiceImpl implements IJbxtUserService  {
 		return jbxtuserDao.getJbxtUserByUsername(username);
 	}
 
+	public List<JbxtUserDVO> findAllByActivityCode(String activityCode) {
+	 	return jbxtuserDao.findAllByActivityCode(activityCode);
+	}
+
+
 	@Override
 	public int insertJbxtUser(JbxtUserVO jbxtuserVO){
 	       JbxtUserDO jbxtuserDO = BeanCopyUtils.copyProperties(JbxtUserDO.class, jbxtuserVO);

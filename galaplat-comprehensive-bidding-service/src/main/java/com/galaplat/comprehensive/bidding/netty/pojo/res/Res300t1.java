@@ -1,13 +1,23 @@
 package com.galaplat.comprehensive.bidding.netty.pojo.res;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class Res300t1 {
     private String supplierName;
     private String CodeName;
     private String supplierCode;
+    private BigDecimal minBid;
     private Integer rank;
     private List<Res300t2> bids;
+
+    public BigDecimal getMinBid() {
+        return minBid;
+    }
+
+    public void setMinBid(BigDecimal minBid) {
+        this.minBid = minBid;
+    }
 
     public List<Res300t2> getBids() {
         return bids;

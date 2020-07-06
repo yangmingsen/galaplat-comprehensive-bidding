@@ -22,6 +22,8 @@ public interface IJbxtUserService{
 
 	 JbxtUserDO getJbxtUserByUsername(String  username);
 
+	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+
 	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
 
     /**

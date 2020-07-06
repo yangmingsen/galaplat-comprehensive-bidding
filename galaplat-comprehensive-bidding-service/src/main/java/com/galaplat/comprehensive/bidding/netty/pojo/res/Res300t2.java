@@ -1,14 +1,16 @@
 package com.galaplat.comprehensive.bidding.netty.pojo.res;
 
+import java.math.BigDecimal;
+
 public class Res300t2 {
-    private Integer bid;
+    private BigDecimal bid;
     private String bidTime;
 
-    public Integer getBid() {
+    public BigDecimal getBid() {
         return bid;
     }
 
-    public void setBid(Integer bid) {
+    public void setBid(BigDecimal bid) {
         this.bid = bid;
     }
 

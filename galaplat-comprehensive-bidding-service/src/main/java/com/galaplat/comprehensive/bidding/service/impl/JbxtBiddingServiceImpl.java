@@ -118,5 +118,8 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
     	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(userCode, goodsId,activityCode);
 	}
 
-
+	@Override
+	public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode) {
+		return jbxtbiddingDao.findAllByUserCodeAndActivityCode(userCode,activityCode);
+	}
 }

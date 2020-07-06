@@ -172,7 +172,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 	 * @return
 	 */
 	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
-		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode);
+		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode).stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());
 
 		Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
 		BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
