@@ -6,6 +6,8 @@ import com.galaplat.baseplatform.permissions.controllers.BaseController;
 import com.galaplat.baseplatform.permissions.vos.UserVO;
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
 import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
+import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
@@ -120,6 +122,9 @@ public class JbxtAdminController extends BaseController {
                     jbxtgoodsService.updateJbxtGoods(tj);
                 }
 
+                notify200Event(activityCode, newGoodsId); //通知供应商端更新
+
+
                 Map<String, String> map = new HashMap<>();
                 map.put("goodsId", newGoodsId.toString());
 
@@ -172,6 +177,8 @@ public class JbxtAdminController extends BaseController {
                 if (isStart) {
                     jbxtgoodsService.updateJbxtGoods(tj);
 
+                    notify200Event(activityCode, tjgd.getGoodsId()); //通知客户端切换
+
                     Map<String, String> map = new HashMap<>();
                     map.put("goodsId", tjgd.getGoodsId().toString());
                     return new MyResult(true, "切换成功", map);
@@ -191,6 +198,10 @@ public class JbxtAdminController extends BaseController {
             return new MyResult(false, "status异常：status="+status, null);
         }
     }
+
+
+    @Autowired
+    private PushQueue pushQueue;
 
 
     @RequestMapping("/goods/next")
@@ -220,6 +231,14 @@ public class JbxtAdminController extends BaseController {
         } else {
             return handlerTheNotExistActiveGoods(jgbacs, activityCode);
         }
+    }
+
+    private void notify200Event( String activityCode, Integer goodsId) {
+        Map<String, String> map200 = new HashMap();
+
+        map200.put("activityCode", activityCode);
+        map200.put("goodsId", goodsId.toString());
+        pushQueue.offer(new QueueMessage(200,map200));
     }
 
 }

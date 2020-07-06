@@ -79,7 +79,7 @@ public class CurrentActivity extends Thread {
     }
 
     private void startRemainingTime() throws InterruptedException{
-        while (remainingTime > 0) {
+        while (remainingTime > -1) {
             if (status == 2) {
                 continue;
             } else if (status == 3) {

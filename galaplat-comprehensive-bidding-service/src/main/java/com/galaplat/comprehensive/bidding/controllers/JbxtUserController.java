@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.controllers;
 
+import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import com.galaplat.comprehensive.bidding.querys.JbxtUserQuery;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +36,9 @@ public class JbxtUserController {
 
     @Autowired
     IJbxtUserService jbxtuserService;
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     Logger LOGGER = LoggerFactory.getLogger(JbxtUserController.class);
 
@@ -75,6 +80,9 @@ public class JbxtUserController {
         }
 
         if(jbxtUserDO.getPassword().equals(password)) {
+            //存入session中
+            httpServletRequest.getSession().setAttribute(SessionConstant.SESSION_USER,jbxtUserDO);
+            LOGGER.info("jbxtUserController(login): "+jbxtUserDO.getUsername()+" Login");
              Map<String, String> map = new HashMap<>();
              map.put("userCode", jbxtUserDO.getCode());
 

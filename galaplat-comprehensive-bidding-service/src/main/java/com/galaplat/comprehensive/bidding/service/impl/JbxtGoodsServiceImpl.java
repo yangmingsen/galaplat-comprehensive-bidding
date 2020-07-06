@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.galaplat.comprehensive.bidding.activity.GoodsTopMap;
+import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
@@ -55,6 +58,12 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
     @Autowired
     IJbxtBiddingDao jbxtBiddingDao;
+
+	@Autowired
+	private GoodsTopMap goodsTopMap;
+
+	@Autowired
+	private PushQueue pushQueue;
 
 
 
@@ -167,12 +176,43 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
         return new ComputedRes(curUserBid, rank);
     }
 
+
+	/***
+	 * v2.0
+	 * @param goodsId
+	 * @param activityCode
+	 * @param topBider
+	 */
+	private void handlerGoodsTopUpdate(Integer goodsId, String activityCode, JbxtBiddingDVO topBider) {
+		String userCode = topBider.getUserCode();
+
+		String key = activityCode+"-"+goodsId.intValue();
+		String topUserCode = goodsTopMap.get(key);
+		if (topUserCode != null) { //存在
+			if ( !topUserCode.equals(userCode)) { //不相等 意味着更新
+
+				Map<String, String> map = new HashMap<>();
+				map.put("activityCode", activityCode);
+				map.put("goodsId", goodsId.toString());
+
+				QueueMessage queueMessage = new QueueMessage(111,map);
+				pushQueue.offer(queueMessage);
+			}
+		} else {
+			goodsTopMap.put(key,topUserCode);
+		}
+	}
+
 	/***
 	 * v2.0
 	 * @return
 	 */
 	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
-		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode).stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());
+		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode);
+
+		if (bidList.size() > 0) {
+			handlerGoodsTopUpdate(goodsId,activityCode,bidList.get(0));
+		}
 
 		Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
 		BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价

@@ -51,7 +51,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_minbid",
-            "where goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR}"
+            "where goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),

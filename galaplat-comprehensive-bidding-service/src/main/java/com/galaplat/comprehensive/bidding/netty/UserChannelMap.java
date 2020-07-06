@@ -95,10 +95,9 @@ public class UserChannelMap {
 
     /**
      * 根据好友id获取对应的通道
-     * @param friendid 好友id
      * @return Netty通道
      */
-    public  Channel get(String friendid) {
-        return userChannelMap.get(friendid);
+    public  Channel get(String userCode) {
+        return userChannelMap.get(userCode);
     }
 }

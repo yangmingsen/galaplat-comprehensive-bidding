@@ -9,8 +9,8 @@ import java.util.Map;
 
 public class AdminChannelMap {
 
-    private Map<String, AdminInfo> map; //adminId => AdminInfo
-    private Map<ChannelId,String> channelRelevanceAdminIdMap; //channelId => adminId
+    private Map<String, AdminInfo> map; //adminCode => AdminInfo
+    private Map<ChannelId,String> channelRelevanceAdminIdMap; //channelId => adminCode
 
     public AdminChannelMap() {
         map = new HashMap<>();
