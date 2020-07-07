@@ -20,6 +20,14 @@ public interface IJbxtUserService{
 
 	boolean handlerLogin(String username, String password);
 
+	 JbxtUserDO getJbxtUserByUsername(String  username);
+
+	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+
+	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+
+	 JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
+
     /**
 	 * 添加用户表
 	 */

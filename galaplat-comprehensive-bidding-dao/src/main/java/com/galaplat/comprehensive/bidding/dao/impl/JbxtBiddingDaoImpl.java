@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -22,10 +23,40 @@ import com.github.pagehelper.PageInfo;
  */
  @Repository
 public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
+	 @Override
+	 public int insertMinBidTableSelective(JbxtBiddingDO record) {
+		 return mapper.insertMinBidTableSelective(record);
+	 }
+
+	 @Override
+	 public JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode) {
+		 return mapper.selectMinBidTableByOne(userCode,goodsId,activityCode);
+	 }
+
+	 @Override
+	 public List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode) {
+		 return mapper.selectMinBidTableByList(goodsId,activityCode);
+	 }
+
+	 @Override
+	 public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record) {
+		 return mapper.updateMinBidTableByPrimaryKeySelective(record);
+	 }
+
+
+	 public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+	 	return mapper.deleteMinbidTableByGoodsIdAndActivityCode(goodsId,activityCode);
+	 }
+
+	 //--------------------------
 
 	@Autowired
 	private JbxtBiddingDOMapper mapper;
-	
+
+	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		 return mapper.deleteByGoodsIdAndActivityCode(goodsId,activityCode);
+	 }
+
     @Override
 	public int insertJbxtBidding(JbxtBiddingDO entity){
 	       return mapper.insert(entity);
@@ -64,7 +95,7 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 		});
 		List<JbxtBiddingDVO> res = new ArrayList<>();
 		 for(String key:map.keySet()) {
-			 res.add(getUserMinBid(key, goodsId, activityCode));
+			 res.add(getUserMinBid(key, goodsId, activityCode)); //
 		 }
 
 		 return res.stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());
@@ -85,5 +116,10 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	 public JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
     	return mapper.gerCurrentGoodsMinSubmitPrice(userCode,goodsId,activityCode);
 	 }
+
+	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode) {
+	 	return mapper.findAllByUserCodeAndActivityCode(userCode,activityCode);
+	 }
+
 
 }

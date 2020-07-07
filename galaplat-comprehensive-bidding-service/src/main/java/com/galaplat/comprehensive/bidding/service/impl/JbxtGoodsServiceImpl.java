@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.galaplat.comprehensive.bidding.activity.GoodsTopMap;
+import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
@@ -56,6 +59,12 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
     @Autowired
     IJbxtBiddingDao jbxtBiddingDao;
 
+	@Autowired
+	private GoodsTopMap goodsTopMap;
+
+	@Autowired
+	private PushQueue pushQueue;
+
 
 
     public List<SimpleGoodsVO> findAll(String activityCode) {
@@ -96,8 +105,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 		String userCode = userInfo.getCode();
 		listGoods.stream().forEach(x -> {
-
-			ComputedRes cr = computedCurrentUserSpecificGoodsRankInfo(userCode, x.getGoodsId(), activityCode);
+			ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity(userCode, x.getGoodsId(), activityCode);
 
 			CustomGoodsVO cgv = new CustomGoodsVO();
 			cgv.setGoodsId(x.getGoodsId());
@@ -168,12 +176,107 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
     }
 
 
+	/***
+	 * v2.0
+	 * @param goodsId
+	 * @param activityCode
+	 * @param topBider
+	 */
+	private void handlerGoodsTopUpdate(Integer goodsId, String activityCode, JbxtBiddingDVO topBider) {
+		String userCode = topBider.getUserCode();
+
+		String key = activityCode+"-"+goodsId.intValue();
+		String topUserCode = goodsTopMap.get(key);
+		if (topUserCode != null) { //存在
+			if ( !topUserCode.equals(userCode)) { //不相等 意味着更新
+
+				Map<String, String> map = new HashMap<>();
+				map.put("activityCode", activityCode);
+				map.put("goodsId", goodsId.toString());
+
+				QueueMessage queueMessage = new QueueMessage(111,map);
+				pushQueue.offer(queueMessage);
+			}
+		} else {
+			goodsTopMap.put(key,topUserCode);
+		}
+	}
+
+	/***
+	 * v2.0 计算当前用户的竞品的排名
+	 * @return
+	 */
+	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(String userCode, Integer goodsId, String activityCode) {
+		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode);
+
+		if (bidList.size() > 0) {
+			handlerGoodsTopUpdate(goodsId,activityCode,bidList.get(0));
+		}
+
+		Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
+		BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
+		Integer rank = -1; //价格排名
+		boolean exsitUserRank = false;
+		for (int i = 0; i < bidList.size(); i++) {
+			JbxtBiddingDVO t1 = bidList.get(i);
+			if (t1.getUserCode().equals(userCode)) {
+				curUserBid = t1.getBid(); //获得当前竞价
+				exsitUserRank = true;
+			}
+
+			Integer tIdx = map.get(t1.getBid());
+			if (tIdx == null) { //存在
+				map.put(t1.getBid(), i+1); //存入当前价格的索引idx
+			}
+		}
+		if (exsitUserRank) {
+			rank = map.get(curUserBid);
+		}
+
+		return new ComputedRes(curUserBid, rank);
+
+	}
+
+	/***
+	 * v2.0
+	 * @param goodsId
+	 * @param userCode
+	 * @param activityCode
+	 * @return
+	 */
+	public CustomBidVO getUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
+		ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity( userCode,  goodsId, activityCode);
+
+		CustomBidVO cbv = new CustomBidVO();
+		//是否更换goodsId
+		JbxtGoodsDO activeGoods = jbxtgoodsService.selectActiveGoods(activityCode);
+		if (activeGoods != null) {
+			Integer gid1 = activeGoods.getGoodsId();
+			if (gid1.intValue() != goodsId.intValue()) {
+				cbv.setGoodsId(gid1); //更换为新的goodsId
+			} else {
+				cbv.setGoodsId(goodsId); //返回原来的goodsId
+			}
+		} else {
+			cbv.setGoodsId(-1); //表示当前正在进行竞品的竞品不存在
+		}
+
+		cbv.setUserRank(cr.getRank());
+		cbv.setGoodsPrice(cr.getBid());
+
+		return cbv;
+	}
+
+	@Autowired
+	IJbxtGoodsService jbxtgoodsService;
+
+
 	public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode) {
 		ComputedRes cr = computedCurrentUserSpecificGoodsRankInfo(userCode, goodsId, activityCode);
 
 		CustomBidVO cbv = new CustomBidVO();
-		cbv.setGoodsId(goodsId);
 		cbv.setUserRank(cr.getRank());
+		cbv.setGoodsPrice(cr.getBid());
 
 		return cbv;
 	}
@@ -182,6 +285,11 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
     public JbxtGoodsDO selectActiveGoods(String activityCode) {
         return jbxtgoodsDao.selectActiveGoods(activityCode);
     }
+
+
+	public JbxtGoodsDO selectByGoodsId(Integer goodsId) {
+		return jbxtgoodsDao.selectByGoodsId(goodsId);
+	}
 
     public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
         return jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);

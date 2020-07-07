@@ -33,6 +33,49 @@ public class JbxtActivityDVO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
+     private Integer supplierNum;
+
+     private Integer status;
+
+     @Override
+     public String toString() {
+         return "JbxtActivityDVO{" +
+                 "code='" + code + '\'' +
+                 ", name='" + name + '\'' +
+                 ", startTime=" + startTime +
+                 ", endTime=" + endTime +
+                 ", createdTime=" + createdTime +
+                 ", updatedTime=" + updatedTime +
+                 ", updator='" + updator + '\'' +
+                 ", creator='" + creator + '\'' +
+                 ", companyCode='" + companyCode + '\'' +
+                 ", sysCode='" + sysCode + '\'' +
+                 ", supplierNum=" + supplierNum +
+                 ", status=" + status +
+                 '}';
+     }
+
+     public static long getSerialVersionUID() {
+         return serialVersionUID;
+     }
+
+     public Integer getSupplierNum() {
+         return supplierNum;
+     }
+
+     public void setSupplierNum(Integer supplierNum) {
+         this.supplierNum = supplierNum;
+     }
+
+     public Integer getStatus() {
+         return status;
+     }
+
+     public void setStatus(Integer status) {
+         this.status = status;
+     }
+
+
     public String getCode() {
         return code;
     }

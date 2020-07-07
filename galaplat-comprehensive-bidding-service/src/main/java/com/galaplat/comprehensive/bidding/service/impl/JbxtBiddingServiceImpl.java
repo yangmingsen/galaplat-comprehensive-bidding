@@ -38,10 +38,54 @@ import javax.servlet.http.HttpServletRequest;
  */
  @Service
 public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public int insertMinBidTableSelective(JbxtBiddingVO record) {
+		record.setCode(idWorker.nextId());
+
+		record.setCreatedTime(new Date());
+		record.setUpdatedTime(new Date());
+
+		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
+
+		return jbxtbiddingDao.insertMinBidTableSelective(jbxtbiddingDO);
+	}
+
+	@Override
+	public JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.selectMinBidTableBy(userCode,goodsId,activityCode);
+	}
+
+	@Override
+	public List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.selectMinBidTableBy(goodsId,activityCode);
+
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record) {
+		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
+		return jbxtbiddingDao.updateMinBidTableByPrimaryKeySelective(jbxtbiddingDO);
+	}
+
+	@Override
+	public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.deleteMinbidTableByGoodsIdAndActivityCode(goodsId,activityCode);
+	}
+
+
+
+	//--------------------
 
 
 	@Autowired
 	IJbxtBiddingDao jbxtbiddingDao;
+
+	@Override
+	public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.deleteByGoodsIdAndActivityCode(goodsId,activityCode);
+	}
 
 	@Autowired
 	private HttpServletRequest httpServletRequest;
@@ -73,6 +117,7 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 	      JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class,jbxtbiddingVO);
 		  jbxtbiddingDO.setUpdatedTime(new Date());
@@ -84,5 +129,8 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
     	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(userCode, goodsId,activityCode);
 	}
 
-
+	@Override
+	public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode) {
+		return jbxtbiddingDao.findAllByUserCodeAndActivityCode(userCode,activityCode);
+	}
 }

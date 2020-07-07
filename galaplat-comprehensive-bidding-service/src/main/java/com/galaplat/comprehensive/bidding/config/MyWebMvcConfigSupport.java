@@ -14,8 +14,8 @@ import com.galaplat.baseplatform.permissions.interceptor.PermissionsInterceptor;
 public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer {
 
 
-
-   /* @Bean
+    /*
+    @Bean
     public PermissionsInterceptor getPermissionsInterceptor() {
         return new PermissionsInterceptor();
     }

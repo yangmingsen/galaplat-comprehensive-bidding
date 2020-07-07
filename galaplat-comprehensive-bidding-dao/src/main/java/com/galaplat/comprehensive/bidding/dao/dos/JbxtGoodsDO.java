@@ -38,6 +38,16 @@ public class JbxtGoodsDO implements Serializable {
     /*是否过期(0表示未过期，1表示为进行中, 2表示过期)*/
     private String status;
 
+    private Integer timeNum;
+
+     public Integer getTimeNum() {
+         return timeNum;
+     }
+
+     public void setTimeNum(Integer timeNum) {
+         this.timeNum = timeNum;
+     }
+
      public String getCode() {
         return code;
     }

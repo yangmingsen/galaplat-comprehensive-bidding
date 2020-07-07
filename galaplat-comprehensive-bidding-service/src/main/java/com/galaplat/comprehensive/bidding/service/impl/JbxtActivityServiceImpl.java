@@ -58,6 +58,10 @@ public  class JbxtActivityServiceImpl implements IJbxtActivityService  {
 		  return jbxtactivityDao.getJbxtActivityPage(jbxtactivityParam);
 	
 	}
+
+	 public List<JbxtActivityDVO> findAll() {
+    	return jbxtactivityDao.findAll();
+	 }
 	
     @Override
     public JbxtActivityDO getJbxtActivity(JbxtActivityQuery jbxtactivityQuery){

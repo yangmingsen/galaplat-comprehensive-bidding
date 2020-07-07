@@ -12,7 +12,9 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
- /**
+import java.util.List;
+
+/**
  * 活动表DaoImpl
  * @author esr
  * @date: 2020年06月17日
@@ -38,6 +40,10 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	       PageHelper.startPage(jbxtactivityParam.getPn(), jbxtactivityParam.getPs());
 		   return new PageInfo<JbxtActivityDVO>(mapper.getJbxtActivityList(jbxtactivityParam));
 	
+	}
+
+	public List<JbxtActivityDVO> findAll(){
+		return mapper.selectAll();
 	}
 	
     @Override

@@ -17,6 +17,44 @@ import com.github.pagehelper.PageInfo;
  */
 public interface IJbxtBiddingService{
 
+	//---------------------
+	 /***
+	  * insert
+	  * @param record
+	  * @return
+	  */
+	 int insertMinBidTableSelective(JbxtBiddingVO record);
+
+	 /***
+	  * 获取当前用户最小竞价
+	  * @param userCode
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode);
+
+	 /***
+	  * 获取当前竞品所有用户最小竞价
+	  * @param goodsId
+	  * @param activityCode
+	  * @return
+	  */
+	 List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode);
+
+	 /***
+	  * update
+	  * @param record
+	  * @return
+	  */
+	 int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record);
+
+	 public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
+
+	//----------minBidTble opreation end-----------
+
+
+	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     /**
 	 * 添加竞价表
@@ -39,5 +77,14 @@ public interface IJbxtBiddingService{
 	  * @return
 	  */
 	 public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
+
+
+	 /***
+	  * 根据userCode和activityCode获取对应的竞价信息(也就是该用户的竞价记录) 根据竞价ASC
+	  * @param userCode
+	  * @param activityCode
+	  * @return
+	  */
+	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
 }
