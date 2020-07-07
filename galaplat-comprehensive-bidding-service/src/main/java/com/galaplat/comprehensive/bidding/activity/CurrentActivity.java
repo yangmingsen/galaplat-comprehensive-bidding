@@ -109,6 +109,11 @@ public class CurrentActivity extends Thread {
             try {
                 iJbxtBiddingService.deleteByGoodsIdAndActivityCode(Integer.parseInt(this.getCurrentGoodsId()), this.currentActivityCode);
                 iJbxtBiddingService.deleteMinbidTableByGoodsIdAndActivityCode(Integer.parseInt(this.getCurrentGoodsId()), this.currentActivityCode);
+
+                //同步数据（管理端 N，供应商端 Y）
+
+
+
                 this.status = 1;
                 this.remainingTime = this.initTime;
             } catch (Exception e) {
