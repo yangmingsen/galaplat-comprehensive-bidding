@@ -5,10 +5,7 @@ public class SessionConstant {
      *  用户信息
      */
     public final static String SESSION_USER = "user";
-    /**
-     *  移动端登录前缀
-     */
-    public final static String MOBILE_ACCESS_PREFIX = "/mobile";
+
     /**
      *  session状态
      */

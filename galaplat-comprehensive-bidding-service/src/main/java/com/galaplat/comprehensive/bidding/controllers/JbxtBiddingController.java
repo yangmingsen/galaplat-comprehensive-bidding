@@ -49,8 +49,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/jbxt/bid")
 public class JbxtBiddingController {
-
-
     @Autowired
     IJbxtBiddingService jbxtbiddingService;
 
@@ -71,40 +69,6 @@ public class JbxtBiddingController {
     @Autowired
     private PushQueue pushQueue;
 
-    public MyResult checkSubmit(BigDecimal bid, Integer goodsId, String activityCode) {
-        if (bid == null) {
-            return new MyResult(false, "提交失败: bid不能为空哦^_^", null);
-        }
-        if (goodsId == null) {
-            return new MyResult(false, "提交失败: goodsId不能为空哦^_^", null);
-        }
-        if (activityCode == null || activityCode.equals("")) {
-            return new MyResult(false, "提交失败: activityCode不能为空哦^_^", null);
-        }
-
-        //处理提交是否过时问题(V2.0添加)
-        CurrentActivity currentActivity = activityMap.get(activityCode);
-        if (currentActivity == null) {
-            return new MyResult(false, "提交失败: 当前活动不存在哦^_^", null);
-        } else {
-            String currentGoodsId = currentActivity.getCurrentGoodsId();
-            if (!currentGoodsId.equals(goodsId.toString())) {
-                return new MyResult(false, "提交失败: 当前竞品竞价已经结束或者未开始哦^_^", null);
-            }
-
-            if (currentActivity.getRemainingTime() < 1) {
-                return new MyResult(false, "提交失败: 当前竞品竞价已经结束哦^_^", null);
-            }
-        }
-
-
-        Map<String, String> map = new HashMap<>();
-        int se = currentActivity.getRemainingTime();
-        String bidTime = (se/60)+":"+(se%60);
-        map.put("bidTime",bidTime);
-
-        return new MyResult(true,"",map);
-    }
 
 
     @PostMapping("/submit")
@@ -140,6 +104,39 @@ public class JbxtBiddingController {
 
     }
 
+    public MyResult checkSubmit(BigDecimal bid, Integer goodsId, String activityCode) {
+        if (bid == null) {
+            return new MyResult(false, "提交失败: bid不能为空哦^_^", null);
+        }
+        if (goodsId == null) {
+            return new MyResult(false, "提交失败: goodsId不能为空哦^_^", null);
+        }
+        if (activityCode == null || activityCode.equals("")) {
+            return new MyResult(false, "提交失败: activityCode不能为空哦^_^", null);
+        }
+
+        //处理提交是否过时问题(V2.0添加)
+        CurrentActivity currentActivity = activityMap.get(activityCode);
+        if (currentActivity == null) {
+            return new MyResult(false, "提交失败: 当前活动不存在哦^_^", null);
+        } else {
+            String currentGoodsId = currentActivity.getCurrentGoodsId();
+            if (!currentGoodsId.equals(goodsId.toString())) {
+                return new MyResult(false, "提交失败: 当前竞品竞价已经结束或者未开始哦^_^", null);
+            }
+
+            if (currentActivity.getRemainingTime() < 1) {
+                return new MyResult(false, "提交失败: 当前竞品竞价已经结束哦^_^", null);
+            }
+        }
+
+
+        Map<String, String> map = new HashMap<>();
+        String remainingTimeString = currentActivity.getRemainingTimeString();
+        map.put("bidTime",remainingTimeString);
+
+        return new MyResult(true,"",map);
+    }
 
     private Object saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
         try {

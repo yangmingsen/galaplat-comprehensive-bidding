@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -42,11 +43,20 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 		 return mapper.updateMinBidTableByPrimaryKeySelective(record);
 	 }
 
+
+	 public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+	 	return mapper.deleteMinbidTableByGoodsIdAndActivityCode(goodsId,activityCode);
+	 }
+
 	 //--------------------------
 
 	@Autowired
 	private JbxtBiddingDOMapper mapper;
-	
+
+	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		 return mapper.deleteByGoodsIdAndActivityCode(goodsId,activityCode);
+	 }
+
     @Override
 	public int insertJbxtBidding(JbxtBiddingDO entity){
 	       return mapper.insert(entity);

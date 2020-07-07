@@ -69,12 +69,23 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 		return jbxtbiddingDao.updateMinBidTableByPrimaryKeySelective(jbxtbiddingDO);
 	}
 
+	@Override
+	public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.deleteMinbidTableByGoodsIdAndActivityCode(goodsId,activityCode);
+	}
+
+
 
 	//--------------------
 
 
 	@Autowired
 	IJbxtBiddingDao jbxtbiddingDao;
+
+	@Override
+	public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.deleteByGoodsIdAndActivityCode(goodsId,activityCode);
+	}
 
 	@Autowired
 	private HttpServletRequest httpServletRequest;

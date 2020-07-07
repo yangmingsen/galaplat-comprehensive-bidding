@@ -105,8 +105,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 		String userCode = userInfo.getCode();
 		listGoods.stream().forEach(x -> {
-
-			ComputedRes cr = computedCurrentUserSpecificGoodsRankInfo(userCode, x.getGoodsId(), activityCode);
+			ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity(userCode, x.getGoodsId(), activityCode);
 
 			CustomGoodsVO cgv = new CustomGoodsVO();
 			cgv.setGoodsId(x.getGoodsId());
@@ -204,10 +203,10 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 	}
 
 	/***
-	 * v2.0
+	 * v2.0 计算当前用户的竞品的排名
 	 * @return
 	 */
-	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
+	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(String userCode, Integer goodsId, String activityCode) {
 		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId, activityCode);
 
 		if (bidList.size() > 0) {
@@ -246,7 +245,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 	 * @return
 	 */
 	public CustomBidVO getUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
-		ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity( goodsId, userCode, activityCode);
+		ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity( userCode,  goodsId, activityCode);
 
 		CustomBidVO cbv = new CustomBidVO();
 		//是否更换goodsId

@@ -16,6 +16,11 @@ public interface JbxtBiddingDOMapper {
     })
     int deleteMinbidTableByPrimaryKey(String code);
 
+    @Delete({
+            "delete from t_jbxt_minbid",
+            "where goods_id = #{goodsId,jdbcType=INTEGER} AND activity_code = #{activityCode,jdbcType=VARCHAR}"
+    })
+    int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     @InsertProvider(type=JbxtBiddingDOSqlProvider.class, method="insertMinBidTableSelective")
     int insertMinBidTableSelective(JbxtBiddingDO record);
@@ -83,6 +88,12 @@ public interface JbxtBiddingDOMapper {
         "where code = #{code,jdbcType=VARCHAR}"
     })
     int deleteByPrimaryKey(String code);
+
+    @Delete({
+            "delete from t_jbxt_minbid",
+            "where goods_id = #{goodsId,jdbcType=INTEGER} AND activity_code = #{activityCode,jdbcType=VARCHAR}"
+    })
+    int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     @Insert({
         "insert into t_jbxt_bidding (code, goods_id, ",

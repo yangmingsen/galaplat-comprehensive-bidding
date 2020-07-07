@@ -40,41 +40,5 @@ public  class JbxtActivityController  {
 		  return jbxtactivityService.getJbxtActivityPage( jbxtactivityQuery);
 	
 	}
-	
-	
-	/**
-	 * 新增活动表
-	 * @param jbxtactivityVO
-	 * @return
-	 */
-   	@PostMapping
-	@RestfulResult
-	public Object insertJbxtActivity(JbxtActivityVO jbxtactivityVO) throws BaseException {
-	
-	   return jbxtactivityService.insertJbxtActivity(jbxtactivityVO);
-	}
 
-	/**
-	 * 修改活动表
-	 * @param jbxtactivityVO
-	 * @return
-	 */
-	@PutMapping
-	@RestfulResult
-	public Object updateJbxtActivity(JbxtActivityVO jbxtactivityVO) throws BaseException {
-	
-		return jbxtactivityService.updateJbxtActivity(jbxtactivityVO);
-	}
-
-    /**
-	 * 获取上架单详情
-	 * @param jbxtactivityQuery
-	 * @return
-	 */
-	@GetMapping()
-	@RestfulResult
-    public JbxtActivityDO getJbxtActivity(JbxtActivityQuery jbxtactivityQuery) throws BaseException {
-
-		return jbxtactivityService.getJbxtActivity(jbxtactivityQuery);
-    }
 }

@@ -46,11 +46,6 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
                 }
             }
 
-//            ActivityMap am = SpringUtil.getBean(ActivityMap.class);
-//            CurrentActivity tca = new CurrentActivity("1275271189644222464","11",600,1);
-//            am.put("1275271189644222464",tca);
-//            tca.start();
-
             QueueHandler queueHandler = new QueueHandler();
             queueHandler.start();
 

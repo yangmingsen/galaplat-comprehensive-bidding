@@ -39,17 +39,11 @@ public class JbxtAdminController extends BaseController {
    @Autowired
     private ActivityMap activityMap;
 
+    @Autowired
+    private IJbxtGoodsService iJbxtGoodsService;
 
-    @RequestMapping("/hello")
-    @RestfulResult
-    public Object hello() throws BaseException {
-
-        UserVO user = this.getUser();
-        System.out.println("userCode="+user.getCode());
-        System.out.println("getName="+user.getName());
-
-        return "helloWorld";
-    }
+    @Autowired
+    private PushQueue pushQueue;
 
 
     @RequestMapping("/activity/goodsStatus")
@@ -70,7 +64,6 @@ public class JbxtAdminController extends BaseController {
     }
 
 
-
     @RequestMapping("/goods/findAll")
     @RestfulResult
     public Object findAll(String activityCode) {
@@ -82,10 +75,44 @@ public class JbxtAdminController extends BaseController {
     }
 
 
-    @Autowired
-    private IJbxtGoodsService iJbxtGoodsService;
 
 
+    @RequestMapping("/goods/next")
+    @RestfulResult
+    @Transactional(rollbackFor = Exception.class)
+    public Object next(String activityCode) {
+        //业务处理逻辑:
+        // 1. 获取当前正在进行的竞品
+        // 2.如果1.返回的结果存在 那么切换下一个
+            //2.1. 获取所有竞品数据 => A
+            //2.2. 获取old_goods_id 和 new_goods_id
+            //2.3. 将old_goods_id的竞品状态置3. 将new_goods_id的竞品状态置1
+            //2.4. 返回 新的goods_id
+        // 3.如果1.返回的结果不存在
+            // 3.1 查询根据活动code查询所有竞品 => list
+            // 3.2 如果 list(0)的status为0则表示竞品都还没有开始 置数据库第一个竞品为当前进行竞价竞品 返回它的id
+            // 3.3 如果 list(0)的status为2则表示竞品都已经结束  返回goodsId为-1
+        if (activityCode == null || activityCode.equals("")) {
+            return new MyResult(false,"错误: activityCode不能为空哦(*￣︶￣)", null);
+        }
+
+        JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectActiveGoods(activityCode); //get 正在进行goods
+        List<JbxtGoodsDVO> jgbacs = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
+
+        if (jbxtGoodsDO != null) {
+            return handlerTheExistActiveGoods(jgbacs, activityCode);
+        } else {
+            return handlerTheNotExistActiveGoods(jgbacs, activityCode);
+        }
+    }
+
+    private void notify200Event( String activityCode, Integer goodsId) {
+        Map<String, String> map200 = new HashMap();
+
+        map200.put("activityCode", activityCode);
+        map200.put("goodsId", goodsId.toString());
+        pushQueue.offer(new QueueMessage(200,map200));
+    }
 
     private Object handlerTheExistActiveGoods(List<JbxtGoodsDVO> jgbacs, String activityCode) {
         Integer oldGoodsId = -1;
@@ -197,48 +224,6 @@ public class JbxtAdminController extends BaseController {
         } else {
             return new MyResult(false, "status异常：status="+status, null);
         }
-    }
-
-
-    @Autowired
-    private PushQueue pushQueue;
-
-
-    @RequestMapping("/goods/next")
-    @RestfulResult
-    @Transactional(rollbackFor = Exception.class)
-    public Object next(String activityCode) {
-        //业务处理逻辑:
-        // 1. 获取当前正在进行的竞品
-        // 2.如果1.返回的结果存在 那么切换下一个
-            //2.1. 获取所有竞品数据 => A
-            //2.2. 获取old_goods_id 和 new_goods_id
-            //2.3. 将old_goods_id的竞品状态置3. 将new_goods_id的竞品状态置1
-            //2.4. 返回 新的goods_id
-        // 3.如果1.返回的结果不存在
-            // 3.1 查询根据活动code查询所有竞品 => list
-            // 3.2 如果 list(0)的status为0则表示竞品都还没有开始 置数据库第一个竞品为当前进行竞价竞品 返回它的id
-            // 3.3 如果 list(0)的status为2则表示竞品都已经结束  返回goodsId为-1
-        if (activityCode == null || activityCode.equals("")) {
-            return new MyResult(false,"错误: activityCode不能为空哦(*￣︶￣)", null);
-        }
-
-        JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectActiveGoods(activityCode); //get 正在进行goods
-        List<JbxtGoodsDVO> jgbacs = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
-
-        if (jbxtGoodsDO != null) {
-            return handlerTheExistActiveGoods(jgbacs, activityCode);
-        } else {
-            return handlerTheNotExistActiveGoods(jgbacs, activityCode);
-        }
-    }
-
-    private void notify200Event( String activityCode, Integer goodsId) {
-        Map<String, String> map200 = new HashMap();
-
-        map200.put("activityCode", activityCode);
-        map200.put("goodsId", goodsId.toString());
-        pushQueue.offer(new QueueMessage(200,map200));
     }
 
 }

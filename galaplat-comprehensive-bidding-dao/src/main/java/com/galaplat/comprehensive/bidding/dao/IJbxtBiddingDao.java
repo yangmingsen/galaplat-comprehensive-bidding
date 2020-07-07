@@ -48,7 +48,11 @@ public interface IJbxtBiddingDao{
 	  */
 	 int updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record);
 
+	 public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
+
 	 //-------------------
+
+	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     /**
 	 * 添加竞价表

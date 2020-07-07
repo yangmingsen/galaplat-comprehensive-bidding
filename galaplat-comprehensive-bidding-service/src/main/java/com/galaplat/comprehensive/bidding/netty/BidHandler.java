@@ -1,22 +1,11 @@
 package com.galaplat.comprehensive.bidding.netty;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.ActivityMap;
 import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.activity.AdminInfo;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
-import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
-import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300;
-import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t1;
-import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t2;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -25,10 +14,8 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
@@ -39,10 +26,6 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
     PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
-//    IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
-//    IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
-
-//    ActivityMap activityMap = SpringUtil.getBean(ActivityMap.class);
 
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
@@ -55,7 +38,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
         // {type: 101, data: {userCode: 22343423, activityCode: 23426783345}}
         // {type: 102, data: {adminCode: 22343423}}
-
+        // {type: 300, data: {activityCode: 2234343423}}
         switch (message.getType()) {
             // 建立供应商客户端连接的消息
             case 101: {
@@ -105,59 +88,6 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
         QueueMessage queueMessage = new QueueMessage(300, map);
         pushQueue.offer(queueMessage);
-
-
-//        CurrentActivity currentActivity = activityMap.get(activityCode);
-//        Integer goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId());
-//        List<JbxtUserDVO> userLists = iJbxtUserService.findAllByActivityCode(activityCode);
-//
-//
-//        List<Res300t1> t1s = new ArrayList<>();
-//        for (int i = 0; i < userLists.size(); i++) {
-//            JbxtUserDVO user1 = userLists.get(i);
-//
-//            Res300t1 res300t1 = new Res300t1();
-//            res300t1.setSupplierName(user1.getSupplierName());
-//            res300t1.setCodeName(user1.getCodeName());
-//            res300t1.setSupplierCode(user1.getCode());
-//
-//            JbxtBiddingDO cUserMinBid = iJbxtBiddingService.selectMinBidTableBy(user1.getCode(), goodsId, activityCode);
-//            if (cUserMinBid != null) {
-//                res300t1.setMinBid(cUserMinBid.getBid());
-//            } else {
-//                res300t1.setMinBid(new BigDecimal("0.000"));
-//            }
-//
-//            List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndActivityCode(user1.getCode(), activityCode);
-//            List<Res300t2> t2s = new ArrayList<>();
-//            if (cUserBidHistory.size() > 0) {
-//
-//                for (int j = 0; j <cUserBidHistory.size(); j++) {
-//                    JbxtBiddingDVO ubid1 = cUserBidHistory.get(j);
-//
-//                    Res300t2 res300t2 = new Res300t2();
-//                    res300t2.setBid(ubid1.getBid());
-//                    res300t2.setBidTime(ubid1.getBidTime());
-//
-//                    t2s.add(res300t2);
-//                }
-//            }
-//            res300t1.setBids(t2s);
-//
-//            t1s.add(res300t1);
-//        }
-//
-//        List<Res300t1> t1sCollect = t1s.stream().sorted(Comparator.comparing(Res300t1::getMinBid)).collect(Collectors.toList());
-//
-//        Res300 res300 = new Res300();
-//        res300.setGoodsId(goodsId);
-//        res300.setMinPrice(t1sCollect.get(0).getMinBid());
-//        res300.setList(t1sCollect);
-//
-//
-//        //处理返回数据
-//        Message tmsg = new Message(300, res300);
-//        ctx.channel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(tmsg)));
     }
 
 

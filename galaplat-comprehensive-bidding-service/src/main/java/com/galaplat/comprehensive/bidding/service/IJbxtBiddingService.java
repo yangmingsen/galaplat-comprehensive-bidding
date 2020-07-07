@@ -17,7 +17,7 @@ import com.github.pagehelper.PageInfo;
  */
 public interface IJbxtBiddingService{
 
-
+	//---------------------
 	 /***
 	  * insert
 	  * @param record
@@ -49,8 +49,12 @@ public interface IJbxtBiddingService{
 	  */
 	 int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record);
 
-	//---------------------
+	 public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
+	//----------minBidTble opreation end-----------
+
+
+	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     /**
 	 * 添加竞价表
