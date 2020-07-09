@@ -4,11 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.SupplierAccountDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
 
- /**
+/**
  * 用户表Dao
  * @author esr
  * @date: 2020年06月17日
@@ -44,4 +45,11 @@ public interface IJbxtUserDao{
 	 JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
 	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);
- }
+
+	 List<SupplierAccountDO> listSupplierAccount(String activityCode);
+
+	int btachInsertAndUpdate(List<JbxtUserParam> userParams);
+
+	List<JbxtUserDO> getUser(JbxtUserParam userParam);
+
+}

@@ -2,6 +2,8 @@ package com.galaplat.comprehensive.bidding.dao.impl;
 
 import java.io.Serializable;
 import java.util.List;
+
+import com.galaplat.comprehensive.bidding.dao.dos.SupplierAccountDO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -51,16 +53,33 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 		return mapper.selectByPrimaryKey(jbxtuserParam.getCode());
     }
 
-
+	 @Override
 	 public JbxtUserDO getJbxtUserByUsername(String username){
 		 return mapper.selectByUsernameKey(username);
 	 }
 
+	 @Override
 	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
     	return mapper.selectByuserCodeAndActivityCode(userCode,activityCode);
 	 }
 
+	 @Override
 	 public JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode) {
 	 	return mapper.selectByUsernameAndActivityCode(username,activityCode);
 	 }
-}
+
+	 @Override
+	 public List<SupplierAccountDO> listSupplierAccount(String activityCode) {
+		 return null;
+	 }
+
+	 @Override
+	 public int btachInsertAndUpdate(List<JbxtUserParam> userParams) {
+		 return mapper.btachInsertAndUpdate(userParams);
+	 }
+
+	 @Override
+	 public List<JbxtUserDO> getUser(JbxtUserParam userParam) {
+		 return mapper.getUser(userParam);
+	 }
+ }
