@@ -1,10 +1,11 @@
 package com.galaplat.comprehensive.bidding.dao;
 
-import java.io.Serializable;
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.CompetitiveListDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
+import com.galaplat.comprehensive.bidding.dao.params.CompetitiveListParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.github.pagehelper.PageInfo;
 
@@ -36,4 +37,31 @@ public interface IJbxtActivityDao{
 	
     
     JbxtActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam);
+
+	 /**
+	  * 竞标单管理列表查询
+	  * @param param
+	  * @return
+	  */
+	 PageInfo<CompetitiveListDVO> listCompetitiveListPage(CompetitiveListParam param);
+
+    /**
+	  * 竞标单删除
+	  * @param activityCodes
+	  * @return
+	  */
+   int delete(String[] activityCodes);
+
+	 /**
+	  * 新增竞标单
+	  * @param entity
+	  * @return
+	  */
+   int insertBidActivity(JbxtActivityDO entity);
+
+	 /**
+	  * 更新竞标活动
+	  */
+	int updateBidActivity(JbxtActivityDO entity);
+
 }
