@@ -5,7 +5,9 @@ import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.activity.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
+import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -23,9 +25,10 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     private static ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
-    AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
-    UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
-    PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
+    private AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
+    private UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
+    private IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
+    private PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
 
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
@@ -44,15 +47,20 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
             case 101: {
                 String userCode = message.getData().get("userCode");
                 String focusActivity = message.getData().get("activityCode");
-                userChannelMapBean.put(userCode, ctx.channel());
-                userChannelMapBean.put(userCode,focusActivity);
-                System.out.println("建立用户:" + userCode + "与通道" + ctx.channel().id() + "的关联");
-                userChannelMapBean.print();
 
-                //同步数据
-                QueueMessage queueMessage = new QueueMessage(211,message.getData());
-                pushQueue.offer(queueMessage);
+                JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, focusActivity);
+                if (jbxtUserDO != null) { //验证该供应商是否存在
+                    userChannelMapBean.put(userCode, ctx.channel());
+                    userChannelMapBean.put(userCode,focusActivity);
+                    System.out.println("建立用户:" + userCode + "与通道" + ctx.channel().id() + "的关联");
+                    userChannelMapBean.print();
 
+                    //同步数据
+                    QueueMessage queueMessage = new QueueMessage(211,message.getData());
+                    pushQueue.offer(queueMessage);
+                } else { //断开该链接
+                    ctx.channel().close();
+                }
             }
             break;
 
