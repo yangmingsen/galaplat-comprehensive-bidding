@@ -1,10 +1,8 @@
 package com.galaplat.comprehensive.bidding.dao;
 
-import java.io.Serializable;
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dos.SupplierAccountDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
@@ -17,7 +15,7 @@ import com.github.pagehelper.PageInfo;
 public interface IJbxtUserDao{
 
 
-    /**
+	/**
 	 * 添加用户表
 	 */
 	int insertJbxtUser(JbxtUserDO entity);
@@ -32,24 +30,32 @@ public interface IJbxtUserDao{
 	 *
 	 */
 	public PageInfo<JbxtUserDVO> getJbxtUserPage(JbxtUserParam jbxtuserParam) throws BaseException;
-	
-    
-    JbxtUserDO getJbxtUser(JbxtUserParam jbxtuserParam);
 
 
-	 JbxtUserDO getJbxtUserByUsername(String  username);
+	JbxtUserDO getJbxtUser(JbxtUserParam jbxtuserParam);
 
 
-	 JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+	JbxtUserDO getJbxtUserByUsername(String  username);
 
-	 JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
-	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+	JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
 
-	 List<SupplierAccountDO> listSupplierAccount(String activityCode);
+	JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
+	List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+
+	/**
+	 *  批量新增或者更新供应商信息
+	 * @param userParams
+	 * @return
+	 */
 	int btachInsertAndUpdate(List<JbxtUserParam> userParams);
 
+	/**
+	 * 获取用户信息
+	 * @param userParam
+	 * @return
+	 */
 	List<JbxtUserDO> getUser(JbxtUserParam userParam);
 
 }

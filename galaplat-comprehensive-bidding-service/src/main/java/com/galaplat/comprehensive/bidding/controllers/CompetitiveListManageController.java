@@ -8,6 +8,7 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.SupplierAccountParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
+import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,6 @@ public class CompetitiveListManageController extends BaseController {
     @RestfulResult
     public Object addAndUpdate(String activitySupplierAccount, String type, String bidActivityCode) throws BaseException {
         List<SupplierAccountParam> supplierAccountParamList =   JSON.parseArray(activitySupplierAccount, SupplierAccountParam.class);
-
         JbxtActivityParam activityParam = new JbxtActivityParam();
         activityParam.setCreator(getUser().getName());
         activityParam.setCompanyCode(getCompanyCode());
@@ -46,6 +46,18 @@ public class CompetitiveListManageController extends BaseController {
             throw new BaseException("供应商信息和代号信息不能为空！","供应商信息和代号信息不能为空！");
         }
         return  manageService.addAndUpdate(activityParam, type, bidActivityCode);
+    }
+
+    @GetMapping("/replacecode")
+    @RestfulResult
+    public Object listReplaceCode(@RequestParam("num") Integer num) throws BaseException {
+        return manageService.listReplaceCode(num);
+    }
+
+    @GetMapping("/supplierquery")
+    @RestfulResult
+    public Object listSupplierAccount(@RequestParam("bidActivityCode") String bidActivityCode) throws BaseException {
+        return manageService.listSupplierAccount(bidActivityCode);
     }
 
 }

@@ -8,6 +8,7 @@ import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.github.pagehelper.PageInfo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Description:  竞标单管理
@@ -41,7 +42,7 @@ public interface ICompetitiveListManageService {
      * @return
      * @throws BaseException
      */
-    List<String>   listReplaceCode(int num) throws BaseException;
+    Set<String> listReplaceCode(Integer num) throws BaseException;
 
     /**
      * 获取供应商的账号信息
