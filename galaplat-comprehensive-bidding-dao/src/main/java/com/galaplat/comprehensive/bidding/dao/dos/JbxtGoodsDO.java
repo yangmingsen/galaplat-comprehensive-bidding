@@ -5,14 +5,14 @@ import java.util.Date;
 
 
 
- /**
+/**
  * 竞品表DO
  * @author esr
  * @date: 2020年06月17日
  */
 public class JbxtGoodsDO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*商品名称*/
@@ -29,6 +29,8 @@ public class JbxtGoodsDO implements Serializable {
     private BigDecimal firstPrice;
     /*创建人*/
     private String creator;
+    /*更新人*/
+    private String updator;
     /*公司唯一编码*/
     private String companyCode;
     /*系统唯一编码*/
@@ -40,31 +42,34 @@ public class JbxtGoodsDO implements Serializable {
 
     private Integer timeNum;
 
-     public Integer getTimeNum() {
-         return timeNum;
-     }
+    public Integer getGoodsId() {
+        return goodsId;
+    }
 
-     public void setTimeNum(Integer timeNum) {
-         this.timeNum = timeNum;
-     }
+    public void setGoodsId(Integer goodsId) {
+        this.goodsId = goodsId;
+    }
 
-     public String getCode() {
+    public String getCode() {
         return code;
     }
+
     public void setCode(String code) {
-        this.code = code;
+        this.code = code == null ? null : code.trim();
     }
 
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
-        this.name = name;
+        this.name = name == null ? null : name.trim();
     }
 
     public Integer getNum() {
         return num;
     }
+
     public void setNum(Integer num) {
         this.num = num;
     }
@@ -72,13 +77,15 @@ public class JbxtGoodsDO implements Serializable {
     public String getActivityCode() {
         return activityCode;
     }
+
     public void setActivityCode(String activityCode) {
-        this.activityCode = activityCode;
+        this.activityCode = activityCode == null ? null : activityCode.trim();
     }
 
     public Date getCreatedTime() {
         return createdTime;
     }
+
     public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
     }
@@ -86,51 +93,65 @@ public class JbxtGoodsDO implements Serializable {
     public Date getUpdatedTime() {
         return updatedTime;
     }
+
     public void setUpdatedTime(Date updatedTime) {
         this.updatedTime = updatedTime;
     }
 
-     public BigDecimal getFirstPrice() {
-         return firstPrice;
-     }
+    public BigDecimal getFirstPrice() {
+        return firstPrice;
+    }
 
-     public void setFirstPrice(BigDecimal firstPrice) {
-         this.firstPrice = firstPrice;
-     }
+    public void setFirstPrice(BigDecimal firstPrice) {
+        this.firstPrice = firstPrice;
+    }
 
-     public String getCreator() {
+    public String getCreator() {
         return creator;
     }
+
     public void setCreator(String creator) {
-        this.creator = creator;
+        this.creator = creator == null ? null : creator.trim();
+    }
+
+    public String getUpdator() {
+        return updator;
+    }
+
+    public void setUpdator(String updator) {
+        this.updator = updator == null ? null : updator.trim();
     }
 
     public String getCompanyCode() {
         return companyCode;
     }
+
     public void setCompanyCode(String companyCode) {
-        this.companyCode = companyCode;
+        this.companyCode = companyCode == null ? null : companyCode.trim();
     }
 
     public String getSysCode() {
         return sysCode;
     }
-    public void setSysCode(String sysCode) {
-        this.sysCode = sysCode;
-    }
 
-    public Integer getGoodsId() {
-        return goodsId;
-    }
-    public void setGoodsId(Integer goodsId) {
-        this.goodsId = goodsId;
+    public void setSysCode(String sysCode) {
+        this.sysCode = sysCode == null ? null : sysCode.trim();
     }
 
     public String getStatus() {
         return status;
     }
+
     public void setStatus(String status) {
-        this.status = status;
+        this.status = status == null ? null : status.trim();
+    }
+
+    public Integer getTimeNum() {
+        return timeNum;
+    }
+
+    public void setTimeNum(Integer timeNum) {
+        this.timeNum = timeNum;
     }
 
 

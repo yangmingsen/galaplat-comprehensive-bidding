@@ -11,6 +11,7 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.galaplat.comprehensive.bidding.dao.params.SupplierAccountParam;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
+import com.galaplat.comprehensive.bidding.enums.CodeNameEnum;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
@@ -30,8 +31,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 竞标单管理
@@ -52,7 +53,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Autowired
     private IdWorker worker;
     /* 新增或修改操作类型*/
-    private final String OPRATETYPE_ADD = "add";
+    private static final String OPRATETYPE_ADD = "add";
 
     @Override
     public PageInfo listCompetitiveListPage(CompetitiveListQuery query) throws BaseException {
@@ -81,13 +82,19 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)
     public String addAndUpdate(JbxtActivityParam activityParam, String type, String bidActivityCode) throws BaseException {
-
         String activityCode = bidActivityCode;
         List<SupplierAccountParam>  supplierAccountParamList = activityParam.getSupplierAccountParams();
+        Map<String, List<SupplierAccountParam>>  supplierAccountParamMap =  supplierAccountParamList.stream().collect(Collectors.groupingBy(o -> o.getCodeName()));
+        for (Map.Entry<String,List<SupplierAccountParam>> m : supplierAccountParamMap.entrySet()) {
+            List<SupplierAccountParam> paramList = m.getValue();
+            if (paramList.size() > 1) {
+                throw new BaseException("代号重复,请重新填写!","代号重复，请重新填写!");
+            }
+        }
         // 校验为空
         supplierAccountParamList.forEach(e->{
             try {
-                 BeanValidateUtils.validateErrorThenThrowException(e, InsertParam.class);
+                BeanValidateUtils.validateErrorThenThrowException(e, InsertParam.class);
             } catch (BaseException baseException) {
                 log.error("操作异常{},{}",baseException.getMessage(),baseException);
             }
@@ -118,13 +125,29 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     @Override
-    public List<String> listReplaceCode(int num) throws BaseException {
-        return null;
+    public Set<String> listReplaceCode(Integer num) throws BaseException {
+        num = null == num ? 20 : num;
+        if (num > 20) {
+            throw  new BaseException("获取代号个数不能超过20个","获取代号个数不能超过20个");
+        }
+        Set<String> numSet = new HashSet<>();
+        for (int i = 1; i <= num ; i++) {
+            numSet.add(CodeNameEnum.findByCode(i) + LocalDate.now().toString().replace("-",""));
+        }
+        return numSet;
     }
 
     @Override
     public List<SupplierAccountVO> listSupplierAccount(String bidActivityCode) throws BaseException {
-        return null;
+        List<SupplierAccountVO> accountVOS = Lists.newArrayList();
+        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+        userDOList.stream().forEach(e->{
+            SupplierAccountVO accountVO = new SupplierAccountVO();
+            CopyUtil.copyPropertiesExceptEmpty(e, accountVO);
+            accountVO.setSupplierAccount(e.getUsername());
+            accountVOS.add(accountVO);
+        });
+        return accountVOS;
     }
 
     @Override
@@ -144,51 +167,51 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param bidActivityCode
      * @return
      */
-   private int batchInsertOrUpdate(JbxtActivityParam activityParam, List<SupplierAccountParam>  supplierAccountParamList , String bidActivityCode) {
-       List<JbxtUserParam> userParamList = Lists.newArrayList();
-       supplierAccountParamList.forEach(e->{
-           JbxtUserDO userDO = null;
-           List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
-                   .username(e.getSupplierAccount()).activityCode(bidActivityCode).build());
-           if (CollectionUtils.isNotEmpty(userDOList)) {
-               userDO = userDOList.get(0);
-           }
-           if (null != userDO) {
-               if (!StringUtils.equals(userDO.getSupplierName(), e.getSupplierName())) {
-                   userDO.setSupplierName(e.getSupplierName());
-                   userDO.setUsername(getUserName(e.getSupplierName()));
-                   userDO.setPassword(getPassword(e.getSupplierName()));
-                   userDO.setUpdatedTime(new Date());
-                   userDO.setUpdator(activityParam.getCreator());
-                   JbxtUserParam userParam = new JbxtUserParam();
-                   CopyUtil.copyPropertiesExceptEmpty(userDO, userParam);
-                   userParamList.add(userParam);
-               }
-           } else {
-               JbxtUserParam userParam = JbxtUserParam.builder()
-                       .code(worker.nextId())
-                       .admin("0")
-                       .companyCode(activityParam.getCompanyCode())
-                       .sysCode(activityParam.getSysCode())
-                       .createdTime(new Date())
-                       .creator(activityParam.getCreator())
-                       .updatedTime(new Date())
-                       .updator(activityParam.getCreator())
-                       .username(getUserName(e.getSupplierName()))
-                       .password(getPassword(e.getSupplierName()))
-                       .supplierName(e.getSupplierName())
-                       .codeName(e.getCodeName())
-                       .activityCode(activityParam.getCode())
-                       .build();
-               userParamList.add(userParam);
-           }
-       });
-       int count = 0;
-       if (CollectionUtils.isNotEmpty(userParamList)) {
-           count = userDao.btachInsertAndUpdate(userParamList);
-       }
-       return count;
-   }
+    private int batchInsertOrUpdate(JbxtActivityParam activityParam, List<SupplierAccountParam>  supplierAccountParamList , String bidActivityCode) {
+        List<JbxtUserParam> userParamList = Lists.newArrayList();
+        supplierAccountParamList.forEach(e->{
+            JbxtUserDO userDO = null;
+            List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
+                    .username(e.getSupplierAccount()).activityCode(bidActivityCode).build());
+            if (CollectionUtils.isNotEmpty(userDOList)) {
+                userDO = userDOList.get(0);
+            }
+            if (null != userDO) {
+                if (!StringUtils.equals(userDO.getSupplierName(), e.getSupplierName())) {
+                    userDO.setSupplierName(e.getSupplierName());
+                    userDO.setUsername(getUserName(e.getSupplierName()));
+                    userDO.setPassword(getPassword(e.getSupplierName()));
+                    userDO.setUpdatedTime(new Date());
+                    userDO.setUpdator(activityParam.getCreator());
+                    JbxtUserParam userParam = new JbxtUserParam();
+                    CopyUtil.copyPropertiesExceptEmpty(userDO, userParam);
+                    userParamList.add(userParam);
+                }
+            } else {
+                JbxtUserParam userParam = JbxtUserParam.builder()
+                        .code(worker.nextId())
+                        .admin("0")
+                        .companyCode(activityParam.getCompanyCode())
+                        .sysCode(activityParam.getSysCode())
+                        .createdTime(new Date())
+                        .creator(activityParam.getCreator())
+                        .updatedTime(new Date())
+                        .updator(activityParam.getCreator())
+                        .username(getUserName(e.getSupplierName()))
+                        .password(getPassword(e.getSupplierName()))
+                        .supplierName(e.getSupplierName())
+                        .codeName(e.getCodeName())
+                        .activityCode(activityParam.getCode())
+                        .build();
+                userParamList.add(userParam);
+            }
+        });
+        int count = 0;
+        if (CollectionUtils.isNotEmpty(userParamList)) {
+            count = userDao.btachInsertAndUpdate(userParamList);
+        }
+        return count;
+    }
 
 
     /**
@@ -201,9 +224,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String nameWords =  SpellingUtil.chineseToFirstChar(supplierName).toUpperCase();
         String userName = nameWords + getShortCode();
         List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
-       while (CollectionUtils.isNotEmpty(userDOList)) {
-           userName =  nameWords + getShortCode();
-           userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
+        while (CollectionUtils.isNotEmpty(userDOList)) {
+            userName =  nameWords + getShortCode();
+            userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         }
         return   userName;
     }
