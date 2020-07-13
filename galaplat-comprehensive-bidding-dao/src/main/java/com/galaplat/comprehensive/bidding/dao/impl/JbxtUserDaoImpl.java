@@ -2,6 +2,7 @@ package com.galaplat.comprehensive.bidding.dao.impl;
 
 import java.util.List;
 
+import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -74,5 +75,10 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 	@Override
 	public List<JbxtUserDO> getUser(JbxtUserParam userParam) {
 		return mapper.getUser(userParam);
+	}
+
+	@Override
+	public List<SupplierAccountExportDVO> getAccountByActivityCode(JbxtUserParam userParam) {
+		return mapper.getAccountByActivityCode(userParam);
 	}
 }

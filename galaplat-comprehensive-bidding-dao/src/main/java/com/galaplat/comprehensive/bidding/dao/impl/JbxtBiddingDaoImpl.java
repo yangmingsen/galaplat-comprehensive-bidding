@@ -1,10 +1,9 @@
 package com.galaplat.comprehensive.bidding.dao.impl;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.annotations.Delete;
+import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -95,7 +94,7 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 		});
 		List<JbxtBiddingDVO> res = new ArrayList<>();
 		 for(String key:map.keySet()) {
-			 res.add(getUserMinBid(key, goodsId, activityCode)); //
+			 res.add(getUserMinBid(key, goodsId, activityCode));
 		 }
 
 		 return res.stream().sorted(Comparator.comparing(JbxtBiddingDVO::getBid)).collect(Collectors.toList());
@@ -109,17 +108,34 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	  * @param activityCode
 	  * @return
 	  */
+	 @Override
 	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode) {
     	return mapper.getUserMinBid(userCode,goodsId,activityCode);
 	 }
 
+	 @Override
 	 public JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
     	return mapper.gerCurrentGoodsMinSubmitPrice(userCode,goodsId,activityCode);
 	 }
 
+	 @Override
 	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode) {
 	 	return mapper.findAllByUserCodeAndActivityCode(userCode,activityCode);
 	 }
 
+	 @Override
+	 public List<String> listBidActivityUsers(JbxtBiddingParam biddingParam) {
+		 return mapper.listBidActivityUsers(biddingParam);
+	 }
 
-}
+	 @Override
+	 public BidDVO getBidActivity(JbxtBiddingParam biddingParam) {
+		 return mapper.getBidActivity(biddingParam);
+	 }
+
+	 @Override
+	 public  List<BidDVO> getOneSupplierBidPriceDeatil(JbxtBiddingParam biddingParam) {
+		 return mapper.getOneSupplierBidPriceDeatil(biddingParam);
+	 }
+
+ }

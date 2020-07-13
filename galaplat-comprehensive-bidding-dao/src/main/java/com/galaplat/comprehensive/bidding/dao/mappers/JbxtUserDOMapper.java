@@ -1,8 +1,8 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dos.SupplierAccountDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
@@ -244,5 +244,35 @@ public interface JbxtUserDOMapper {
             @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
     })
     List<JbxtUserDO> getUser(@Param("param")JbxtUserParam userParam);
+
+    @Select({
+            "<script>",
+            "select" ,
+            "u.username," ,
+            "u.`password`," ,
+            "u.supplier_name," ,
+            "u.code_name," ,
+            "u.activity_code," ,
+            "date_format(a.created_time,'%Y-%m-%d') activity_create_date," ,
+            "date_format(NOW(),'%Y-%m-%d')  activity_export_date " ,
+            "from" ,
+            "t_jbxt_user u" ,
+            "left join t_jbxt_activity a ON u.activity_code = a.`code`",
+            " where 1=1 ",
+            " <if test='param.activityCode != null' > " ,
+            " and u.activity_code = #{param.activityCode,jdbcType=VARCHAR}",
+            " </if>",
+            "</script>"
+    })
+    @Results({
+            @Result(column="username", property="account", jdbcType=JdbcType.VARCHAR),
+            @Result(column="password", property="password", jdbcType=JdbcType.VARCHAR),
+            @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
+            @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_create_date", property="activityCreateDate", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_export_date", property="activityExportDate", jdbcType=JdbcType.VARCHAR)
+    })
+    List<SupplierAccountExportDVO> getAccountByActivityCode(@Param("param")JbxtUserParam userParam);
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
 
@@ -58,4 +59,10 @@ public interface IJbxtUserDao{
 	 */
 	List<JbxtUserDO> getUser(JbxtUserParam userParam);
 
+	/**
+	 * 获取供应商站账号
+	 * @param userParam
+	 * @return
+	 */
+	List<SupplierAccountExportDVO> getAccountByActivityCode(JbxtUserParam userParam);
 }

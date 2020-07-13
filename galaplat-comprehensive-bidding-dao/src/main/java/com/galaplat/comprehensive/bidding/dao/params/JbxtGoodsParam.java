@@ -1,5 +1,9 @@
 package com.galaplat.comprehensive.bidding.dao.params;
 import com.galaplat.base.core.common.params.Param;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -11,6 +15,10 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
+ @Data
+ @Builder
+ @AllArgsConstructor
+ @NoArgsConstructor
 public class JbxtGoodsParam extends Param {
     private static final long serialVersionUID = 1L;
     
@@ -38,6 +46,8 @@ public class JbxtGoodsParam extends Param {
     private Integer goodsId;
     /*是否过期(0表示未过期，1表示为进行中, 2表示过期)*/
     private String status;
+
+    private Integer timeNum;
 
     public String getCode() {
         return code;
@@ -124,5 +134,11 @@ public class JbxtGoodsParam extends Param {
         this.status = status;
     }
 
+     public Integer getTimeNum() {
+         return timeNum;
+     }
+     public void setTimeNum(Integer timeNum) {
+         this.timeNum = timeNum;
+     }
 
 }
