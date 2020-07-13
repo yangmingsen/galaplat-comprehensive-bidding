@@ -69,6 +69,10 @@ public class QueueHandler extends Thread {
                     supplierInHandler.problem(takeQueuemsg.getType(), takeQueuemsg);
                     break;
 
+                case 214: //处理当管理端切换下一个竞品时，提示所有供应商端更新
+                    supplierOutHandler.problem(takeQueuemsg.getType(), takeQueuemsg);
+                    break;
+
                 case 300: //当某个管理端中途加入（或掉线从新加入） 同步数据给管理端
                     adminOutHandler.problem(takeQueuemsg.getType(),takeQueuemsg);
                     break;

@@ -214,24 +214,9 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 	 */
 	public CustomBidVO getUserBidRankInfoByUserCodeAndActivity(Integer goodsId,String userCode, String activityCode) {
 		ComputedRes cr = computedUserBidRankInfoByUserCodeAndActivity( userCode,  goodsId, activityCode);
-
 		CustomBidVO cbv = new CustomBidVO();
-		//是否更换goodsId
-		JbxtGoodsDO activeGoods = jbxtgoodsDao.selectActiveGoods(activityCode);
-		if (activeGoods != null) {
-			Integer gid1 = activeGoods.getGoodsId();
-			if (gid1.intValue() != goodsId.intValue()) {
-				cbv.setGoodsId(gid1); //更换为新的goodsId
-			} else {
-				cbv.setGoodsId(goodsId); //返回原来的goodsId
-			}
-		} else {
-			cbv.setGoodsId(-1); //表示当前正在进行竞品的竞品不存在
-		}
-
 		cbv.setUserRank(cr.getRank());
 		cbv.setGoodsPrice(cr.getBid());
-
 		return cbv;
 	}
 

@@ -27,7 +27,16 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
             case 212: //当管理端数据重置时，通知供应商端清理排名数据
                 handler212Problem(queuemsg);
                 break;
+            case 214: //当管理端数据重置时，通知供应商端清理排名数据
+                handler214Problem(queuemsg);
+                break;
         }
+    }
+
+    private void handler214Problem(QueueMessage queuemsg) {
+        Message message = new Message(214, queuemsg.getData());
+        String activityCode = queuemsg.getData().get("activityCode");
+        notifyAllSupplier(message, activityCode);
     }
 
 

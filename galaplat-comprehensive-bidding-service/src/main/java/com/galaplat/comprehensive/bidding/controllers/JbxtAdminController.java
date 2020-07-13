@@ -114,12 +114,12 @@ public class JbxtAdminController extends BaseController {
         }
     }
 
-    private void notify200Event( String activityCode, Integer goodsId) {
-        Map<String, String> map200 = new HashMap();
+    private void notify214Event( String activityCode, Integer goodsId) {
+        Map<String, String> map214 = new HashMap();
 
-        map200.put("activityCode", activityCode);
-        map200.put("goodsId", goodsId.toString());
-        pushQueue.offer(new QueueMessage(200,map200));
+        map214.put("activityCode", activityCode);
+        map214.put("goodsId", goodsId.toString());
+        pushQueue.offer(new QueueMessage(214, map214));
     }
 
     private Object handlerTheExistActiveGoods(List<JbxtGoodsDVO> jgbacs, String activityCode) {
@@ -157,7 +157,7 @@ public class JbxtAdminController extends BaseController {
                     jbxtgoodsService.updateJbxtGoods(tj);
                 }
 
-                notify200Event(activityCode, newGoodsId); //通知供应商端更新
+                notify214Event(activityCode, newGoodsId); //通知供应商端更新
 
 
                 Map<String, String> map = new HashMap<>();
@@ -212,7 +212,7 @@ public class JbxtAdminController extends BaseController {
                 if (isStart) {
                     jbxtgoodsService.updateJbxtGoods(tj);
 
-                    notify200Event(activityCode, tjgd.getGoodsId()); //通知客户端切换
+                    notify214Event(activityCode, tjgd.getGoodsId()); //通知客户端切换
 
                     Map<String, String> map = new HashMap<>();
                     map.put("goodsId", tjgd.getGoodsId().toString());
