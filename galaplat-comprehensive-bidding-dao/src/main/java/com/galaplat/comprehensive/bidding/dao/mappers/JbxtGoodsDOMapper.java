@@ -164,4 +164,32 @@ public interface JbxtGoodsDOMapper {
     })
     int batchInsertOrUpdate(@Param("list") List<JbxtGoodsParam> goodsParam);
 
+    @Select({
+            " <script>",
+            " select",
+            " goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
+            " creator, company_code, sys_code, status, time_num",
+            " from t_jbxt_goods",
+            " where status = 1 " ,
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode,jdbcType=VARCHAR}",
+            " </if>",
+            " </script>",
+    })
+    @Results({
+            @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER, id=true),
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR),
+            @Result(column="name", property="name", jdbcType=JdbcType.VARCHAR),
+            @Result(column="num", property="num", jdbcType=JdbcType.INTEGER),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
+            @Result(column="first_price", property="firstPrice", jdbcType=JdbcType.DECIMAL),
+            @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
+    })
+    List<JbxtGoodsDO> getGoods(@Param("param") JbxtGoodsParam goodsParam);
 }

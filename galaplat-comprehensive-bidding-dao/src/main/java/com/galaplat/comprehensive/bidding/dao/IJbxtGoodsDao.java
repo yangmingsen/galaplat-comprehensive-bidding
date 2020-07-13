@@ -62,4 +62,6 @@ public interface IJbxtGoodsDao{
 	 */
 	int batchInsertOrUpdate(List<JbxtGoodsParam> jbxtgoodsParam);
 
+	List<JbxtGoodsDO> getGoods(JbxtGoodsParam jbxtgoodsParam);
+
 }

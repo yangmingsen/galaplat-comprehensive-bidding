@@ -8,11 +8,12 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.SupplierAccountParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
-import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -26,6 +27,12 @@ public class CompetitiveListManageController extends BaseController {
 
     @Autowired
     private ICompetitiveListManageService manageService;
+
+    @Autowired
+    HttpServletResponse response;
+
+    @Autowired
+    HttpServletRequest request;
 
     @PostMapping
     @RestfulResult
@@ -58,6 +65,12 @@ public class CompetitiveListManageController extends BaseController {
     @RestfulResult
     public Object listSupplierAccount(@RequestParam("bidActivityCode") String bidActivityCode) throws BaseException {
         return manageService.listSupplierAccount(bidActivityCode);
+    }
+
+    @PostMapping("/export")
+    @RestfulResult
+    public Object exportBidRankAndBidPrice(String bidActivityCode) throws BaseException {
+        return manageService.exportBidRankAndBidPrice(bidActivityCode, response, request);
     }
 
 }

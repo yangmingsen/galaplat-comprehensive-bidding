@@ -27,7 +27,9 @@ import com.github.pagehelper.PageInterceptor;
 @Configuration
 @EnableTransactionManagement
 @MapperScan(basePackages = { "com.galaplat.comprehensive.bidding.dao.mappers.**",
-		"com.galaplat.baseplatform.permissions.dao.mappers.**","com.galaplat.baseplatform.serialnumber.plugin2.dao.mappers.**" }, sqlSessionFactoryRef = "mySqlSessionFactory", sqlSessionTemplateRef = "mySqlSessionTemplate")
+		"com.galaplat.baseplatform.permissions.dao.mappers.**",
+		"com.galaplat.baseplatform.serialnumber.plugin2.dao.mappers.**" ,
+		"org.galaplat.baseplatform.file.upload.dao.mappers.**"}, sqlSessionFactoryRef = "mySqlSessionFactory", sqlSessionTemplateRef = "mySqlSessionTemplate")
 public class MysqlDataSourceBase {
 
 

@@ -1,14 +1,15 @@
 package com.galaplat.comprehensive.bidding.dao;
 
-import java.io.Serializable;
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
 import com.github.pagehelper.PageInfo;
+import org.apache.ibatis.annotations.Param;
 
- /**
+/**
  * 竞价表Dao
  * @author esr
  * @date: 2020年06月17日
@@ -107,5 +108,24 @@ public interface IJbxtBiddingDao{
 	  */
 	 JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( String userCode,Integer goodsId, String activityCode);
 
+	 /**
+	  * 获取竞标活动的供应商
+	  * @param biddingParam
+	  * @return
+	  */
+	 List<String> listBidActivityUsers(JbxtBiddingParam biddingParam);
 
+	/**
+	 * 获取竞价活动
+	 * @param biddingParam
+	 * @return
+	 */
+	BidDVO getBidActivity(JbxtBiddingParam biddingParam);
+
+	/**
+	 * 获取一个供应商在一个竞标活动中的某个竞品的所有价格
+	 * @param biddingParam
+	 * @return
+	 */
+	List<BidDVO> getOneSupplierBidPriceDeatil(JbxtBiddingParam biddingParam);
 }

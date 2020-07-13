@@ -7,6 +7,8 @@ import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.github.pagehelper.PageInfo;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Set;
 
@@ -62,8 +64,10 @@ public interface ICompetitiveListManageService {
 
     /**导出竞标单 ，供应商竞标排名和供应商历史竞标价格信息
      * @param bidActivityCode 竞标单号
+     * @param response
+     * @param request
      * @return
      * @throws BaseException
      */
-    String exportBidRankAndBidPrice(String bidActivityCode) throws BaseException;
+    String exportBidRankAndBidPrice(String bidActivityCode,HttpServletResponse response, HttpServletRequest request) throws BaseException;
 }

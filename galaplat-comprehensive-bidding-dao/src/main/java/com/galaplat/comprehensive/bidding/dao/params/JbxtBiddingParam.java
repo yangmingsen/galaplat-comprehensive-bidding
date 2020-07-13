@@ -1,5 +1,10 @@
 package com.galaplat.comprehensive.bidding.dao.params;
 import com.galaplat.base.core.common.params.Param;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -10,6 +15,10 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
+ @Data
+ @Builder
+ @AllArgsConstructor
+ @NoArgsConstructor
 public class JbxtBiddingParam extends Param {
     private static final long serialVersionUID = 1L;
     
