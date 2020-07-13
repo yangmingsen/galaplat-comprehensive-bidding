@@ -50,9 +50,17 @@ public class JbxtAdminController extends BaseController {
     @RestfulResult
     public Object updateCurrentBidActivityStatus(String activityCode, Integer status) {
 
+        if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
+        if (status == null ) return new MyResult(false, "status不能为null");
+
         try {
             CurrentActivity currentActivity = activityMap.get(activityCode);
-            currentActivity.setStatus(status);
+
+            if (currentActivity != null) {
+                currentActivity.setStatus(status);
+            } else {
+                return new MyResult(false, "currentActivity("+activityCode+")不存在");
+            }
 
             return new MyResult(true, "更新成功");
 

@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class QueueMessage {
     private Integer type; // 消息类型
-    private Map<String,String> data;  // 扩展消息字段
+    private Map<String,String> data;  // 消息字段
 
     public QueueMessage(Integer type, Map<String, String> data) {
         this.type = type;

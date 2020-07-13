@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 
 
-public class AdminProblemHandler extends BaseProblemHandler {
+public class AdminOutProblemHandler extends BaseProblemHandler {
     @Override
     public void handlerProblem(int type, QueueMessage queuemsg) {
         switch (type) {
@@ -36,28 +36,28 @@ public class AdminProblemHandler extends BaseProblemHandler {
     }
 
 
-    /***
-     *  推数据流到所有管理端
-     * @param message
-     * @param activityCode
-     */
-    private void notifyAllAdmin(Message message, String activityCode) {
-        adminChannel.getAllAdmin().forEach(adminCode -> notifyOptionAdmin(message, activityCode, adminCode));
-    }
-
-    /***
-     * 推送数据到指定管理端
-     * @param message
-     * @param activityCode
-     * @param adminCode
-     */
-    private void notifyOptionAdmin(Message message, String activityCode, String adminCode) {
-        AdminInfo adminInfo = adminChannel.get(adminCode);
-        if (adminInfo.getFocusActivity().equals(activityCode)) {
-            //推数据到管理端
-            adminInfo.getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-        }
-    }
+//    /***
+//     *  推数据流到所有管理端
+//     * @param message
+//     * @param activityCode
+//     */
+//    private void notifyAllAdmin(Message message, String activityCode) {
+//        adminChannel.getAllAdmin().forEach(adminCode -> notifyOptionAdmin(message, activityCode, adminCode));
+//    }
+//
+//    /***
+//     * 推送数据到指定管理端
+//     * @param message
+//     * @param activityCode
+//     * @param adminCode
+//     */
+//    private void notifyOptionAdmin(Message message, String activityCode, String adminCode) {
+//        AdminInfo adminInfo = adminChannel.get(adminCode);
+//        if (adminInfo.getFocusActivity().equals(activityCode)) {
+//            //推数据到管理端
+//            adminInfo.getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+//        }
+//    }
 
     private void handler300Problem(QueueMessage takeQueuemsg) {
 

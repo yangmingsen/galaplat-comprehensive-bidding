@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class RequestMessage {
     private Integer type; // 消息类型
-    private Map<String,String> data;  // 扩展消息字段
+    private Map<String,String> data;  //消息字段
 
     public Integer getType() {
         return type;

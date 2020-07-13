@@ -46,7 +46,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
                 }
             }
 
-            QueueHandler queueHandler = new QueueHandler();
+            QueueHandler queueHandler = QueueHandler.getInstance();
             queueHandler.start();
 
             this.isInit = true;

@@ -64,7 +64,6 @@ public class JbxtGoodsController extends BaseController {
         }
 
     }
-
     /**
      * 获取某个竞品的竞价信息
      *

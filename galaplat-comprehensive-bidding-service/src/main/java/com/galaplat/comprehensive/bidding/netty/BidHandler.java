@@ -15,6 +15,8 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,6 +26,8 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     // 用来保存所有的客户端连接
     private static ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
+
+    private Logger LOGGER = LoggerFactory.getLogger(BidHandler.class);
 
     private AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
@@ -42,6 +46,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         // {type: 101, data: {userCode: 22343423, activityCode: 23426783345}}
         // {type: 102, data: {adminCode: 22343423}}
         // {type: 300, data: {activityCode: 2234343423}}
+        // {type: 213, data: {bidPrice: 32.345, goodsId: 234}}
         switch (message.getType()) {
             // 建立供应商客户端连接的消息
             case 101: {
@@ -52,6 +57,8 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                 if (jbxtUserDO != null) { //验证该供应商是否存在
                     userChannelMapBean.put(userCode, ctx.channel());
                     userChannelMapBean.put(userCode,focusActivity);
+                    userChannelMapBean.putChannelToUser(ctx.channel(), userCode);
+
                     System.out.println("建立用户:" + userCode + "与通道" + ctx.channel().id() + "的关联");
                     userChannelMapBean.print();
 
@@ -74,6 +81,32 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                 adminChannelMap.print();
             }
              break;
+
+            case 213: { //处理供应商端提交竞价
+                String tStr1 = message.getData().get("bidPrice");
+                if (tStr1 == null || "".equals(tStr1)) {
+                    LOGGER.info("BidHandler(channelRead0-case213): bidPrice is null or empty");
+                    return;
+                }
+                String tStr2 = message.getData().get("goodsId");
+                if (tStr2 == null || "".equals(tStr2)) {
+                    LOGGER.info("BidHandler(channelRead0-case213): goodsId is null or empty");
+                    return;
+                }
+                String userCode = userChannelMapBean.getUserByChannel(ctx.channel());
+                if (userCode == null)  {
+                    LOGGER.info("BidHandler(channelRead0-case213): userCode is null");
+                    return;
+                }
+                message.getData().put("userCode", userCode);
+                String activityCode = userChannelMapBean.getUserFocusActivity(userCode);
+                message.getData().put("activityCode", activityCode);
+
+                //
+                QueueMessage queueMessage = new QueueMessage(213,message.getData());
+                pushQueue.offer(queueMessage);
+            }
+            break;
 
                 //处理管理端主动请求
             case 300: {
@@ -103,7 +136,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         // 将新的通道加入到clients
-        clients.add(ctx.channel());
+       // clients.add(ctx.channel());
     }
 
     @Override

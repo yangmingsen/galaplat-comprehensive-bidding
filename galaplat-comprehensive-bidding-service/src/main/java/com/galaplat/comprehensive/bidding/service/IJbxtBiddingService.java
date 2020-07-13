@@ -54,7 +54,10 @@ public interface IJbxtBiddingService{
 	//----------minBidTble opreation end-----------
 
 
-	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
+	 List<JbxtBiddingDVO> getTheTopBids(Integer goodsId, String activityCode);
+
+
+	 int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     /**
 	 * 添加竞价表

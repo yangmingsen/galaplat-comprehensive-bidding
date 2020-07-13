@@ -23,22 +23,4 @@ import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 @RequestMapping("/jbxtactivity")
 public  class JbxtActivityController  {
 
-
-	@Autowired
-	IJbxtActivityService jbxtactivityService;
-	
-
-	/**
-	 * 分页获取活动表列表
-	 * @param jbxtactivityQuery
-	 * @return
-	 */
-	@GetMapping("/list")
-	@RestfulResult
-	public Object getJbxtActivityPage(JbxtActivityQuery jbxtactivityQuery) throws BaseException{
-
-		  return jbxtactivityService.getJbxtActivityPage( jbxtactivityQuery);
-	
-	}
-
 }

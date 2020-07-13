@@ -3,6 +3,7 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
+import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -10,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class SupplierProblemHandler extends BaseProblemHandler {
+public class SupplierOutProblemHandler extends BaseProblemHandler {
     @Override
     public void handlerProblem(int type, QueueMessage queuemsg) {
         switch (type) {
@@ -30,26 +31,26 @@ public class SupplierProblemHandler extends BaseProblemHandler {
     }
 
 
-    /***
-     *  推数据流到所有供应商端（适用于所有供应商发同一个数据）
-     * @param message
-     * @param activityCode
-     */
-    private void notifyAllSupplier(Message message, String activityCode) {
-        userChannelMap.getAllUser().forEach(supplier -> notifyOptionSupplier(message, activityCode, supplier));
-    }
-
-    /***
-     * 推送数据到指定供应商端
-     * @param message
-     * @param activityCode
-     * @param userCode
-     */
-    private void notifyOptionSupplier(Message message, String activityCode, String userCode) {
-        if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-        }
-    }
+//    /***
+//     *  推数据流到所有供应商端（适用于所有供应商发同一个数据）
+//     * @param message
+//     * @param activityCode
+//     */
+//    private void notifyAllSupplier(Message message, String activityCode) {
+//        userChannelMap.getAllUser().forEach(supplier -> notifyOptionSupplier(message, activityCode, supplier));
+//    }
+//
+//    /***
+//     * 推送数据到指定供应商端
+//     * @param message
+//     * @param activityCode
+//     * @param userCode
+//     */
+//    private void notifyOptionSupplier(Message message, String activityCode, String userCode) {
+//        if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
+//            userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+//        }
+//    }
 
 
     private void handlerSendOneSupplier(String activityCode, Integer goodsId, String userCode) {
@@ -63,7 +64,6 @@ public class SupplierProblemHandler extends BaseProblemHandler {
             //推流到供应商客户端
             Message message = new Message(200, map);
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-            ;
         }
     }
 
@@ -71,7 +71,7 @@ public class SupplierProblemHandler extends BaseProblemHandler {
     private void handler111Problem(QueueMessage takeQueuemsg) {
         String activityCode = takeQueuemsg.getData().get("activityCode");
 
-        Message message = new Message(200, takeQueuemsg.getData());
+        Message message = new Message(111, takeQueuemsg.getData());
         notifyAllSupplier(message, activityCode);
     }
 

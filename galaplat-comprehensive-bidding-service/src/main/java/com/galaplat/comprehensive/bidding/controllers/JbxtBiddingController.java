@@ -34,10 +34,10 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.*;
 
 
 /**
@@ -73,7 +73,6 @@ public class JbxtBiddingController {
 
     @PostMapping("/submit")
     @RestfulResult
-    @Transactional(rollbackFor = Exception.class)
     public Object submit(BigDecimal bid, Integer goodsId, String activityCode) {
         MyResult myResult = checkSubmit(bid, goodsId, activityCode);
         if (myResult.isSuccess() == false) {
@@ -139,8 +138,8 @@ public class JbxtBiddingController {
     }
 
     private Object saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
-        try {
 
+        try {
             CurrentActivity currentActivity = activityMap.get(activityCode);
             int se = currentActivity.getRemainingTime();
             String bidTime = (se/60)+":"+(se%60);
@@ -167,7 +166,6 @@ public class JbxtBiddingController {
                 var1.setBidTime(bidTime);
                 jbxtbiddingService.updateMinBidTableByPrimaryKeySelective(var1);
             }
-
             //
             Map<String, String> map301 = new HashMap();
             map301.put("bidTime",bidTime);
@@ -178,7 +176,6 @@ public class JbxtBiddingController {
             map301.put("CodeName", jbxtUserDO.getCodeName());
             map301.put("supplierName", jbxtUserDO.getSupplierName());
             pushQueue.offer(new QueueMessage(301, map301));
-
 
             //
             Map<String, String> map200 = new HashMap();
@@ -193,6 +190,17 @@ public class JbxtBiddingController {
             e.printStackTrace();
         }
         return new MyResult(false, "提交失败: 保存失败", null);
+    }
+
+
+    @GetMapping("/test")
+    @RestfulResult
+    public void test() {
+        //
+        Map<String, String> map200 = new HashMap();
+        map200.put("activityCode", "1275271189644222464");
+        map200.put("goodsId", "15");
+        pushQueue.offer(new QueueMessage(200,map200));
     }
 
 }

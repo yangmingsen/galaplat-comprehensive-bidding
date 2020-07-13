@@ -34,14 +34,14 @@ public class MyInterceptor implements HandlerInterceptor {
         LOGGER.info("requestUser="+userExist.getUsername()+" Code="+userExist.getCode());
 
 
-        JbxtUserDO user = (JbxtUserDO)userExist;
-        String reqPath = httpServletRequest.getServletPath();
-        if (reqPath.startsWith("/admin")) { //拦截非管理员的请求
-            String isAdmin = user.getAdmin();
-            if (isAdmin.equals("0")) {
-                return false;
-            }
-        }
+//        JbxtUserDO user = (JbxtUserDO)userExist;
+//        String reqPath = httpServletRequest.getServletPath();
+//        if (reqPath.startsWith("/admin")) { //拦截非管理员的请求
+//            String isAdmin = user.getAdmin();
+//            if (isAdmin.equals("0")) {
+//                return false;
+//            }
+//        }
 
         return true;
     }

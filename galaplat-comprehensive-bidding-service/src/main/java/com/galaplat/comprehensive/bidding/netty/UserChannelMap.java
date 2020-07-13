@@ -15,12 +15,15 @@ public class UserChannelMap {
     // 用户保存用户id与通道的Map对象 的关联
     private  Map<String, Channel> userChannelMap;
 
+    private Map<Channel, String> channelRelevanceUser;
+
     // 用户保存用户id与活动Code的关联
     private Map<String, String> userFocusActivity;
 
 
     public UserChannelMap() {
-        userChannelMap = new HashMap<String, Channel>();
+        userChannelMap = new HashMap<>();
+        channelRelevanceUser = new HashMap<>();
         userFocusActivity = new HashMap<>();
     }
 
@@ -38,7 +41,7 @@ public class UserChannelMap {
 
 
     /**
-     * 添加用户id与channel的关联
+     * 添加供应商与channel的关联
      * @param userid
      * @param channel
      */
@@ -46,10 +49,24 @@ public class UserChannelMap {
         userChannelMap.put(userid, channel);
     }
 
+    public void putChannelToUser(Channel channel, String userCode) {
+        channelRelevanceUser.put(channel, userCode);
+    }
+
     public void put(String userid, String focusActivity) {
         userFocusActivity.put(userid,focusActivity);
     }
 
+
+    public String getUserByChannel(Channel channel) {
+        return channelRelevanceUser.get(channel);
+    }
+
+    /***
+     * 获取当前供应商关联的活动code
+     * @param userid
+     * @return
+     */
     public String getUserFocusActivity(String userid) {
         return userFocusActivity.get(userid);
     }
@@ -94,7 +111,7 @@ public class UserChannelMap {
     }
 
     /**
-     * 根据好友id获取对应的通道
+     * 根据userCode获取对应的通道
      * @return Netty通道
      */
     public  Channel get(String userCode) {

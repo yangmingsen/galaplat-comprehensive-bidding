@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,7 +39,9 @@ import javax.servlet.http.HttpServletRequest;
  */
  @Service
 public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
-	@Override
+
+ 	//--------------------------CRUD------------
+ 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public int insertMinBidTableSelective(JbxtBiddingVO record) {
 		record.setCode(idWorker.nextId());
@@ -74,9 +77,28 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 		return jbxtbiddingDao.deleteMinbidTableByGoodsIdAndActivityCode(goodsId,activityCode);
 	}
 
-
-
 	//--------------------
+
+
+	public List<JbxtBiddingDVO> getTheTopBids(Integer goodsId, String activityCode) {
+		List<JbxtBiddingDVO> allUserMinBid = jbxtbiddingDao.selectMinBidTableBy(goodsId, activityCode);
+		if (allUserMinBid.size() > 0) {
+			BigDecimal bid = allUserMinBid.get(0).getBid();
+			int lastIdx = -1;
+			for (int i = 1; i < allUserMinBid.size(); i++) {
+				JbxtBiddingDVO tMinBid = allUserMinBid.get(i);
+				if (tMinBid.getBid().compareTo(bid) == 1) {
+					lastIdx = i;break;
+				}
+			}
+			if (lastIdx != -1) {
+				return allUserMinBid.subList(0,lastIdx);
+			} else {
+				return allUserMinBid.subList(0,1);
+			}
+		}
+		return allUserMinBid;
+	}
 
 
 	@Autowired
