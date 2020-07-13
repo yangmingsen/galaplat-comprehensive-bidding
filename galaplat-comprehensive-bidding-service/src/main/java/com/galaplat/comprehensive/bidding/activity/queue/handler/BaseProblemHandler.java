@@ -6,7 +6,6 @@ import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.activity.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
-import com.galaplat.comprehensive.bidding.controllers.JbxtGoodsController;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
@@ -14,8 +13,6 @@ import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class BaseProblemHandler implements ProblemHandler {
 

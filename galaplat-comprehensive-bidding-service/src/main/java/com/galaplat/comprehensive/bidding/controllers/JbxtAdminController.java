@@ -34,7 +34,7 @@ public class JbxtAdminController extends BaseController {
     @Autowired
     IJbxtGoodsService jbxtgoodsService;
 
-    Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsController.class);
+    Logger LOGGER = LoggerFactory.getLogger(JbxtAdminController.class);
 
    @Autowired
     private ActivityMap activityMap;
