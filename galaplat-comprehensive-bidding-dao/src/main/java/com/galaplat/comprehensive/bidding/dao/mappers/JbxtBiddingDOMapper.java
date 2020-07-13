@@ -1,6 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
 import org.apache.ibatis.annotations.*;
@@ -286,4 +287,73 @@ public interface JbxtBiddingDOMapper {
             @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
     })
     List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
+
+    @Select({
+            "<script>",
+            " SELECT DISTINCT(user_code) FROM `t_jbxt_bidding` " ,
+            " WHERE 1=1 ",
+            " <if test='param.goodsId != null' > " ,
+            " and goods_id = #{param.goodsId,jdbcType=INTEGER}",
+            " </if>",
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode, jdbcType=INTEGER}",
+            " </if>",
+            "</script>"
+    })
+    List<String> listBidActivityUsers(@Param("param") JbxtBiddingParam biddingParam);
+
+
+    @Select({
+            "<script>",
+            " SELECT code,goods_id,user_code,activity_code,bid,created_time FROM t_jbxt_bidding " ,
+            " WHERE 1=1 ",
+            " <if test='param.goodsId != null' > " ,
+            " and goods_id = #{param.goodsId,jdbcType=INTEGER}",
+            " </if>",
+            " <if test='param.userCode != null' > " ,
+            " and user_code = #{param.userCode,jdbcType = VARCHAR}",
+            " </if>",
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode,jdbcType = VARCHAR}",
+            " </if>",
+            " ORDER BY bid ASC LIMIT 0,1",
+            "</script>"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER),
+            @Result(column="user_code", property="userCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid", property="bid", jdbcType=JdbcType.DECIMAL),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+    })
+    BidDVO getBidActivity(@Param("param")JbxtBiddingParam biddingParam);
+
+
+    @Select({
+            "<script>",
+            " SELECT code,goods_id,user_code,activity_code,bid,created_time FROM t_jbxt_bidding " ,
+            " WHERE 1=1 ",
+            " <if test='param.goodsId != null' > " ,
+            " and goods_id = #{param.goodsId,jdbcType=INTEGER}",
+            " </if>",
+            " <if test='param.userCode != null' > " ,
+            " and user_code = #{param.userCode,jdbcType = VARCHAR}",
+            " </if>",
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode,jdbcType = VARCHAR}",
+            " </if>",
+            "  ORDER BY created_time ASC",
+            "</script>"
+    })
+    @Results({
+            @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
+            @Result(column="goods_id", property="goodsId", jdbcType=JdbcType.INTEGER),
+            @Result(column="user_code", property="userCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="activity_code", property="activityCode", jdbcType=JdbcType.VARCHAR),
+            @Result(column="bid", property="bid", jdbcType=JdbcType.DECIMAL),
+            @Result(column="created_time", property="createdTime", jdbcType=JdbcType.TIMESTAMP),
+    })
+    List<BidDVO> getOneSupplierBidPriceDeatil(@Param("param")JbxtBiddingParam biddingParam);
+
 }

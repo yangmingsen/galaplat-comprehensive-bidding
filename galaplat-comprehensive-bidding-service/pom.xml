@@ -17,6 +17,12 @@
 			<version>0.0.1-SNAPSHOT</version>
 			<artifactId>galaplat-comprehensive-bidding-dao</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-data-redis</artifactId>
@@ -56,7 +62,7 @@
 		<dependency>
 			<groupId>com.galaplat.baseplatform</groupId>
 			<artifactId>galaplat-baseplatform-file-upload-plugin</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>io.github.openfeign.form</groupId>
@@ -123,7 +129,11 @@
 			<version>2.8.5</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>com.belerweb</groupId>
+			<artifactId>pinyin4j</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
