@@ -78,7 +78,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public PageInfo listCompetitiveListPage(CompetitiveListQuery query) throws BaseException {
         CompetitiveListParam param = new CompetitiveListParam();
-        query.getBidActivityCodeList(query.getBidActivityCode());
+        if (null != query && StringUtils.isNotEmpty(query.getBidActivityCode())) {
+            query.getBidActivityCodeList(query.getBidActivityCode());
+        }
         CopyUtil.copyPropertiesExceptEmpty(query, param);
 
         if (StringUtils.isAllEmpty(param.getEndTime(), param.getEndTime(), param.getActivityStatus(), param.getBidActivityCode())) {
