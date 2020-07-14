@@ -21,7 +21,7 @@ public class CompetitiveListDVO {
     private static final Logger log = LoggerFactory.getLogger(CompetitiveListDVO.class);
 
     /*竞标单状态*/
-    private String activityStatus;
+    private int activityStatus;
 
     /*竞标单编号*/
     private String activityCode;
