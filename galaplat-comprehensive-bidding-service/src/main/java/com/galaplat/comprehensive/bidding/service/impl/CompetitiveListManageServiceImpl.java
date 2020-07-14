@@ -271,7 +271,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     private void exportBidPriceRankAndDetail(Workbook workbook, HttpServletResponse response,  String bidActivityCode) {
-        String fileName = bidActivityCode + LocalDate.now().toString();
+        String fileName = bidActivityCode + LocalDate.now().toString() + ".xls";
         try {
             response.setContentType("application/vnd.ms-excel;charset=UTF-8");
             response.setHeader("Content-disposition",
