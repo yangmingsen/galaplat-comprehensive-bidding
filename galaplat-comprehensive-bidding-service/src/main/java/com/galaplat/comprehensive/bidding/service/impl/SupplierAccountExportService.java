@@ -1,17 +1,17 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
-import com.galaplat.base.core.common.enums.CodeEnum;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
-import com.galaplat.comprehensive.bidding.utils.RequestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.galaplat.baseplatform.file.upload.service.IExportSubMethodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 供应商账户（一个竞标活动中的）信息导出
@@ -26,12 +26,14 @@ public class SupplierAccountExportService implements IExportSubMethodService<Sup
 
     @Override
     public List<SupplierAccountExportDVO> getExportExcelDataList(HttpServletRequest request, String sysCode, String companyCode) throws BaseException {
-        JbxtUserParam userParam = null;
-        try {
-            userParam = RequestUtils.reflects(request, JbxtUserParam.class);
-        } catch (Exception e) {
-            throw new BaseException(CodeEnum.PARAM_INVALID, "入参解析异常");
+        JbxtUserParam userParam = new JbxtUserParam();
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        String bidActivityCode = "bidActivityCode";
+        if (parameterMap.get(bidActivityCode).length == 0 || StringUtils.isEmpty(parameterMap.get(bidActivityCode)[0])) {
+            throw new BaseException("传参异常","传参异常");
         }
+        String activitYCode = parameterMap.get(bidActivityCode)[0];
+        userParam.setActivityCode(activitYCode);
         return userDao.getAccountByActivityCode(userParam);
     }
 
