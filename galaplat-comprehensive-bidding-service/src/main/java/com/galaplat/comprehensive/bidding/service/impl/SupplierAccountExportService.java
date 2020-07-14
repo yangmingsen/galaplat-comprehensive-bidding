@@ -4,12 +4,14 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.galaplat.baseplatform.file.upload.service.IExportSubMethodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +35,13 @@ public class SupplierAccountExportService implements IExportSubMethodService<Sup
             throw new BaseException("传参异常","传参异常");
         }
         String activitYCode = parameterMap.get(bidActivityCode)[0];
-        userParam.setActivityCode(activitYCode);
-        return userDao.getAccountByActivityCode(userParam);
+        if (StringUtils.isNotEmpty(activitYCode)) {
+            userParam.setActivityCode(activitYCode);
+            return userDao.getAccountByActivityCode(userParam);
+        } else {
+            return new ArrayList<SupplierAccountExportDVO>();
+        }
+
     }
 
     @Override
