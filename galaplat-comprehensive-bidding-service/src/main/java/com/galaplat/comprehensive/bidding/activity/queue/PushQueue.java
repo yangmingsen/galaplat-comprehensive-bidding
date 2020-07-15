@@ -11,7 +11,7 @@ public class PushQueue {
     private BlockingQueue<QueueMessage> blockingQueue = null;
 
     public PushQueue() {
-        blockingQueue = new ArrayBlockingQueue<>(100);
+        blockingQueue = new ArrayBlockingQueue<>(1000);
     }
 
     /***

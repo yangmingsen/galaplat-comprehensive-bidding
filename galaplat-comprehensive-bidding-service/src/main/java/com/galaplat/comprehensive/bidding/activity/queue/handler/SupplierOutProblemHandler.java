@@ -49,27 +49,6 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     }
 
 
-//    /***
-//     *  推数据流到所有供应商端（适用于所有供应商发同一个数据）
-//     * @param message
-//     * @param activityCode
-//     */
-//    private void notifyAllSupplier(Message message, String activityCode) {
-//        userChannelMap.getAllUser().forEach(supplier -> notifyOptionSupplier(message, activityCode, supplier));
-//    }
-//
-//    /***
-//     * 推送数据到指定供应商端
-//     * @param message
-//     * @param activityCode
-//     * @param userCode
-//     */
-//    private void notifyOptionSupplier(Message message, String activityCode, String userCode) {
-//        if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-//            userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-//        }
-//    }
-
 
     private void handlerSendOneSupplier(String activityCode, Integer goodsId, String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
@@ -101,10 +80,32 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     }
 
 
+    /***
+     * 同步当前竞品状态 给 指定供应商端
+     * @param takeQueuemsg
+     */
+    private void sendStatusToSomeOne(QueueMessage takeQueuemsg) {
+        String activityCode = takeQueuemsg.getData().get("activityCode");
+        String userCode = takeQueuemsg.getData().get("userCode");
+        takeQueuemsg.getData().put("userCode", null);
+
+        Message message = new Message(215, takeQueuemsg.getData());
+        notifyOptionSupplier(message ,activityCode, userCode);
+    }
+
     private void handler211Problem(QueueMessage takeQueuemsg) {
         String activityCode = takeQueuemsg.getData().get("activityCode");
         String userCode = takeQueuemsg.getData().get("userCode");
         String goodsId = activityMap.get(activityCode).getCurrentGoodsId();
+        takeQueuemsg.getData().put("goodsId", goodsId);
+        int status = activityMap.get(activityCode).getStatus();
+        if (status == 2) {
+            takeQueuemsg.getData().put("status","3");
+        } else {
+            takeQueuemsg.getData().put("status","1");
+        }
+
+        sendStatusToSomeOne(takeQueuemsg);
         handlerSendOneSupplier(activityCode, new Integer(goodsId), userCode);
     }
 

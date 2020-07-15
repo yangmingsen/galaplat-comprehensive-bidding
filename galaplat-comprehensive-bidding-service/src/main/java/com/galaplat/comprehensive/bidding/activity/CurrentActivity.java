@@ -134,6 +134,10 @@ public class CurrentActivity extends Thread {
         return initTime;
     }
 
+    /***
+     * //1 进行 2暂停  3//重置
+     * @return
+     */
     public int getStatus() {
         return status;
     }

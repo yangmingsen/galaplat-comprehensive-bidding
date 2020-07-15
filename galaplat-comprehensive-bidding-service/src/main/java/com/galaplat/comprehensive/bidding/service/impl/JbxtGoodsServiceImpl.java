@@ -2,42 +2,31 @@ package com.galaplat.comprehensive.bidding.service.impl;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
 import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
-import com.galaplat.comprehensive.bidding.activity.GoodsTopMap;
-import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+
 import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.vos.JbxtUserVO;
+
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
-import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.BeanCopyUtils;
-import com.galaplat.base.core.common.utils.HttpResultUtils;
 
 
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
-import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
-import com.galaplat.comprehensive.bidding.querys.JbxtGoodsQuery;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
-import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
 
 import javax.servlet.http.HttpServletRequest;
 
