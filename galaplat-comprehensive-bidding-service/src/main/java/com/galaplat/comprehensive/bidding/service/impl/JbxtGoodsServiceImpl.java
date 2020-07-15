@@ -77,6 +77,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
             sgv.setGoodsName(x.getName());
             sgv.setIsActive(x.getStatus());
             sgv.setFirstPrice(x.getFirstPrice());
+            sgv.setTimeNum(x.getTimeNum());
 
             sgvs.add(sgv);
         });

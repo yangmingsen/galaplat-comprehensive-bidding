@@ -88,8 +88,6 @@ public class CurrentActivity extends Thread {
         pushQueue.offer(queueMessage);
     }
 
-
-
     public void setRemainingTime(int remainingTime) {
         this.remainingTime = remainingTime;
     }
@@ -113,6 +111,7 @@ public class CurrentActivity extends Thread {
     public String getRemainingTimeString() {
         int ttime = this.remainingTime;
         int minute = ttime/60;
+
         int second = ttime%60;
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -129,6 +128,10 @@ public class CurrentActivity extends Thread {
         }
 
         return stringBuilder.toString();
+    }
+
+    public int getInitTime() {
+        return initTime;
     }
 
     public int getStatus() {
@@ -149,6 +152,10 @@ public class CurrentActivity extends Thread {
         this.initTime = initTime;
         this.status = status;
         this.remainingTime = initTime;
+    }
+
+    public CurrentActivity(String currentActivityCode, String currentGoodsId, int initTime) {
+        this(currentActivityCode,currentGoodsId,initTime,1);
     }
 
     public void setStatus(int status) {

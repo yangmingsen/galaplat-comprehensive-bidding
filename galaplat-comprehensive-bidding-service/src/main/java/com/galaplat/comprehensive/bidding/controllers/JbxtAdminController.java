@@ -57,6 +57,19 @@ public class JbxtAdminController extends BaseController {
             CurrentActivity currentActivity = activityMap.get(activityCode);
 
             if (currentActivity != null) {
+                if (status == 3) { //处理剩余时间为0 且管理端点击重置问题
+                    int remainingTime = currentActivity.getRemainingTime();
+                    if (remainingTime < 0 ) {
+                        CurrentActivity newActivity = new CurrentActivity(currentActivity.getCurrentActivityCode(),
+                                currentActivity.getCurrentGoodsId(),
+                                currentActivity.getInitTime());
+                        activityMap.put(currentActivity.getCurrentActivityCode(), newActivity);
+                        newActivity.start();
+
+                        return new MyResult(true,"更新成功");
+                    }
+                }
+
                 currentActivity.setStatus(status);
             } else {
                 return new MyResult(false, "currentActivity("+activityCode+")不存在");

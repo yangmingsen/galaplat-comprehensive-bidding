@@ -16,6 +16,16 @@ public class SimpleGoodsVO {
 
     private String isActive;
 
+    private Integer timeNum;
+
+    public Integer getTimeNum() {
+        return timeNum;
+    }
+
+    public void setTimeNum(Integer timeNum) {
+        this.timeNum = timeNum;
+    }
+
     public BigDecimal getFirstPrice() {
         return firstPrice;
     }
