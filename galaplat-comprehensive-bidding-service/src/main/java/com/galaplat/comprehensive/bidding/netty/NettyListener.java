@@ -49,6 +49,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
                         CurrentActivity currentActivity = new CurrentActivity(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
                         activityMap.put(jbxtActivityDVO.getCode(),currentActivity);
                         currentActivity.start();
+                        LOGGER.info("启动 "+jbxtActivityDVO.getCode()+" 活动");
                     }
 
                 }
