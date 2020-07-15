@@ -151,18 +151,10 @@ public interface JbxtGoodsDOMapper {
             "#{item.firstPrice,jdbcType=DECIMAL}, #{item.creator,jdbcType=VARCHAR}, ",
             "#{item.companyCode,jdbcType=VARCHAR}, #{item.sysCode,jdbcType=VARCHAR}, ",
             "#{item.status,jdbcType=VARCHAR}, #{item.timeNum,jdbcType=INTEGER})",
-            " </foreach> ON DUPLICATE KEY UPDATE " ,
-            " code = values(code)," ,
-            " name = values(name)," ,
-            " num = values(num)," ,
-            " activity_code = values(activity_code)," ,
-            " updated_time = values(updated_time)," ,
-            " updator = values(updator)," ,
-            " status = values(status)," ,
-            " time_num = values(time_num)" ,
+            " </foreach> ",
             " </script>",
     })
-    int batchInsertOrUpdate(@Param("list") List<JbxtGoodsParam> goodsParam);
+    int batchInsert(@Param("list") List<JbxtGoodsParam> goodsParam);
 
     @Select({
             " <script>",
@@ -170,9 +162,15 @@ public interface JbxtGoodsDOMapper {
             " goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
             " creator, company_code, sys_code, status, time_num",
             " from t_jbxt_goods",
-            " where status = 1 " ,
+            " where 1=1 " ,
             " <if test='param.activityCode != null' > " ,
             " and activity_code = #{param.activityCode,jdbcType=VARCHAR}",
+            " </if>",
+            " <if test='param.name != null' > " ,
+            " and name = #{param.name,jdbcType=VARCHAR}",
+            " </if>",
+            " <if test='param.code != null' > " ,
+            " and code = #{param.code,jdbcType=VARCHAR}",
             " </if>",
             " </script>",
     })
@@ -191,5 +189,5 @@ public interface JbxtGoodsDOMapper {
             @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
             @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
     })
-    List<JbxtGoodsDO> getGoods(@Param("param") JbxtGoodsParam goodsParam);
+    List<JbxtGoodsDO> listGoods(@Param("param") JbxtGoodsParam goodsParam);
 }
