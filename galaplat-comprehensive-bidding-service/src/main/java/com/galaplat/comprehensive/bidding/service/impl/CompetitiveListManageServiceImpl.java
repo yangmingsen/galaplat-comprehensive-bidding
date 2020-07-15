@@ -193,7 +193,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             throw new BaseException("竞标编码不能为空！", "竞标编码不能为空！");
         }
         int maxBidNum = 0;
-        List<JbxtGoodsDO> goodsList = goodsDdao.getGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
         List<List<String>> bidPriceRankData = new ArrayList<>();
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
 

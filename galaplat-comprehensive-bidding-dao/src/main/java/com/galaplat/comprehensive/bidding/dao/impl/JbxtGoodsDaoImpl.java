@@ -62,12 +62,12 @@ public   class JbxtGoodsDaoImpl implements IJbxtGoodsDao  {
 	}
 
 	@Override
-	public int batchInsertOrUpdate(List<JbxtGoodsParam>  goodsParams) {
-		return mapper.batchInsertOrUpdate(goodsParams);
+	public int batchInsert(List<JbxtGoodsParam>  goodsParams) {
+		return mapper.batchInsert(goodsParams);
 	}
 
 	@Override
-	public List<JbxtGoodsDO> getGoods(JbxtGoodsParam jbxtgoodsParam) {
-		return mapper.getGoods(jbxtgoodsParam);
+	public List<JbxtGoodsDO> listGoods(JbxtGoodsParam jbxtgoodsParam) {
+		return mapper.listGoods(jbxtgoodsParam);
 	}
 }
