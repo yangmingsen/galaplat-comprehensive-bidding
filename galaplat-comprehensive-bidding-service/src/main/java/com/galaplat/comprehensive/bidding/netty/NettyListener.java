@@ -23,19 +23,22 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
 
     private boolean isInit = false;
 
+    @Autowired
+    private SpringUtil springUtil;
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
 
         if (!isInit) {
             websocketServer.start();
 
-            IJbxtActivityService iJbxtActivityServiceBeans = SpringUtil.getBean(IJbxtActivityService.class);
-            ActivityMap activityMap = SpringUtil.getBean(ActivityMap.class);
+            IJbxtActivityService iJbxtActivityServiceBeans = springUtil.getBean(IJbxtActivityService.class);
+            ActivityMap activityMap = springUtil.getBean(ActivityMap.class);
             List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
             for (int i = 0; i < lists.size(); i++) {
                 JbxtActivityDVO jbxtActivityDVO = lists.get(i);
                 if (jbxtActivityDVO.getStatus() == 3) {
-                    IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+                    IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
                     JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());
                     if (activeGoods != null) {
                         CurrentActivity currentActivity = new CurrentActivity(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
