@@ -46,6 +46,8 @@ public class QueueHandler extends Thread {
             //{type: 211, data: {userCode: "235235345", activityCode: "s34534534"}}
             //{type: 212, data: {activityCode: "s34534534", goodsId: 234235}}
             //{type: 213, data: {bidPrice: 32.345, goodsId: 234, userCode: "235235345", activityCode: "s34534534"}}
+            //{type: 214, data: {activityCode: "s34534534", goodsId: 234235}}
+            //{type: 215, data: {activityCode: "s34534534", goodsId: 234235, status: 3 or 1 }}
             //{type: 300, data: {adminCode: "235235345", activityCode: "s34534534"}}
             //{type: 301, data: { activityCode: 23423345, bidTime: 15:32, bid: 2.345, supplierCode: 234903945834, CodeName: '小红', supplierName: '小米科技电子有限公司'}}
             switch (takeQueuemsg.getType()) {
@@ -70,6 +72,10 @@ public class QueueHandler extends Thread {
                     break;
 
                 case 214: //处理当管理端切换下一个竞品时，提示所有供应商端更新
+                    supplierOutHandler.problem(takeQueuemsg.getType(), takeQueuemsg);
+                    break;
+
+                case 215: //处理当管理端点击暂停或者继续后，通知供应商端暂停某个正在进行的竞品
                     supplierOutHandler.problem(takeQueuemsg.getType(), takeQueuemsg);
                     break;
 

@@ -193,6 +193,16 @@ public class CurrentActivity extends Thread {
                     e.printStackTrace();
                 }
             }
+
+            //通知供应商端 继续
+            Map<String, String> map = new HashMap<>();
+            map.put("activityCode",this.currentActivityCode);
+            map.put("goodsId", this.currentGoodsId);
+            map.put("status", "1");
+            QueueMessage queueMessage = new QueueMessage(215, map);
+
+            pushQueue.offer(queueMessage);
+
         }
 
 
@@ -201,6 +211,16 @@ public class CurrentActivity extends Thread {
     private void startRemainingTime() throws InterruptedException{
         while (remainingTime > -1) {
             if (status == 2) {
+
+                //通知供应商端 暂停
+                Map<String, String> map = new HashMap<>();
+                map.put("activityCode",this.currentActivityCode);
+                map.put("goodsId", this.currentGoodsId);
+                map.put("status", "3");
+                QueueMessage queueMessage = new QueueMessage(215, map);
+
+                pushQueue.offer(queueMessage);
+
                 final ReentrantLock lock = this.lock;
                 try {
                     lock.lockInterruptibly();

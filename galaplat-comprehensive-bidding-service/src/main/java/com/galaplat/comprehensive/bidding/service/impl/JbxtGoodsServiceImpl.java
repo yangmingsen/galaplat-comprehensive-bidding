@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.galaplat.comprehensive.bidding.activity.ActivityMap;
+import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.GoodsTopMap;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
@@ -54,13 +56,18 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
     private HttpServletRequest httpServletRequest;
 
     @Autowired
-    IJbxtGoodsDao jbxtgoodsDao;
+	private IJbxtGoodsDao jbxtgoodsDao;
 
     @Autowired
-    IJbxtBiddingDao jbxtBiddingDao;
+	private IJbxtBiddingDao jbxtBiddingDao;
 
 	@Autowired
-	IJbxtGoodsDao iJbxtGoodsDao;
+	private IJbxtGoodsDao iJbxtGoodsDao;
+
+	@Autowired
+	private ActivityMap activityMap;
+
+
 
 
 
@@ -69,15 +76,26 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
         List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
-        jgdList.stream().forEach(x -> {
+		CurrentActivity currentActivity = activityMap.get(activityCode);
+		jgdList.stream().forEach(x -> {
             SimpleGoodsVO sgv = new SimpleGoodsVO();
             sgv.setGoodsId(x.getGoodsId());
             sgv.setGoodsCode(x.getCode());
             sgv.setGoodsNum(x.getNum());
             sgv.setGoodsName(x.getName());
-            sgv.setIsActive(x.getStatus());
-            sgv.setFirstPrice(x.getFirstPrice());
-            sgv.setTimeNum(x.getTimeNum());
+			sgv.setFirstPrice(x.getFirstPrice());
+			sgv.setTimeNum(x.getTimeNum());
+
+			if (currentActivity.getCurrentGoodsId().equals(x.getGoodsId().toString())) {
+				int status = currentActivity.getStatus();
+				if (status == 2) {
+					sgv.setIsActive("3");
+				} else {
+					sgv.setIsActive(x.getStatus());
+				}
+			} else {
+				sgv.setIsActive(x.getStatus());
+			}
 
             sgvs.add(sgv);
         });
