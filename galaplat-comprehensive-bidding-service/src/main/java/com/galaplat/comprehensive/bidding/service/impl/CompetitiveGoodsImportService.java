@@ -9,6 +9,7 @@ import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
 import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
@@ -67,41 +68,58 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         String activityCode= null;
 
         if (StringUtils.isNotEmpty(paramJson)) {
-            Map<String, Object> mapVO  = JSONObject.parseObject(paramJson, new TypeReference<Map<String, Object>>(){});
+            Map<String, Object> mapVO = JSONObject.parseObject(paramJson, new TypeReference<Map<String, Object>>() {
+            });
             activityCode = (String) mapVO.get("bidActivityCode");
         }
-
-        for (Map<String, Object>  goodsMap: list) {
-            JbxtGoodsExcelParam goodsExcelParam = null;
-            try {
-                goodsExcelParam = JsonUtils.toObject(JsonUtils.toJson(goodsMap), JbxtGoodsExcelParam.class);
-            } catch (Exception e) {
-                log.error(" 竞品导入格式化异常【{}】,【{}】",e.getMessage(), e );
-            }
-            ValidateResultVO resultVO =  BeanValidateUtils.validateEntity(goodsExcelParam, InsertParam.class);
-            if (resultVO.isHasErrors() && null != goodsExcelParam) {
-                goodsExcelParam.setErrorMsg(resultVO.getErrorMessage());
-                errorList.add(goodsExcelParam);
-            } else {
-                if (null != goodsExcelParam) {
-                    goodsExcelParam.setActivityCode(activityCode);
-                    goodsExcelParam.setCreatedTime(new Date());
-                    goodsExcelParam.setUpdatedTime(new Date());
-                    goodsExcelParam.setCreator(creatorName);
-                    goodsExcelParam.setStatus("0");
-                    JbxtGoodsParam goodsParam =  new JbxtGoodsParam();
-                    CopyUtil.copyPropertiesExceptEmpty(goodsExcelParam, goodsParam);
-                    saveList.add(goodsParam);
+        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
+        if (null != activityDO) {
+            for (Map<String, Object>  goodsMap: list) {
+                JbxtGoodsExcelParam goodsExcelParam = new JbxtGoodsExcelParam();
+                try {
+                    goodsExcelParam = JsonUtils.toObject(JsonUtils.toJson(goodsMap), JbxtGoodsExcelParam.class);
+                } catch (Exception e) {
+                    log.error(" 竞品导入格式化异常【{}】,【{}】",e.getMessage(), e );
+                }
+                ValidateResultVO resultVO =  BeanValidateUtils.validateEntity(goodsExcelParam, InsertParam.class);
+                if (resultVO.isHasErrors()) {
+                    goodsExcelParam.setErrorMsg(resultVO.getErrorMessage());
+                    errorList.add(goodsExcelParam);
+                } else {
+                    List<JbxtGoodsDO> goodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode)
+                            .name(goodsExcelParam.getName()).code(goodsExcelParam.getCode()).build());
+                    if (CollectionUtils.isEmpty(goodsDOList)) {
+                        goodsExcelParam.setActivityCode(activityCode);
+                        goodsExcelParam.setCreatedTime(new Date());
+                        goodsExcelParam.setUpdatedTime(new Date());
+                        goodsExcelParam.setCreator(creatorName);
+                        goodsExcelParam.setStatus("0");
+                        JbxtGoodsParam goodsParam = new JbxtGoodsParam();
+                        CopyUtil.copyPropertiesExceptEmpty(goodsExcelParam, goodsParam);
+                        saveList.add(goodsParam);
+                    } else {
+                        JbxtGoodsDO jbxtGoodsDO = goodsDOList.get(0);
+                        jbxtGoodsDO.setTimeNum(goodsExcelParam.getTimeNum());
+                        jbxtGoodsDO.setFirstPrice(goodsExcelParam.getFirstPrice());
+                        jbxtGoodsDO.setNum(goodsExcelParam.getNum());
+                        jbxtGoodsDO.setUpdatedTime(new Date());
+                        jbxtGoodsDO.setUpdator(creatorName);
+                        goodsDao.updateJbxtGoods(jbxtGoodsDO);
+                    }
                 }
             }
-        }
-        if (CollectionUtils.isNotEmpty(saveList)) {
-            goodsDao.batchInsertOrUpdate(saveList);
-            JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
-            if (null != activityDO && activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())) {
+            int insertCount = 0;
+            if (CollectionUtils.isNotEmpty(saveList)) {
+                insertCount = goodsDao.batchInsert(saveList);
+            }
+
+            List<JbxtGoodsDO> activityGoodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode).build());
+            if (activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())
+                    && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
                 activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
             }
-        }
+
+        }// if
 
         return errorList;
     }
@@ -128,7 +146,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                     if (userByCode.get(result).get("name") != null) {
                         creatorName = userByCode.get(result).get("name").asText();
                     }else{
-                        creatorName = "没有查询到用户名称";
+                        creatorName = creator;
                     }
 
                 } catch (BaseException e) {

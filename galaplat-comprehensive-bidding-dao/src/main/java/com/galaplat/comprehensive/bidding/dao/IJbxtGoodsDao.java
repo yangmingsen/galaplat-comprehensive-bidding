@@ -60,8 +60,8 @@ public interface IJbxtGoodsDao{
 	 * @param jbxtgoodsParam
 	 * @return
 	 */
-	int batchInsertOrUpdate(List<JbxtGoodsParam> jbxtgoodsParam);
+	int batchInsert(List<JbxtGoodsParam> jbxtgoodsParam);
 
-	List<JbxtGoodsDO> getGoods(JbxtGoodsParam jbxtgoodsParam);
+	List<JbxtGoodsDO> listGoods(JbxtGoodsParam jbxtgoodsParam);
 
 }
