@@ -7,12 +7,15 @@ import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.netty.BidHandler;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t1;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t2;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,6 +26,9 @@ import java.util.stream.Collectors;
 
 
 public class AdminOutProblemHandler extends BaseProblemHandler {
+
+    private Logger LOGGER = LoggerFactory.getLogger(AdminOutProblemHandler.class);
+
     @Override
     public void handlerProblem(int type, QueueMessage queuemsg) {
         switch (type) {
@@ -32,32 +38,17 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             case 301: //推数据给管理端（同步一些数据给管理端）
                 handler301Problem(queuemsg);
                 break;
+
+            case 302: //处理管理端主动请求获取某个竞品数据时
+                handler302Problem(queuemsg);
+                break;
         }
     }
 
+    private void handler302Problem(QueueMessage queuemsg) {
+        this.handler300Problem(queuemsg);
+    }
 
-//    /***
-//     *  推数据流到所有管理端
-//     * @param message
-//     * @param activityCode
-//     */
-//    private void notifyAllAdmin(Message message, String activityCode) {
-//        adminChannel.getAllAdmin().forEach(adminCode -> notifyOptionAdmin(message, activityCode, adminCode));
-//    }
-//
-//    /***
-//     * 推送数据到指定管理端
-//     * @param message
-//     * @param activityCode
-//     * @param adminCode
-//     */
-//    private void notifyOptionAdmin(Message message, String activityCode, String adminCode) {
-//        AdminInfo adminInfo = adminChannel.get(adminCode);
-//        if (adminInfo.getFocusActivity().equals(activityCode)) {
-//            //推数据到管理端
-//            adminInfo.getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-//        }
-//    }
 
     private void handler300Problem(QueueMessage takeQueuemsg) {
 
@@ -65,9 +56,22 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         String adminCode = takeQueuemsg.getData().get("adminCode");
         Channel caChannel = adminChannel.get(adminCode).getChannel();
 
+        String goodsIdStr = takeQueuemsg.getData().get("goodsId");
+        Integer goodsId = null;
+        if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
+            CurrentActivity currentActivity = activityMap.get(activityCode);
+            goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId());
+        } else { //不为null 意味着302问题
+            try {
+                goodsId = Integer.parseInt(goodsIdStr);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                LOGGER.info("handler300Problem(ERROR): "+e.getMessage());
+                return;
+            }
 
-        CurrentActivity currentActivity = activityMap.get(activityCode);
-        Integer goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId());
+        }
+
         List<JbxtUserDVO> userLists = iJbxtUserService.findAllByActivityCode(activityCode);
 
 
@@ -87,7 +91,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                 res300t1.setMinBid(new BigDecimal("0.000"));
             }
 
-            List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndActivityCode(user1.getCode(), activityCode);
+            List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
             List<Res300t2> t2s = new ArrayList<>();
             if (cUserBidHistory.size() > 0) {
 

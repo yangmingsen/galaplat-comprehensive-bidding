@@ -39,7 +39,7 @@ public class QueueHandler extends Thread {
         while (true) {
             QueueMessage takeQueuemsg = pushQueue.take();
 
-            System.out.println("QueueMessage: "+JSON.toJSONString(takeQueuemsg));
+            //System.out.println("QueueMessage: "+JSON.toJSONString(takeQueuemsg));
 
             //{type: 111, data: {goodsId: 23423, activityCode: 23423345}}
             //{type: 200, data: {goodsId: 23423, activityCode: 23423345}}
@@ -50,6 +50,7 @@ public class QueueHandler extends Thread {
             //{type: 215, data: {activityCode: "s34534534", goodsId: 234235, status: 3 or 1 }}
             //{type: 300, data: {adminCode: "235235345", activityCode: "s34534534"}}
             //{type: 301, data: { activityCode: 23423345, bidTime: 15:32, bid: 2.345, supplierCode: 234903945834, CodeName: '小红', supplierName: '小米科技电子有限公司'}}
+            //{type: 302, data: {activityCode: "s34534534", goodsId: 234235, adminCode: 345dfg}}
             switch (takeQueuemsg.getType()) {
                 case 111: //处理第一名发生变化时 同步数据给供应商
                     supplierOutHandler.problem(takeQueuemsg.getType(),takeQueuemsg);
@@ -84,6 +85,10 @@ public class QueueHandler extends Thread {
                     break;
 
                 case 301: //当供应商端提交最新竞价信息时，推数据给管理端（同步一些数据给管理端）
+                    adminOutHandler.problem(takeQueuemsg.getType(),takeQueuemsg);
+                    break;
+
+                case 302: //处理管理端主动请求获取某个竞品数据时
                     adminOutHandler.problem(takeQueuemsg.getType(),takeQueuemsg);
                     break;
             }

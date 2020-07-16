@@ -9,9 +9,12 @@ import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
+import com.galaplat.comprehensive.bidding.service.impl.JbxtGoodsServiceImpl;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class CurrentActivity extends Thread {
 
+    private Logger LOGGER = LoggerFactory.getLogger(CurrentActivity.class);
     private String currentActivityCode;
     private String currentGoodsId;
     private int initTime; //秒
@@ -40,6 +44,11 @@ public class CurrentActivity extends Thread {
     private boolean haveMinBid = false;
     private Map<String, BigDecimal> minSubmitMap = new HashMap<>();
 
+    private void reInitTopInfo() {
+        minBid = new BigDecimal("0.0");
+        haveMinBid = false;
+        minSubmitMap.clear();
+    }
 
     public void updateTopMinBid(List<JbxtBiddingDVO> theTopBids) {
         if (theTopBids.size() == 0 ) return;
@@ -73,7 +82,6 @@ public class CurrentActivity extends Thread {
     private void updateMinSubmitInfo(List<JbxtBiddingDVO> theTopBids) {
         this.minSubmitMap.clear();
         for (int i = 0; i < theTopBids.size(); i++) {
-            //this.minSubmitUsers.add(theTopBids.get(i).getUserCode());
             JbxtBiddingDVO ttBid = theTopBids.get(i);
             this.minSubmitMap.put(ttBid.getUserCode(), ttBid.getBid());
         }
@@ -191,10 +199,13 @@ public class CurrentActivity extends Thread {
 
                     pushQueue.offer(queueMessage);
 
-                    this.status = 1;
-                    this.remainingTime = this.initTime;
                 } catch (Exception e) {
                     e.printStackTrace();
+                    LOGGER.info("setStatusExction(ERROR): "+e.getMessage());
+                } finally {
+                    this.status = 1;
+                    this.remainingTime = this.initTime;
+                    this.reInitTopInfo();
                 }
             }
 

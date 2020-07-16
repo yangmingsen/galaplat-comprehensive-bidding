@@ -91,6 +91,15 @@ public interface IJbxtBiddingDao{
 	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
 
+	/***
+	 * 根据userCode和goodsId and activityCode获取对应的竞价信息(也就是该用户的竞价记录)
+	 * @param userCode
+	 * @param goodsId
+	 * @param activityCode
+	 * @return
+	 */
+	List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
+
 	 /***
 	  * 获取当前用户当前竞品最小竞价
 	  * @param userCode

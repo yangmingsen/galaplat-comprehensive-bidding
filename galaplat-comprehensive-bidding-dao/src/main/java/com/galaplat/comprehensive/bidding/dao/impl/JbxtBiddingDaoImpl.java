@@ -123,6 +123,11 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	 	return mapper.findAllByUserCodeAndActivityCode(userCode,activityCode);
 	 }
 
+	 public  List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode) {
+	 	return mapper.findAllByUserCodeAndGooodsIdAndActivityCode(userCode, goodsId, activityCode);
+	 }
+
+
 	 @Override
 	 public List<String> listBidActivityUsers(JbxtBiddingParam biddingParam) {
 		 return mapper.listBidActivityUsers(biddingParam);

@@ -17,6 +17,8 @@ public class AdminChannelMap {
         channelRelevanceAdminIdMap = new HashMap<>();
     }
 
+
+
     /***
      * 获取通道的所有管理员
      * @return
@@ -29,16 +31,39 @@ public class AdminChannelMap {
         return res;
     }
 
-
-    public void put(String key, AdminInfo value) {
-         map.put(key, value);
-         channelRelevanceAdminIdMap.put(value.getChannel().id(), key);
+    /***
+     * 根据adminCode移除相关channel 关联
+     * @param adminCode
+     */
+    public void remove(String adminCode) {
+        this.removeRelevance(adminCode);
     }
 
+    private void removeRelevance(String adminCode) {
+        AdminInfo adminInfo = this.map.remove(adminCode);
+        this.channelRelevanceAdminIdMap.remove(adminInfo.getChannel().id());
+    }
+
+
+    public void put(String key, AdminInfo value) {
+         this.map.put(key, value);
+         this.channelRelevanceAdminIdMap.put(value.getChannel().id(), key);
+    }
+
+    /***
+     * 获取 AdminInfo by adminCode
+     * @param key
+     * @return
+     */
     public AdminInfo get(String key) {
         return map.get(key);
     }
 
+    /***
+     *  获取 AdminCode by channel
+     * @param key
+     * @return
+     */
     public String getAdminIdByChannelId(ChannelId key){
         return channelRelevanceAdminIdMap.get(key);
     }

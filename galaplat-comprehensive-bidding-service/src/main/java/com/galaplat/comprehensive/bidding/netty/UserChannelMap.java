@@ -53,6 +53,7 @@ public class UserChannelMap {
         channelRelevanceUser.put(channel, userCode);
     }
 
+
     public void put(String userid, String focusActivity) {
         userFocusActivity.put(userid,focusActivity);
     }
@@ -78,26 +79,13 @@ public class UserChannelMap {
      * @param userid
      */
     public  void remove(String userid) {
-        userChannelMap.remove(userid);
+        this.removeRelevance(userid);
     }
 
-    /**
-     * 根据通道id移除用户与channel的关联
-     * @param channelId 通道的id
-     */
-    public  void removeByChannelId(String channelId) {
-        if(!StringUtils.isNotBlank(channelId)) {
-            return;
-        }
-
-        for (String s : userChannelMap.keySet()) {
-            Channel channel = userChannelMap.get(s);
-            if(channelId.equals(channel.id().asLongText())) {
-                System.out.println("客户端连接断开,取消用户" + s + "与通道" + channelId + "的关联");
-                userChannelMap.remove(s);
-                break;
-            }
-        }
+    private void removeRelevance(String userCode) {
+        Channel channel = this.userChannelMap.remove(userCode);
+        this.channelRelevanceUser.remove(channel);
+        this.userChannelMap.remove(userCode);
     }
 
 
