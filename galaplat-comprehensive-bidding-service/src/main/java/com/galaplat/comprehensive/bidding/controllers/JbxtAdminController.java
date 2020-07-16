@@ -164,9 +164,14 @@ public class JbxtAdminController extends BaseController {
         }
 
         try {
+            boolean isStart = true;
+            if (newGoodsId == -1) { //最后一个竞品
+                newGoodsId = oldGoodsId;
+            } else {
+                JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(newGoodsId);
+                 isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
+            }
 
-            JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(newGoodsId);
-            boolean isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
             if (isStart) {
                 if (oldGoodsId.intValue() != -1) {
                     JbxtGoodsVO tj = new JbxtGoodsVO();
@@ -175,12 +180,15 @@ public class JbxtAdminController extends BaseController {
                     jbxtgoodsService.updateJbxtGoods(tj);
                 }
 
-                if (newGoodsId.intValue() != -1) {
-                    JbxtGoodsVO tj = new JbxtGoodsVO();
-                    tj.setGoodsId(newGoodsId);
-                    tj.setStatus("1");
-                    jbxtgoodsService.updateJbxtGoods(tj);
+                if (oldGoodsId != newGoodsId) {
+                    if (newGoodsId.intValue() != -1) {
+                        JbxtGoodsVO tj = new JbxtGoodsVO();
+                        tj.setGoodsId(newGoodsId);
+                        tj.setStatus("1");
+                        jbxtgoodsService.updateJbxtGoods(tj);
+                    }
                 }
+
 
                 notify214Event(activityCode, newGoodsId); //通知供应商端更新
 
