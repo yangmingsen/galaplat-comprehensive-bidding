@@ -1,8 +1,10 @@
 package com.galaplat.comprehensive.bidding.netty;
 
 import com.alibaba.fastjson.JSON;
+import com.galaplat.comprehensive.bidding.activity.ActivityMap;
 import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.activity.AdminInfo;
+import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
@@ -32,6 +34,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     private AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
     private IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
+    private ActivityMap activityMap = SpringUtil.getBean(ActivityMap.class);
     private PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
 
     private boolean eventInterceptor(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
@@ -65,9 +68,13 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                     userChannelMapBean.putChannelToUser(ctx.channel(), userCode);
 
                     LOGGER.info("channelRead0: "+"建立用户:" + userCode + "与通道" + ctx.channel().id() + "的关联");
-                    //同步数据
-                    QueueMessage queueMessage = new QueueMessage(211,message.getData());
-                    pushQueue.offer(queueMessage);
+
+                    CurrentActivity currentActivity = activityMap.get(focusActivity);
+                    if (currentActivity != null) { //如果当前供应商聚焦的竞品活动存在 则同步数据
+                        //同步数据
+                        QueueMessage queueMessage = new QueueMessage(211,message.getData());
+                        pushQueue.offer(queueMessage);
+                    }
                 } else { //断开该链接
                     ctx.channel().close();
                 }
@@ -84,7 +91,8 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
             }
              break;
 
-            case 213: { //处理供应商端提交竞价
+            //处理供应商端提交竞价
+            case 213: {
                 String tStr1 = message.getData().get("bidPrice");
                 if (tStr1 == null || "".equals(tStr1)) {
                     LOGGER.info("channelRead0-case213: bidPrice is null or empty");
@@ -135,6 +143,9 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
     }
 
+
+
+
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
         String activityCode = message.getData().get("activityCode");
         String adminCode = adminChannelMap.getAdminIdByChannelId(ctx.channel().id());
@@ -146,8 +157,13 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         map.put("adminCode", adminCode);
 
 
-        QueueMessage queueMessage = new QueueMessage(300, map);
-        pushQueue.offer(queueMessage);
+        CurrentActivity currentActivity = activityMap.get(activityCode);
+        if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
+            //同步数据
+            QueueMessage queueMessage = new QueueMessage(300, map);
+            pushQueue.offer(queueMessage);
+        }
+
     }
 
 

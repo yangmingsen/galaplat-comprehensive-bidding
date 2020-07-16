@@ -37,6 +37,15 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	        return mapper.updateByPrimaryKey(entity);
 	}
 
+	public int updateByPrimaryKeySelective(JbxtActivityDO entity) {
+    	return mapper.updateByPrimaryKeySelective(entity);
+	}
+
+	public JbxtActivityDO findOneByCode(String code) {
+    	return mapper.selectByPrimaryKey(code);
+	}
+
+
 	@Override
 	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException{
 	       PageHelper.startPage(jbxtactivityParam.getPn(), jbxtactivityParam.getPs());

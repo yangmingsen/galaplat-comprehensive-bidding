@@ -63,26 +63,28 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
         List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
 		CurrentActivity currentActivity = activityMap.get(activityCode);
-		jgdList.stream().forEach(x -> {
+		jgdList.stream().forEach(goods -> {
             SimpleGoodsVO sgv = new SimpleGoodsVO();
-            sgv.setGoodsId(x.getGoodsId());
-            sgv.setGoodsCode(x.getCode());
-            sgv.setGoodsNum(x.getNum());
-            sgv.setGoodsName(x.getName());
-			sgv.setFirstPrice(x.getFirstPrice());
-			sgv.setTimeNum(x.getTimeNum());
+            sgv.setGoodsId(goods.getGoodsId());
+            sgv.setGoodsCode(goods.getCode());
+            sgv.setGoodsNum(goods.getNum());
+            sgv.setGoodsName(goods.getName());
+			sgv.setFirstPrice(goods.getFirstPrice());
+			sgv.setTimeNum(goods.getTimeNum());
 
-			if (currentActivity.getCurrentGoodsId().equals(x.getGoodsId().toString())) {
-				int status = currentActivity.getStatus();
-				if (status == 2) {
-					sgv.setIsActive("3");
-				} else {
-					sgv.setIsActive(x.getStatus());
+			if (currentActivity != null) {
+				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId().toString())) {
+					int status = currentActivity.getStatus();
+					if (status == 2) {
+						sgv.setIsActive("3");
+					} else {
+						sgv.setIsActive(goods.getStatus());
+					}
 				}
 			} else {
-				sgv.setIsActive(x.getStatus());
+				sgv.setIsActive(goods.getStatus());
 			}
-
+			
             sgvs.add(sgv);
         });
 

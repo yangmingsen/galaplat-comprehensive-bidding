@@ -44,58 +44,6 @@ public class CurrentActivity extends Thread {
     private boolean haveMinBid = false;
     private Map<String, BigDecimal> minSubmitMap = new HashMap<>();
 
-    private void reInitTopInfo() {
-        minBid = new BigDecimal("0.0");
-        haveMinBid = false;
-        minSubmitMap.clear();
-    }
-
-    public void updateTopMinBid(List<JbxtBiddingDVO> theTopBids) {
-        if (theTopBids.size() == 0 ) return;
-
-        if (haveMinBid) {
-            if (this.minBid.compareTo(theTopBids.get(0).getBid()) == 1) {
-                //处理第一名提交竞价后还是第一名的情况
-                for (int i = 0; i < theTopBids.size(); i++) {
-                    JbxtBiddingDVO tbid = theTopBids.get(i);
-                    BigDecimal ttbidPrice = minSubmitMap.get(tbid.getUserCode());
-                    if (ttbidPrice != null) {
-                        return;
-                    }
-                }
-
-                updateMinSubmitInfo(theTopBids);
-                return;
-            }
-
-            if (this.minSubmitMap.size() < theTopBids.size()) {
-                updateMinSubmitInfo(theTopBids);
-            }
-
-        } else {
-            //首次 top
-            updateMinSubmitInfo(theTopBids);
-            this.haveMinBid = true;
-        }
-    }
-
-    private void updateMinSubmitInfo(List<JbxtBiddingDVO> theTopBids) {
-        this.minSubmitMap.clear();
-        for (int i = 0; i < theTopBids.size(); i++) {
-            JbxtBiddingDVO ttBid = theTopBids.get(i);
-            this.minSubmitMap.put(ttBid.getUserCode(), ttBid.getBid());
-        }
-        this.minBid = theTopBids.get(0).getBid();
-
-        //notity all supplier the top updated
-        Map<String, String> map = new HashMap<>();
-        map.put("activityCode",this.currentActivityCode);
-        map.put("goodsId", this.currentGoodsId);
-        QueueMessage queueMessage = new QueueMessage(111, map);
-
-        pushQueue.offer(queueMessage);
-    }
-
     public void setRemainingTime(int remainingTime) {
         this.remainingTime = remainingTime;
     }
@@ -223,7 +171,17 @@ public class CurrentActivity extends Thread {
 
     }
 
+    public void run() {
+        try {
+            this.startRemainingTime();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private void startRemainingTime() throws InterruptedException{
+        this.syncInfoToAll();
         while (remainingTime > -1) {
             if (status == 2) {
 
@@ -270,13 +228,67 @@ public class CurrentActivity extends Thread {
 
     }
 
+    private void syncInfoToAll() {
+        //{type: 200, data: {goodsId: 23423, activityCode: 23423345}}
+        Map<String, String> supplierInfo = new HashMap<>();
+        supplierInfo.put("goodsId", this.currentGoodsId);
+        supplierInfo.put("activityCode", this.currentActivityCode);
+        //同步数据 给 供应商
+        QueueMessage queueMessage = new QueueMessage(200,supplierInfo);
+        pushQueue.offer(queueMessage);
 
-    public void run() {
-        try {
-            startRemainingTime();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    }
+
+    private void reInitTopInfo() {
+        minBid = new BigDecimal("0.0");
+        haveMinBid = false;
+        minSubmitMap.clear();
+    }
+
+    public void updateTopMinBid(List<JbxtBiddingDVO> theTopBids) {
+        if (theTopBids.size() == 0 ) return;
+
+        if (haveMinBid) {
+            if (this.minBid.compareTo(theTopBids.get(0).getBid()) == 1) {
+                //处理第一名提交竞价后还是第一名的情况
+                for (int i = 0; i < theTopBids.size(); i++) {
+                    JbxtBiddingDVO tbid = theTopBids.get(i);
+                    BigDecimal ttbidPrice = minSubmitMap.get(tbid.getUserCode());
+                    if (ttbidPrice != null) {
+                        return;
+                    }
+                }
+
+                updateMinSubmitInfo(theTopBids);
+                return;
+            }
+
+            if (this.minSubmitMap.size() < theTopBids.size()) {
+                updateMinSubmitInfo(theTopBids);
+            }
+
+        } else {
+            //首次 top
+            updateMinSubmitInfo(theTopBids);
+            this.haveMinBid = true;
         }
+    }
+
+    private void updateMinSubmitInfo(List<JbxtBiddingDVO> theTopBids) {
+        this.minSubmitMap.clear();
+        for (int i = 0; i < theTopBids.size(); i++) {
+            JbxtBiddingDVO ttBid = theTopBids.get(i);
+            this.minSubmitMap.put(ttBid.getUserCode(), ttBid.getBid());
+        }
+        this.minBid = theTopBids.get(0).getBid();
+
+        //notity all supplier the top updated
+        Map<String, String> map = new HashMap<>();
+        map.put("activityCode",this.currentActivityCode);
+        map.put("goodsId", this.currentGoodsId);
+        QueueMessage queueMessage = new QueueMessage(111, map);
+
+        pushQueue.offer(queueMessage);
     }
 
 }

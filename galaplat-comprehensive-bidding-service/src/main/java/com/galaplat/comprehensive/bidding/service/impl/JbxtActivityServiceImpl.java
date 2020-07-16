@@ -50,6 +50,14 @@ public  class JbxtActivityServiceImpl implements IJbxtActivityService  {
 		  return jbxtactivityDao.updateJbxtActivity(jbxtactivityDO);
 	}
 
+	public int updateByPrimaryKeySelective(JbxtActivityDO entity) {
+    	return jbxtactivityDao.updateByPrimaryKeySelective(entity);
+	}
+
+	public JbxtActivityDO findOneByCode(String code) {
+    	return jbxtactivityDao.findOneByCode(code);
+	}
+
 	@Override
 	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityQuery jbxtactivityQuery) throws BaseException{
 	        JbxtActivityParam jbxtactivityParam = BeanCopyUtils.copyProperties(JbxtActivityParam.class, jbxtactivityQuery);

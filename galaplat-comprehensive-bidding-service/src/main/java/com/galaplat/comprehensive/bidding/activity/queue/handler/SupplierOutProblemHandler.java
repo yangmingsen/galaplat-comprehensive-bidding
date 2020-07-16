@@ -27,7 +27,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
             case 212: //当管理端数据重置时，通知供应商端清理排名数据
                 handler212Problem(queuemsg);
                 break;
-            case 214: //当管理端数据重置时，通知供应商端清理排名数据
+            case 214:  //处理当管理端切换下一个竞品时，提示所有供应商端更新
                 handler214Problem(queuemsg);
                 break;
             case 215: ////处理当管理端点击暂停或者继续后，通知供应商端暂停某个正在进行的竞品

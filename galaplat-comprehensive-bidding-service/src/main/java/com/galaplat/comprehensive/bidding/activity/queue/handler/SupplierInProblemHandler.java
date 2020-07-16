@@ -71,8 +71,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
     private void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
         try {
             CurrentActivity currentActivity = activityMap.get(activityCode);
-            int se = currentActivity.getRemainingTime();
-            String bidTime = (se/60)+":"+(se%60);
+            String bidTime = currentActivity.getRemainingTimeString();
 
             JbxtBiddingVO jbv = new JbxtBiddingVO();
             jbv.setBid(bid);

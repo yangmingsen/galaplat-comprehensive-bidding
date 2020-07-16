@@ -9,8 +9,10 @@ import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
+import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
@@ -41,6 +43,9 @@ public class JbxtAdminController extends BaseController {
 
     @Autowired
     private IJbxtGoodsService iJbxtGoodsService;
+
+    @Autowired
+    private IJbxtActivityService iJbxtActivityService;
 
     @Autowired
     private PushQueue pushQueue;
@@ -117,6 +122,13 @@ public class JbxtAdminController extends BaseController {
             return new MyResult(false,"错误: activityCode不能为空哦(*￣︶￣)", null);
         }
 
+        JbxtActivityDO activityEntity = iJbxtActivityService.findOneByCode(activityCode);
+        if (activityEntity == null)  {
+           String errorInfo = "错误: 当前活动"+activityCode+"不存在";
+            LOGGER.info("next(msg): "+errorInfo);
+            return new MyResult(false, errorInfo);
+        }
+
         JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectActiveGoods(activityCode); //get 正在进行goods
         List<JbxtGoodsDVO> jgbacs = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
 
@@ -191,6 +203,7 @@ public class JbxtAdminController extends BaseController {
         if (currentActivity != null) { //停止上一个goods的活动
             currentActivity.setStatus(1);
             currentActivity.setRemainingTime(0);
+            LOGGER.info("closeLastActivity(msg): 活动"+activityCode+"结束");
         }
     }
 
@@ -201,45 +214,66 @@ public class JbxtAdminController extends BaseController {
             CurrentActivity ca1 = new CurrentActivity(activityCode, goodsId, initTime * 60, 1);
             activityMap.put(activityCode, ca1);
             ca1.start();
-
+            LOGGER.info("startActivity(msg): 启动"+activityCode+"活动成功");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.info("startActivity(ERROR): 启动"+activityCode+"活动失败"+e.getMessage());
             return false;
         }
 
     }
 
+
     private Object handlerTheNotExistActiveGoods(List<JbxtGoodsDVO> jgbacs, String activityCode) {
         JbxtGoodsDVO tjgd = jgbacs.get(0);
         String status = tjgd.getStatus();
 
+        JbxtActivityDO activityEntity = iJbxtActivityService.findOneByCode(activityCode);
         if (status.equals("0")) {
-            JbxtGoodsVO tj = new JbxtGoodsVO();
-            tj.setGoodsId(tjgd.getGoodsId());
-            tj.setStatus("1");
+            if (activityEntity.getStatus() == 2) { //当为已导入数据未开始
+                JbxtGoodsVO tj = new JbxtGoodsVO();
+                tj.setGoodsId(tjgd.getGoodsId());
+                tj.setStatus("1");
 
-            try {
-                JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(tj.getGoodsId());
-                boolean isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
-                if (isStart) {
-                    jbxtgoodsService.updateJbxtGoods(tj);
+                try {
+                    JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(tj.getGoodsId());
+                    boolean isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
+                    if (isStart) {
+                        jbxtgoodsService.updateJbxtGoods(tj);
 
-                    notify214Event(activityCode, tjgd.getGoodsId()); //通知客户端切换
+                        //更新竞品单 当前竞品单状态为进行中
+                        JbxtActivityDO tActivity = new JbxtActivityDO();
+                        tActivity.setCode(activityCode);
+                        tActivity.setStatus(3);
+                        iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
 
-                    Map<String, String> map = new HashMap<>();
-                    map.put("goodsId", tjgd.getGoodsId().toString());
-                    return new MyResult(true, "切换成功", map);
-                } else {
+
+                        notify214Event(activityCode, tjgd.getGoodsId()); //通知客户端切换
+
+                        Map<String, String> map = new HashMap<>();
+                        map.put("goodsId", tjgd.getGoodsId().toString());
+                        return new MyResult(true, "切换成功", map);
+                    } else {
+                        return new MyResult(false, "切换失败", null);
+                    }
+                } catch (Exception e) {
                     return new MyResult(false, "切换失败", null);
                 }
-            } catch (Exception e) {
-                return new MyResult(false, "切换失败", null);
+            } else {
+                return new MyResult(false, "切换失败: 错误状态 "+status, null);
             }
-
         } else if (status.equals("2")) {
             Map<String, String> map = new HashMap<>();
             map.put("goodsId", "-1");
+
+            Integer curActivityStatus = activityEntity.getStatus();
+            if (curActivityStatus == 3) {
+                //更新竞品单 当前竞品单状态为 已结束
+                JbxtActivityDO tActivity = new JbxtActivityDO();
+                tActivity.setCode(activityCode);
+                tActivity.setStatus(4);
+                iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
+            }
 
             return new MyResult(true, "所有竞品已结束", map);
         } else {

@@ -64,7 +64,8 @@ management:
 #    password: 123456
 
 datasource:
-    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+#    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://ser04.test.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: Esr16888
     driver-class-name: com.mysql.jdbc.Driver
