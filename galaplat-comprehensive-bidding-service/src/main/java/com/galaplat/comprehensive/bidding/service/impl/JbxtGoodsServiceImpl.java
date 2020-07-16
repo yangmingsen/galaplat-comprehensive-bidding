@@ -225,6 +225,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 		CustomBidVO cbv = new CustomBidVO();
 		cbv.setUserRank(cr.getRank());
 		cbv.setGoodsPrice(cr.getBid());
+		cbv.setGoodsId(goodsId);
 		return cbv;
 	}
 
