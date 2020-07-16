@@ -76,6 +76,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                         pushQueue.offer(queueMessage);
                     }
                 } else { //断开该链接
+                    LOGGER.info("channelRead00: 非法连接"+ctx);
                     ctx.channel().close();
                 }
             }

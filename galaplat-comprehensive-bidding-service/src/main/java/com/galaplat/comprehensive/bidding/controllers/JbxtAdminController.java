@@ -167,6 +167,7 @@ public class JbxtAdminController extends BaseController {
             boolean isStart = true;
             if (newGoodsId == -1) { //最后一个竞品
                 newGoodsId = oldGoodsId;
+                closeLastActivity(activityCode);
             } else {
                 JbxtGoodsDO goods1 = jbxtgoodsService.selectByGoodsId(newGoodsId);
                  isStart = startActivity(activityCode, goods1.getGoodsId().toString(),goods1.getTimeNum());
