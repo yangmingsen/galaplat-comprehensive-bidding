@@ -114,7 +114,16 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
         Res300 res300 = new Res300();
         res300.setGoodsId(goodsId);
-        res300.setMinPrice(t1sCollect.get(0).getMinBid());
+
+        BigDecimal minPrice = new BigDecimal("0.000");
+        for (int i = 0; i < t1sCollect.size(); i++) {
+            Res300t1 tres = t1sCollect.get(i);
+            if (tres.getMinBid().compareTo(minPrice) == 1) { //如果当前 > minPrice
+                minPrice = tres.getMinBid();
+                break;
+            }
+        }
+        res300.setMinPrice(minPrice);
         res300.setList(t1sCollect);
 
 
