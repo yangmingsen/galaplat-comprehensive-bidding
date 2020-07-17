@@ -134,6 +134,8 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                     LOGGER.info("channelRead0(msg): focusActivity is null or empty");
                     return;
                 }
+                LOGGER.info("channelRead0: "+"建立（admin）用户:" + adminCode + "与活动" + focusActivity + "的关联");
+
                 AdminInfo tAdminInfo1 = adminChannelMap.get(adminCode);
                 message.getData().put("adminCode", adminCode);
 

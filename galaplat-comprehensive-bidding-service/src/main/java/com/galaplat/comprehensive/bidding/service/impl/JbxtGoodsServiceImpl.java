@@ -6,13 +6,10 @@ import java.util.*;
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
 import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 
-import com.galaplat.comprehensive.bidding.constants.SessionConstant;
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
-import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +77,8 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 					} else {
 						sgv.setIsActive(goods.getStatus());
 					}
+				} else {
+					sgv.setIsActive(goods.getStatus());
 				}
 			} else {
 				sgv.setIsActive(goods.getStatus());
