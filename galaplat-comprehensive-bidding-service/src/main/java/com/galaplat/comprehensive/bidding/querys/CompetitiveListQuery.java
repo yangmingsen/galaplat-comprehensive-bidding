@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.querys;
 
+import com.galaplat.comprehensive.bidding.dao.params.BaseParam;
 import com.google.common.base.Splitter;
 import lombok.*;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CompetitiveListQuery {
+public class CompetitiveListQuery extends BaseParam {
 
     /* 开始时间(创建时间) */
     private String startTime;
@@ -31,10 +32,18 @@ public class CompetitiveListQuery {
     /* 需求单编号 （竞标单编码） */
     private List<String> bidActivityCodeList;
 
+    /* 活动状态  */
+    private List<String> activityStatusList;
+
 
     public List<String> getBidActivityCodeList(String bidActivityCode) {
         bidActivityCodeList = strings2List(bidActivityCode);
         return bidActivityCodeList;
+    }
+
+    public List<String> getActivityStatusList(String activityStatus) {
+        activityStatusList = strings2List(activityStatus);
+        return activityStatusList;
     }
 
     /**
