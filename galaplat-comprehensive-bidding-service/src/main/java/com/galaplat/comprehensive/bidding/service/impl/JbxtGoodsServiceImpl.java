@@ -24,6 +24,7 @@ import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -181,6 +182,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
     }
 
     @Override
+	@Transactional(rollbackFor = Exception.class)
     public int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
         JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class, jbxtgoodsVO);
         jbxtgoodsDO.setUpdatedTime(new Date());

@@ -243,6 +243,7 @@ public class CurrentActivity extends Thread {
             try {
                 iJbxtGoodsService.updateJbxtGoods(jbxtgoodsVO);
                 this.status = 4;
+                LOGGER.info("endTheCurrentGoodsActivity(msg): 活动: "+currentActivityCode+" 竞品id: "+currentGoodsId+" 结束");
             } catch (Exception e) {
                 LOGGER.info("endTheCurrentGoodsActivity(ERROR): "+e.getMessage());
             }
