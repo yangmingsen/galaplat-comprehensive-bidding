@@ -469,17 +469,17 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
     /**
      * 获取账号
-     * 账号格式：供应商名称拼音首字母大写 + 四位自增数字
+     * 账号格式：供应商名称拼音首字母大写取前两个字母 + 四位自增数字
      *
      * @param supplierName 供应商名称
      * @return
      */
     private String getUserName(String supplierName) {
-        String nameWords = SpellingUtil.chineseToFirstChar(supplierName).toUpperCase();
-        String userName = nameWords + getShortCode();
+        String nameWords = SpellingUtil.chineseToFirstChar(supplierName).toLowerCase().substring(0,2);
+        String userName = nameWords + getShortCode(4);
         List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         while (CollectionUtils.isNotEmpty(userDOList)) {
-            userName = nameWords + getShortCode();
+            userName = nameWords + getShortCode(4);
             userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         }
         return userName;
@@ -487,30 +487,28 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
     /**
      * 获取供应商密码
-     * 密码格式 ：
-     * （1）如果供应商名称的汉字字数为偶数个---供应商名称拼音首字母大写 + 日期（形如20200709） + 四位自增数字
-     * （2）如果供应商名称的汉字字数为奇数个---供应商名称拼音首字母小写 + 日期（形如20200709） + 四位自增数字
+     * 密码格式 ：供应商名称拼音首字母 + 两位随机数 + 供应商名称拼音首字母/2+1的字母 +  两位随机数 + 供应商名称拼音首字母最后两个字母
      *
      * @param supplierName
      * @return
      */
     private String getPassword(String supplierName) {
-        String today = LocalDate.now().toString().replace("-", "");
-        String nameWords = SpellingUtil.chineseToFirstChar(supplierName);
-        if (StringUtils.isNotEmpty(nameWords) && nameWords.length() % 2 == 0) {
-            nameWords = nameWords.toUpperCase();
-        }
-        return nameWords + today + getShortCode();
+        String nameWords = SpellingUtil.chineseToFirstChar(supplierName).toLowerCase();
+        int nameLenth = nameWords.length();
+        nameWords = nameWords.substring(0,1) +  getShortCode(2) +  nameWords.substring(nameLenth / 2, nameLenth / 2 + 1)
+                +  getShortCode(2) + nameWords.substring(nameLenth - 3, nameLenth - 1) ;
+        return nameWords ;
     }
 
     /**
      * 获取四位自增数字
      *
      * @return
+     * @param index
      */
-    private String getShortCode() {
+    private String getShortCode(int index) {
         String code = worker.nextId();
-        return code.substring(code.length() - 4, code.length());
+        return code.substring(code.length() - index, code.length());
     }
 
 }
