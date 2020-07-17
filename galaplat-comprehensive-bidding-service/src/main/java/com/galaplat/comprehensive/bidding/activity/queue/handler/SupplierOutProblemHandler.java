@@ -1,6 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
@@ -81,7 +82,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
 
 
     /***
-     * 同步当前竞品状态 给 指定供应商端
+     * 同步当前竞品状态() 给 指定供应商端
      * @param takeQueuemsg
      */
     private void sendStatusToSomeOne(QueueMessage takeQueuemsg) {
@@ -91,6 +92,17 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
 
         Message message = new Message(215, takeQueuemsg.getData());
         notifyOptionSupplier(message ,activityCode, userCode);
+
+        //传递当前活动剩余时长
+        CurrentActivity currentActivity = activityMap.get(activityCode);
+        if (currentActivity != null) {
+            if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
+                Map<String, String> t_map = new HashMap<>();
+                t_map.put("remainingTime",currentActivity.getRemainingTimeString());
+                Message remainingTimeMessage = new Message(100, t_map);
+                notifyOptionSupplier(remainingTimeMessage ,activityCode, userCode);
+            }
+        }
     }
 
     private void handler211Problem(QueueMessage takeQueuemsg) {
@@ -105,8 +117,8 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
             takeQueuemsg.getData().put("status","1");
         }
 
-        sendStatusToSomeOne(takeQueuemsg);
         handlerSendOneSupplier(activityCode, new Integer(goodsId), userCode);
+        sendStatusToSomeOne(takeQueuemsg);
     }
 
 

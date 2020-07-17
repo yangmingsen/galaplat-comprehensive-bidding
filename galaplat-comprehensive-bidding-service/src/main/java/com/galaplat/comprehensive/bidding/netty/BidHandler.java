@@ -7,8 +7,10 @@ import com.galaplat.comprehensive.bidding.activity.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
+import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,6 +22,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -34,6 +37,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     private AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
     private IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
+    private IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
     private ActivityMap activityMap = SpringUtil.getBean(ActivityMap.class);
     private PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
 
@@ -81,7 +85,6 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                 }
             }
             break;
-
                 // 建立管理员客户端连接的消息
             case 102: {
                 String adminCode = message.getData().get("adminCode");
@@ -91,40 +94,16 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                 LOGGER.info("channelRead0: "+"建立（admin）用户:" + adminCode + "与通道" + ctx.channel().id() + "的关联");
             }
              break;
-
-            //处理供应商端提交竞价
+                //处理供应商端提交竞价
             case 213: {
-                String tStr1 = message.getData().get("bidPrice");
-                if (tStr1 == null || "".equals(tStr1)) {
-                    LOGGER.info("channelRead0-case213: bidPrice is null or empty");
-                    return;
-                }
-                String tStr2 = message.getData().get("goodsId");
-                if (tStr2 == null || "".equals(tStr2)) {
-                    LOGGER.info("channelRead0-case213: goodsId is null or empty");
-                    return;
-                }
-                String userCode = userChannelMapBean.getUserByChannel(ctx.channel());
-                if (userCode == null)  {
-                    LOGGER.info("channelRead0-case213: userCode is null");
-                    return;
-                }
-                message.getData().put("userCode", userCode);
-                String activityCode = userChannelMapBean.getUserFocusActivity(userCode);
-                message.getData().put("activityCode", activityCode);
-
-                //
-                QueueMessage queueMessage = new QueueMessage(213,message.getData());
-                pushQueue.offer(queueMessage);
+                handler213Problem(message, ctx);
             }
             break;
-
                 //处理管理端主动请求
             case 300: {
-              handler300Problem(message,ctx);
+              handler300Problem(message, ctx);
             }
             break;
-
                 //处理管理端主动请求获取某个竞品数据时
             case 302: {
                 String adminCode = adminChannelMap.getAdminIdByChannelId(ctx.channel().id());
@@ -146,7 +125,55 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
     }
 
+    private void handler213Problem(RequestMessage message, ChannelHandlerContext ctx) {
+        String tStr1 = message.getData().get("bidPrice");
+        if (tStr1 == null || "".equals(tStr1)) {
+            LOGGER.info("channelRead0-case213: bidPrice is null or empty");
+            return;
+        }
+        BigDecimal bidPrice = null;
+        try {
+            bidPrice = new BigDecimal(tStr1);
+        } catch (Exception e) {
+            LOGGER.info("channelRead0-case213(ERROR): "+e.getMessage());
+            return;
+        }
 
+        String tStr2 = message.getData().get("goodsId");
+        if (tStr2 == null || "".equals(tStr2)) {
+            LOGGER.info("channelRead0-case213: goodsId is null or empty");
+            return;
+        }
+
+        Integer goodsId = null;
+        try {
+            goodsId = Integer.parseInt(tStr2);
+        }catch (NumberFormatException e) {
+            LOGGER.info("channelRead0-case213(ERROR): "+e.getMessage());
+            return;
+        }
+
+        String userCode = userChannelMapBean.getUserByChannel(ctx.channel());
+        if (userCode == null)  {
+            LOGGER.info("channelRead0-case213: userCode is null");
+            return;
+        }
+        message.getData().put("userCode", userCode);
+        String activityCode = userChannelMapBean.getUserFocusActivity(userCode);
+        message.getData().put("activityCode", activityCode);
+
+        //验证当前用提交价格 是否大于自己的上一次提交竞价
+        JbxtBiddingDO lastUserMinBid = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+        int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
+        if (compareRes== 0 || compareRes == 1) {
+            LOGGER.info("channelRead0-case213: 当前竞价("+bidPrice+")大于或等于历史竞价("+lastUserMinBid.getBid()+")");
+            return;
+        }
+
+        //
+        QueueMessage queueMessage = new QueueMessage(213,message.getData());
+        pushQueue.offer(queueMessage);
+    }
 
 
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
@@ -154,6 +181,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         String adminCode = adminChannelMap.getAdminIdByChannelId(ctx.channel().id());
         AdminInfo tAdminInfo1 = adminChannelMap.get(adminCode);
         tAdminInfo1.setFocusActivity(activityCode); //设置当前管理员聚焦的活动
+        LOGGER.info("Admin foucus "+activityCode+" 活动");
 
         Map<String, String > map = new HashMap<>();
         map.put("activityCode", activityCode);

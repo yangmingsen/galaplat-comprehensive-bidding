@@ -96,7 +96,7 @@ public class CurrentActivity extends Thread {
     }
 
     /***
-     * //1 进行 2暂停  3//重置
+     * //1 进行 2暂停  3//重置 4 结束
      * @return
      */
     public int getStatus() {

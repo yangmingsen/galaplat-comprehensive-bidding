@@ -119,10 +119,8 @@ public class JbxtAdminController extends BaseController {
                 LOGGER.info(info);
                 return new MyResult(false, info);
             }
-            return switchActivityGoods(activityCode);
-        } else {
-            return switchActivityGoods(activityCode);
         }
+        return switchActivityGoods(activityCode);
     }
     private MyResult checkNextReq(String activityCode) {
         if (activityCode == null || activityCode.equals("")) {
@@ -139,9 +137,9 @@ public class JbxtAdminController extends BaseController {
         return new MyResult(true, "");
     }
     private Object switchActivityGoods(String activityCode) {
-        List<JbxtGoodsDVO> jgbacs = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
-        for (int i = 0; i < jgbacs.size(); i++) {
-            JbxtGoodsDVO jbxtGoodsDVO1 = jgbacs.get(i);
+        List<JbxtGoodsDVO> goodsList = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
+        for (int i = 0; i < goodsList.size(); i++) {
+            JbxtGoodsDVO jbxtGoodsDVO1 = goodsList.get(i);
             if ("0".equals(jbxtGoodsDVO1.getStatus())) {
                 //更新当前竞品状态为 1
                 JbxtGoodsVO newGoodsStatus = new JbxtGoodsVO();
@@ -181,7 +179,7 @@ public class JbxtAdminController extends BaseController {
         tActivity.setStatus(4);
         iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
         closeLastActivity(activityCode);
-        return new MyResult(true, "所有竞品已结束", map);
+        return new MyResult(false, "所有竞品已结束", map);
     }
     private void notify214Event( String activityCode, Integer goodsId) {
         Map<String, String> map214 = new HashMap();

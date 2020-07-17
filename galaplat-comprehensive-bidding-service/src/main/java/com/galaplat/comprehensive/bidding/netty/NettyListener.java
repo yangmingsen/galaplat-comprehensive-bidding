@@ -36,7 +36,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
 
         if (!isInit) {
             websocketServer.start();
-
+            LOGGER.info("onApplicationEvent(msg): WebSocket started");
             IJbxtActivityService iJbxtActivityServiceBeans = springUtil.getBean(IJbxtActivityService.class);
             ActivityMap activityMap = springUtil.getBean(ActivityMap.class);
             List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
