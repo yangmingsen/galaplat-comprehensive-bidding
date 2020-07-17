@@ -105,7 +105,7 @@ public class JbxtAdminController extends BaseController {
 
     @RequestMapping("/goods/next")
     @RestfulResult
-    @Transactional(rollbackFor = Exception.class)
+//    @Transactional(rollbackFor = Exception.class)
     public Object next(String activityCode) {
         //业务处理逻辑:
         // 1. 获取当前正在进行的竞品
@@ -135,6 +135,29 @@ public class JbxtAdminController extends BaseController {
         if (jbxtGoodsDO != null) {
             return handlerTheExistActiveGoods(jgbacs, activityCode);
         } else {
+            for (int i = 0; i < jgbacs.size(); i++) {
+                JbxtGoodsDVO jbxtGoodsDVO1 = jgbacs.get(i);
+                if ("0".equals(jbxtGoodsDVO1.getStatus())) {
+                    //更新当前竞品状态为 1
+                    JbxtGoodsVO newGoodsStatus = new JbxtGoodsVO();
+                    newGoodsStatus.setGoodsId(jbxtGoodsDVO1.getGoodsId());
+                    newGoodsStatus.setStatus("1");
+                    boolean switchOk = false;
+                    try {
+                        iJbxtGoodsService.updateJbxtGoods(newGoodsStatus);
+                        switchOk = true;
+                    } catch (Exception e) {
+                        LOGGER.info("next(ERROR): 更新状态为开始失败");
+                    }
+
+                    if (switchOk) {
+                        startActivity(activityCode, jbxtGoodsDVO1.getGoodsId().toString(),jbxtGoodsDVO1.getTimeNum());
+                        return new MyResult(true, "切换成功");
+                    } else {
+                        return new MyResult(false,"错误: 更新状态为开始失败");
+                    }
+                }
+            }
             return handlerTheNotExistActiveGoods(jgbacs, activityCode);
         }
     }

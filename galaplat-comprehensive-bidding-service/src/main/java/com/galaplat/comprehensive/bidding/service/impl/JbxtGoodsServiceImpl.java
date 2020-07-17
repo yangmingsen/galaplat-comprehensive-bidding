@@ -74,6 +74,8 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 					int status = currentActivity.getStatus();
 					if (status == 2) {
 						sgv.setIsActive("3");
+					} else if (status == 4) { //如果状态为已结束
+						sgv.setIsActive("2");
 					} else {
 						sgv.setIsActive(goods.getStatus());
 					}

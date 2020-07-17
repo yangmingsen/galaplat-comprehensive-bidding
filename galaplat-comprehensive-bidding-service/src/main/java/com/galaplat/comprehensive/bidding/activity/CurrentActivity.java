@@ -3,14 +3,18 @@ package com.galaplat.comprehensive.bidding.activity;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
+import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.service.impl.JbxtGoodsServiceImpl;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
+import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
@@ -31,10 +35,11 @@ public class CurrentActivity extends Thread {
     private String currentActivityCode;
     private String currentGoodsId;
     private int initTime; //秒
-    private int status;//1 进行 2暂停  3//重置
+    private int status;//1 进行 2暂停  3//重置 4 结束
     private int remainingTime;  //秒
     private UserChannelMap userChannelMap = SpringUtil.getBean(UserChannelMap.class);
     private AdminChannelMap adminChannel = SpringUtil.getBean(AdminChannelMap.class);
+    private IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
     private ReentrantLock lock =  new ReentrantLock();
     private Condition continueRun = lock.newCondition();
     private PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
@@ -225,8 +230,25 @@ public class CurrentActivity extends Thread {
             Thread.sleep(1*1000);
             remainingTime --;
         }
-
+        this.endTheCurrentGoodsActivity();
     }
+
+    private void endTheCurrentGoodsActivity() {
+        JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectByGoodsId(Integer.parseInt(currentGoodsId));
+        if (jbxtGoodsDO != null) {
+            JbxtGoodsVO jbxtgoodsVO = new JbxtGoodsVO();
+            jbxtgoodsVO.setGoodsId(Integer.parseInt(currentGoodsId));
+            jbxtgoodsVO.setStatus("2");
+
+            try {
+                iJbxtGoodsService.updateJbxtGoods(jbxtgoodsVO);
+                this.status = 4;
+            } catch (Exception e) {
+                LOGGER.info("endTheCurrentGoodsActivity(ERROR): "+e.getMessage());
+            }
+        }
+    }
+
 
     private void syncInfoToAll() {
         //{type: 200, data: {goodsId: 23423, activityCode: 23423345}}
