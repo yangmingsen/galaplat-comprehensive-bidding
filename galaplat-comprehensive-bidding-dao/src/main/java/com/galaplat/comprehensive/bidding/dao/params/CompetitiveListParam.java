@@ -31,4 +31,7 @@ public class CompetitiveListParam extends BaseParam {
     /* 需求单编号 （竞标单编码） */
     private List<String> bidActivityCodeList;
 
+    /* 活动状态  */
+    private List<String> activityStatusList;
+
 }
