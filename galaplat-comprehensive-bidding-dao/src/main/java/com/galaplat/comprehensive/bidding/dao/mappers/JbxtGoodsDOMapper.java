@@ -142,7 +142,7 @@ public interface JbxtGoodsDOMapper {
             "created_time, updated_time, ",
             "updator, creator, ",
             "company_code, sys_code, ",
-            "status, time_num)",
+            "status, time_num, first_price)",
             " values ",
             " <foreach collection=\"list\" item=\"item\" separator=\",\"> ",
             " (#{item.goodsId,jdbcType=INTEGER}, #{item.code,jdbcType=VARCHAR}, ",
@@ -150,7 +150,7 @@ public interface JbxtGoodsDOMapper {
             "#{item.createdTime,jdbcType=TIMESTAMP}, #{item.updatedTime,jdbcType=TIMESTAMP}, ",
             "#{item.firstPrice,jdbcType=DECIMAL}, #{item.creator,jdbcType=VARCHAR}, ",
             "#{item.companyCode,jdbcType=VARCHAR}, #{item.sysCode,jdbcType=VARCHAR}, ",
-            "#{item.status,jdbcType=VARCHAR}, #{item.timeNum,jdbcType=INTEGER})",
+            "#{item.status,jdbcType=VARCHAR}, #{item.timeNum,jdbcType=INTEGER}, #{item.firstPrice,jdbcType=DECIMAL})",
             " </foreach> ",
             " </script>",
     })
