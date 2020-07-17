@@ -22,14 +22,15 @@ import java.util.List;
 public class NettyListener implements ApplicationListener<ContextRefreshedEvent> {
 
 
-    Logger LOGGER = LoggerFactory.getLogger(NettyListener.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(NettyListener.class);
+
     @Autowired
     private WebSocketServer websocketServer;
 
     private boolean isInit = false;
 
     @Autowired
-    private SpringUtil springUtil;
+    private  SpringUtil springUtil;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -37,19 +38,19 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
         if (!isInit) {
             websocketServer.start();
             LOGGER.info("onApplicationEvent(msg): WebSocket started");
+
             IJbxtActivityService iJbxtActivityServiceBeans = springUtil.getBean(IJbxtActivityService.class);
             ActivityMap activityMap = springUtil.getBean(ActivityMap.class);
             List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
-            for (int i = 0; i < lists.size(); i++) {
-                JbxtActivityDVO jbxtActivityDVO = lists.get(i);
+            for (JbxtActivityDVO jbxtActivityDVO : lists) {
                 if (jbxtActivityDVO.getStatus() == 3) {
                     IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
                     JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());
                     if (activeGoods != null) {
                         CurrentActivity currentActivity = new CurrentActivity(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
-                        activityMap.put(jbxtActivityDVO.getCode(),currentActivity);
+                        activityMap.put(jbxtActivityDVO.getCode(), currentActivity);
                         currentActivity.start();
-                        LOGGER.info("启动 "+jbxtActivityDVO.getCode()+" 活动");
+                        LOGGER.info("启动 " + jbxtActivityDVO.getCode() + " 活动");
                     }
 
                 }
@@ -61,13 +62,5 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
             this.isInit = true;
         }
 
-        if(event.getApplicationContext().getParent() == null) {
-            try {
-                System.out.println("ws.start");
-               //websocketServer.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

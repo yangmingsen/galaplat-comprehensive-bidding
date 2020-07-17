@@ -13,12 +13,12 @@ import java.util.Map;
  */
 public class UserChannelMap {
     // 用户保存用户id与通道的Map对象 的关联
-    private  Map<String, Channel> userChannelMap;
+    private final Map<String, Channel> userChannelMap;
 
-    private Map<Channel, String> channelRelevanceUser;
+    private final Map<Channel, String> channelRelevanceUser;
 
     // 用户保存用户id与活动Code的关联
-    private Map<String, String> userFocusActivity;
+    private final Map<String, String> userFocusActivity;
 
 
     public UserChannelMap() {

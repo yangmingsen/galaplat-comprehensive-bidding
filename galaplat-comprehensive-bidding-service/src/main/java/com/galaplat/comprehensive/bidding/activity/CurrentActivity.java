@@ -31,24 +31,28 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class CurrentActivity extends Thread {
 
-    private Logger LOGGER = LoggerFactory.getLogger(CurrentActivity.class);
-    private String currentActivityCode;
-    private String currentGoodsId;
+    private final Logger LOGGER = LoggerFactory.getLogger(CurrentActivity.class);
+    private final String currentActivityCode;
+    private final String currentGoodsId;
+    private final Message message = new Message(100,null);
+    private final UserChannelMap userChannelMap = SpringUtil.getBean(UserChannelMap.class);
+    private final AdminChannelMap adminChannel = SpringUtil.getBean(AdminChannelMap.class);
+    private final IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+    private final ReentrantLock lock =  new ReentrantLock();
+    private final Condition continueRun = lock.newCondition();
+    private final PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
     private int initTime; //秒
     private int status;//1 进行 2暂停  3//重置 4 结束
     private int remainingTime;  //秒
-    private UserChannelMap userChannelMap = SpringUtil.getBean(UserChannelMap.class);
-    private AdminChannelMap adminChannel = SpringUtil.getBean(AdminChannelMap.class);
-    private IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
-    private ReentrantLock lock =  new ReentrantLock();
-    private Condition continueRun = lock.newCondition();
-    private PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
     private Map<String, String> t_map = new HashMap<>();
-    private Message message = new Message(100,null);
     private BigDecimal minBid = new BigDecimal("0.0");
     private boolean haveMinBid = false;
     private Map<String, BigDecimal> minSubmitMap = new HashMap<>();
 
+    /***
+     * 设置当前活动剩余时长（秒）
+     * @param remainingTime
+     */
     public void setRemainingTime(int remainingTime) {
         this.remainingTime = remainingTime;
     }
@@ -69,6 +73,10 @@ public class CurrentActivity extends Thread {
         return remainingTime;
     }
 
+    /***
+     * 获取当前剩余时间（字符串方式，例如 "15:34"）
+     * @return
+     */
     public String getRemainingTimeString() {
         int ttime = this.remainingTime;
         int minute = ttime/60;
@@ -91,6 +99,10 @@ public class CurrentActivity extends Thread {
         return stringBuilder.toString();
     }
 
+    /***
+     * 获取当前剩余时间（秒）
+     * @return
+     */
     public int getInitTime() {
         return initTime;
     }
@@ -104,11 +116,11 @@ public class CurrentActivity extends Thread {
     }
 
     /***
-     *
+     *设置活动线程构造参数
      * @param currentActivityCode
      * @param currentGoodsId
      * @param initTime 秒
-     * @param status 1 进行 2暂停  3重置
+     * @param status 1 进行 2暂停  3重置 4结束。必须是1
      */
     public CurrentActivity(String currentActivityCode, String currentGoodsId,
                            int initTime, int status) {
@@ -119,13 +131,54 @@ public class CurrentActivity extends Thread {
         this.remainingTime = initTime;
     }
 
+    /***
+     * 设置活动线程构造参数
+     * @param currentActivityCode 活动code
+     * @param currentGoodsId  竞品id
+     * @param initTime 初始化时间：以秒计算
+     */
     public CurrentActivity(String currentActivityCode, String currentGoodsId, int initTime) {
         this(currentActivityCode,currentGoodsId,initTime,1);
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    /***
+     * 设置榜首信息
+     * @param theTopBids 处于第一名的竞价列表
+     */
+    public void updateTopMinBid(List<JbxtBiddingDVO> theTopBids) {
+        if (theTopBids.size() == 0 ) return;
 
+        if (haveMinBid) {
+            if (this.minBid.compareTo(theTopBids.get(0).getBid()) == 1) {
+                //处理第一名提交竞价后还是第一名的情况
+                for (JbxtBiddingDVO tbid : theTopBids) {
+                    BigDecimal ttbidPrice = minSubmitMap.get(tbid.getUserCode());
+                    if (ttbidPrice != null) {
+                        return;
+                    }
+                }
+                updateMinSubmitInfo(theTopBids);
+                return;
+            }
+            if (this.minSubmitMap.size() < theTopBids.size()) {
+                updateMinSubmitInfo(theTopBids);
+            }
+
+        } else {
+            //首次 top
+            updateMinSubmitInfo(theTopBids);
+            this.haveMinBid = true;
+        }
+    }
+
+    /***
+     * 设置 当前竞品活动状态
+     * @param status 1 进行 2暂停  3重置 4结束
+     */
+    public void setStatus(int status) {
+        if (this.status == status) return; //处理相同status设置
+
+        this.status = status;
         if (this.status != 2) {
 
             final ReentrantLock lock = this.lock;
@@ -170,12 +223,12 @@ public class CurrentActivity extends Thread {
             QueueMessage queueMessage = new QueueMessage(215, map);
 
             pushQueue.offer(queueMessage);
-
         }
-
-
     }
 
+    /***
+     * 业务启动入口
+     */
     public void run() {
         try {
             this.startRemainingTime();
@@ -184,7 +237,10 @@ public class CurrentActivity extends Thread {
         }
     }
 
-
+    /***
+     * 启动剩余时长计算
+     * @throws InterruptedException
+     */
     private void startRemainingTime() throws InterruptedException{
         this.syncInfoToAll();
         while (remainingTime > -1) {
@@ -196,8 +252,9 @@ public class CurrentActivity extends Thread {
                 map.put("goodsId", this.currentGoodsId);
                 map.put("status", "3");
                 QueueMessage queueMessage = new QueueMessage(215, map);
-
                 pushQueue.offer(queueMessage);
+
+                this.whenAcitvityPause();
 
                 final ReentrantLock lock = this.lock;
                 try {
@@ -209,30 +266,40 @@ public class CurrentActivity extends Thread {
                     lock.unlock();
                 }
             }
-
-            String remainingTimeString = getRemainingTimeString();
-//           System.out.println("currentActivityCode="+currentActivityCode+" goodsId="+currentGoodsId+" 剩余时间:"+remainingTimeString);
-            t_map.put("remainingTime",remainingTimeString);
-            message.setData(t_map);
-
-            userChannelMap.getAllUser().forEach(supplier -> {
-                if (userChannelMap.getUserFocusActivity(supplier).equals(this.currentActivityCode)) {
-                    userChannelMap.get(supplier).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-                }
-            });
-
-            adminChannel.getAllAdmin().forEach(admin -> {
-                if (adminChannel.get(admin).getFocusActivity().equals(this.currentActivityCode)) {
-                    adminChannel.get(admin).getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-                }
-            });
-
+            this.sendRemainingTimeToAll();
             Thread.sleep(1*1000);
             remainingTime --;
         }
         this.endTheCurrentGoodsActivity();
     }
 
+    /***
+     * 发送剩余时长到所有通道（supplier,admin）
+     */
+    private void sendRemainingTimeToAll() {
+        String remainingTimeString = getRemainingTimeString();
+//           System.out.println("currentActivityCode="+currentActivityCode+" goodsId="+currentGoodsId+" 剩余时间:"+remainingTimeString);
+        t_map.put("remainingTime",remainingTimeString);
+        message.setData(t_map);
+
+        userChannelMap.getAllUser().forEach(supplier -> {
+            if (userChannelMap.getUserFocusActivity(supplier).equals(this.currentActivityCode)) {
+                userChannelMap.get(supplier).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+            }
+        });
+
+        adminChannel.getAllAdmin().forEach(admin -> {
+            if (adminChannel.get(admin).getFocusActivity().equals(this.currentActivityCode)) {
+                adminChannel.get(admin).getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+            }
+        });
+
+    }
+
+    /***
+     * 自动结束当前活动
+     *
+     */
     private void endTheCurrentGoodsActivity() {
         JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectByGoodsId(Integer.parseInt(currentGoodsId));
         if (jbxtGoodsDO != null) {
@@ -250,7 +317,9 @@ public class CurrentActivity extends Thread {
         }
     }
 
-
+    /***
+     * 同步数据给所有供应商端
+     */
     private void syncInfoToAll() {
         //{type: 200, data: {goodsId: 23423, activityCode: 23423345}}
         Map<String, String> supplierInfo = new HashMap<>();
@@ -262,41 +331,26 @@ public class CurrentActivity extends Thread {
 
     }
 
+    /***
+     * 当活动处于暂停时 同步暂停后最后一次时间
+     */
+    private void whenAcitvityPause() {
+        this.sendRemainingTimeToAll();
+    }
+
+    /***
+     *  清除榜首信息
+     */
     private void reInitTopInfo() {
         minBid = new BigDecimal("0.0");
         haveMinBid = false;
         minSubmitMap.clear();
     }
 
-    public void updateTopMinBid(List<JbxtBiddingDVO> theTopBids) {
-        if (theTopBids.size() == 0 ) return;
-
-        if (haveMinBid) {
-            if (this.minBid.compareTo(theTopBids.get(0).getBid()) == 1) {
-                //处理第一名提交竞价后还是第一名的情况
-                for (int i = 0; i < theTopBids.size(); i++) {
-                    JbxtBiddingDVO tbid = theTopBids.get(i);
-                    BigDecimal ttbidPrice = minSubmitMap.get(tbid.getUserCode());
-                    if (ttbidPrice != null) {
-                        return;
-                    }
-                }
-
-                updateMinSubmitInfo(theTopBids);
-                return;
-            }
-
-            if (this.minSubmitMap.size() < theTopBids.size()) {
-                updateMinSubmitInfo(theTopBids);
-            }
-
-        } else {
-            //首次 top
-            updateMinSubmitInfo(theTopBids);
-            this.haveMinBid = true;
-        }
-    }
-
+    /**
+     * 更新榜首 提示
+     * @param theTopBids
+     */
     private void updateMinSubmitInfo(List<JbxtBiddingDVO> theTopBids) {
         this.minSubmitMap.clear();
         for (int i = 0; i < theTopBids.size(); i++) {

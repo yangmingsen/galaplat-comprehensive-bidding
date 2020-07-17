@@ -18,9 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -130,6 +128,19 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         //处理返回数据
         Message tmsg = new Message(300, res300);
         caChannel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(tmsg)));
+
+        //处理当管理端点击暂停后无故刷新控制台界面 时间同步问题
+        //传递当前活动剩余时长
+        CurrentActivity currentActivity = activityMap.get(activityCode);
+        if (currentActivity != null) {
+            if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
+                Map<String, String> t_map = new HashMap<>();
+                t_map.put("remainingTime",currentActivity.getRemainingTimeString());
+                Message remainingTimeMessage = new Message(100, t_map);
+                notifyOptionAdmin(remainingTimeMessage ,activityCode, adminCode);
+            }
+        }
+
     }
 
 

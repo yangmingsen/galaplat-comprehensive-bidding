@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityMap {
-    private Map<String, CurrentActivity> map; //activityCode => CurrentActivity
+    private final Map<String, CurrentActivity> map; //activityCode => CurrentActivity
 
     public ActivityMap() {
         map = new HashMap<>();

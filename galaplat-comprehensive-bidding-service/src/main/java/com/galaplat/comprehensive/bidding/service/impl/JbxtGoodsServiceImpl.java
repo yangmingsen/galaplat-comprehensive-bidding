@@ -40,9 +40,6 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
     Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsServiceImpl.class);
 
     @Autowired
-    private HttpServletRequest httpServletRequest;
-
-    @Autowired
 	private IJbxtGoodsDao jbxtgoodsDao;
 
     @Autowired
@@ -50,11 +47,6 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 	@Autowired
 	private ActivityMap activityMap;
-
-
-
-
-
 
     public List<SimpleGoodsVO> findAll(String activityCode) {
 

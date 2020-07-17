@@ -32,14 +32,14 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     private static ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
-    private Logger LOGGER = LoggerFactory.getLogger(BidHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(BidHandler.class);
 
-    private AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
-    private UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
-    private IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
-    private IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
-    private ActivityMap activityMap = SpringUtil.getBean(ActivityMap.class);
-    private PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
+    private final AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
+    private final UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
+    private final IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
+    private final IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
+    private final ActivityMap activityMap = SpringUtil.getBean(ActivityMap.class);
+    private final PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
 
     private boolean eventInterceptor(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
         return false;
@@ -99,7 +99,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                 handler213Problem(message, ctx);
             }
             break;
-                //处理管理端主动请求
+                //处理管理端主动请求(建立对目标活动关联)
             case 300: {
               handler300Problem(message, ctx);
             }
@@ -174,7 +174,6 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         QueueMessage queueMessage = new QueueMessage(213,message.getData());
         pushQueue.offer(queueMessage);
     }
-
 
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
         String activityCode = message.getData().get("activityCode");

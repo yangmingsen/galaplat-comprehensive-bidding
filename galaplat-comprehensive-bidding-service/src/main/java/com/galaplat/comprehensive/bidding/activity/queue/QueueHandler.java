@@ -6,11 +6,11 @@ import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 
 public class QueueHandler extends Thread {
 
-    private PushQueue pushQueue;
-    private ProblemHandler supplierOutHandler;
-    private ProblemHandler supplierInHandler;
-    private ProblemHandler adminOutHandler;
-    private ProblemHandler adminInHandler;
+    private final PushQueue pushQueue;
+    private final ProblemHandler supplierOutHandler;
+    private final ProblemHandler supplierInHandler;
+    private final ProblemHandler adminOutHandler;
+    private final ProblemHandler adminInHandler;
 
     private static QueueHandler queueHandler;
 

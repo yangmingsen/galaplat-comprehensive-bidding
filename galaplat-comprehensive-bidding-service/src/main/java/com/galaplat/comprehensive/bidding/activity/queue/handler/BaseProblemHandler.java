@@ -36,8 +36,8 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     }
 
     @Override
-    public void problem(int type, QueueMessage queuemsg) {
-        this.handlerProblem(type,queuemsg);
+    public void problem(int type, QueueMessage queueMsg) {
+        this.handlerProblem(type,queueMsg);
     }
 
     public abstract void handlerProblem(int type, QueueMessage queuemsg);
