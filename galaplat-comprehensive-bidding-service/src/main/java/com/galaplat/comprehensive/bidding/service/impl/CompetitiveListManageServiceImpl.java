@@ -78,8 +78,13 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public PageInfo listCompetitiveListPage(CompetitiveListQuery query) throws BaseException {
         CompetitiveListParam param = new CompetitiveListParam();
-        if (null != query && StringUtils.isNotEmpty(query.getBidActivityCode())) {
-            query.getBidActivityCodeList(query.getBidActivityCode());
+        if (null != query) {
+            if (StringUtils.isNotEmpty(query.getBidActivityCode())) {
+                query.getBidActivityCodeList(query.getBidActivityCode());
+            }
+            if (StringUtils.isNotEmpty(query.getActivityStatus())) {
+                query.getActivityStatusList(query.getActivityStatus());
+            }
         }
         CopyUtil.copyPropertiesExceptEmpty(query, param);
 
@@ -419,10 +424,10 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<JbxtUserParam> userParamList = Lists.newArrayList();
         supplierAccountParamList.forEach(e -> {
             JbxtUserDO userDO = null;
-            List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
-                    .username(e.getSupplierAccount()).activityCode(bidActivityCode).build());
-            if (CollectionUtils.isNotEmpty(userDOList)) {
-                userDO = userDOList.get(0);
+            if (StringUtils.isNotEmpty(bidActivityCode)) {
+                List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
+                        .username(e.getSupplierAccount()).activityCode(bidActivityCode).build());
+                userDO = CollectionUtils.isNotEmpty(userDOList) ? userDOList.get(0) : null;
             }
             if (null != userDO) {
                 if (!StringUtils.equals(userDO.getSupplierName(), e.getSupplierName())) {
