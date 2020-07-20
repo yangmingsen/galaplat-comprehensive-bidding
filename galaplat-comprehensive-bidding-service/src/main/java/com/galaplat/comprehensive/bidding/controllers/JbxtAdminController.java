@@ -38,7 +38,7 @@ public class JbxtAdminController extends BaseController {
 
     Logger LOGGER = LoggerFactory.getLogger(JbxtAdminController.class);
 
-   @Autowired
+    @Autowired
     private ActivityMap activityMap;
 
     @Autowired
@@ -56,7 +56,7 @@ public class JbxtAdminController extends BaseController {
     public Object updateCurrentBidActivityStatus(String activityCode, Integer status) {
 
         if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
-        if (status == null ) return new MyResult(false, "status不能为null");
+        if (status == null) return new MyResult(false, "status不能为null");
 
         try {
             CurrentActivity currentActivity = activityMap.get(activityCode);
@@ -64,20 +64,20 @@ public class JbxtAdminController extends BaseController {
             if (currentActivity != null) {
                 if (status == 3) { //处理剩余时间为0 且管理端点击重置问题
                     int remainingTime = currentActivity.getRemainingTime();
-                    if (remainingTime < 0 ) {
+                    if (remainingTime < 0) {
                         CurrentActivity newActivity = new CurrentActivity(currentActivity.getCurrentActivityCode(),
                                 currentActivity.getCurrentGoodsId(),
                                 currentActivity.getInitTime());
                         activityMap.put(currentActivity.getCurrentActivityCode(), newActivity);
                         newActivity.start();
 
-                        return new MyResult(true,"更新成功");
+                        return new MyResult(true, "更新成功");
                     }
                 }
 
                 currentActivity.setStatus(status);
             } else {
-                return new MyResult(false, "currentActivity("+activityCode+")不存在");
+                return new MyResult(false, "currentActivity(" + activityCode + ")不存在");
             }
 
             return new MyResult(true, "更新成功");
@@ -105,7 +105,7 @@ public class JbxtAdminController extends BaseController {
     @RestfulResult
     public Object next(String activityCode) {
         MyResult checkNextRes = checkNextReq(activityCode);
-        if (! checkNextRes.isSuccess()) return checkNextRes;
+        if (!checkNextRes.isSuccess()) return checkNextRes;
 
         JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectActiveGoods(activityCode); //get 正在进行goods
         if (jbxtGoodsDO != null) {
@@ -115,27 +115,29 @@ public class JbxtAdminController extends BaseController {
             try {
                 jbxtgoodsService.updateJbxtGoods(tj);
             } catch (Exception e) {
-                String info = "next(ERROR): 切换活动: "+activityCode+" goodsId: "+jbxtGoodsDO.getGoodsId()+" 状态为2失败. info="+e.getMessage();
+                String info = "next(ERROR): 切换活动: " + activityCode + " goodsId: " + jbxtGoodsDO.getGoodsId() + " 状态为2失败. info=" + e.getMessage();
                 LOGGER.info(info);
                 return new MyResult(false, info);
             }
         }
         return switchActivityGoods(activityCode);
     }
+
     private MyResult checkNextReq(String activityCode) {
         if (activityCode == null || activityCode.equals("")) {
-            return new MyResult(false,"错误: activityCode不能为空哦(*￣︶￣)", null);
+            return new MyResult(false, "错误: activityCode不能为空哦(*￣︶￣)", null);
         }
 
         JbxtActivityDO activityEntity = iJbxtActivityService.findOneByCode(activityCode);
-        if (activityEntity == null)  {
-            String errorInfo = "错误: 当前活动"+activityCode+"不存在";
-            LOGGER.info("next(msg): "+errorInfo);
+        if (activityEntity == null) {
+            String errorInfo = "错误: 当前活动" + activityCode + "不存在";
+            LOGGER.info("next(msg): " + errorInfo);
             return new MyResult(false, errorInfo);
         }
 
         return new MyResult(true, "");
     }
+
     private Object switchActivityGoods(String activityCode) {
         List<JbxtGoodsDVO> goodsList = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
         for (int i = 0; i < goodsList.size(); i++) {
@@ -162,12 +164,12 @@ public class JbxtAdminController extends BaseController {
                 }
 
                 if (switchOk) {
-                    startActivity(activityCode, jbxtGoodsDVO1.getGoodsId().toString(),jbxtGoodsDVO1.getTimeNum());
+                    startActivity(activityCode, jbxtGoodsDVO1.getGoodsId().toString(), jbxtGoodsDVO1.getTimeNum());
                     notify214Event(activityCode, jbxtGoodsDVO1.getGoodsId());
 
                     return new MyResult(true, "切换成功");
                 } else {
-                    return new MyResult(false,"错误: 切换失败");
+                    return new MyResult(false, "错误: 切换失败");
                 }
             }
         }
@@ -181,21 +183,24 @@ public class JbxtAdminController extends BaseController {
         closeLastActivity(activityCode);
         return new MyResult(false, "所有竞品已结束", map);
     }
-    private void notify214Event( String activityCode, Integer goodsId) {
+
+    private void notify214Event(String activityCode, Integer goodsId) {
         Map<String, String> map214 = new HashMap();
 
         map214.put("activityCode", activityCode);
         map214.put("goodsId", goodsId.toString());
         pushQueue.offer(new QueueMessage(214, map214));
     }
+
     private void closeLastActivity(String activityCode) {
         CurrentActivity currentActivity = activityMap.get(activityCode);
         if (currentActivity != null) { //停止上一个goods的活动
             currentActivity.setStatus(1);
             currentActivity.setRemainingTime(0);
-            LOGGER.info("closeLastActivity(msg): 活动"+activityCode+" 商品("+currentActivity.getCurrentGoodsId()+")结束");
+            LOGGER.info("closeLastActivity(msg): 活动" + activityCode + " 商品(" + currentActivity.getCurrentGoodsId() + ")结束");
         }
     }
+
     private boolean startActivity(String activityCode, String goodsId, int initTime) {
         try {
             closeLastActivity(activityCode);
@@ -203,10 +208,10 @@ public class JbxtAdminController extends BaseController {
             CurrentActivity ca1 = new CurrentActivity(activityCode, goodsId, initTime * 60, 1);
             activityMap.put(activityCode, ca1);
             ca1.start();
-            LOGGER.info("startActivity(msg): 启动"+activityCode+" 商品("+ca1.getCurrentGoodsId()+")活动成功");
+            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + ca1.getCurrentGoodsId() + ")活动成功");
             return true;
         } catch (Exception e) {
-            LOGGER.info("startActivity(ERROR): 启动"+activityCode+" 活动失败"+e.getMessage());
+            LOGGER.info("startActivity(ERROR): 启动" + activityCode + " 活动失败" + e.getMessage());
             return false;
         }
 
