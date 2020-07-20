@@ -15,28 +15,28 @@ import com.galaplat.baseplatform.permissions.interceptor.PermissionsInterceptor;
 public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer {
 
 
-//    @Bean
-//    public PermissionsInterceptor getPermissionsInterceptor() {
-//        return new PermissionsInterceptor();
-//    }
-//
-//    @Bean
-//    public AppAccountInterceptor getAppAccountInterceptor() {
-//        return new AppAccountInterceptor();
-//    }
-//
-//    @Bean
-//    public DatabaseSchemaInterceptor getDatabaseSchemaInterceptor() {
-//        return new DatabaseSchemaInterceptor();
-//    }
-//
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(new LoginSecurityInterceptor()).addPathPatterns("/**").excludePathPatterns("/api/**");
-//        registry.addInterceptor(getDatabaseSchemaInterceptor()).addPathPatterns("/**");
-//        registry.addInterceptor(getAppAccountInterceptor()).addPathPatterns("/api/**");
-//        super.addInterceptors(registry);
-//    }
+    @Bean
+    public PermissionsInterceptor getPermissionsInterceptor() {
+        return new PermissionsInterceptor();
+    }
+
+    @Bean
+    public AppAccountInterceptor getAppAccountInterceptor() {
+        return new AppAccountInterceptor();
+    }
+
+    @Bean
+    public DatabaseSchemaInterceptor getDatabaseSchemaInterceptor() {
+        return new DatabaseSchemaInterceptor();
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LoginSecurityInterceptor()).addPathPatterns("/**").excludePathPatterns("/api/**");
+        registry.addInterceptor(getDatabaseSchemaInterceptor()).addPathPatterns("/**");
+        registry.addInterceptor(getAppAccountInterceptor()).addPathPatterns("/api/**");
+        super.addInterceptors(registry);
+    }
 
 
 

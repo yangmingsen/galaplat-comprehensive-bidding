@@ -164,10 +164,12 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
         //验证当前用提交价格 是否大于自己的上一次提交竞价
         JbxtBiddingDO lastUserMinBid = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
-        int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
-        if (compareRes== 0 || compareRes == 1) {
-            LOGGER.info("channelRead0-case213: 当前竞价("+bidPrice+")大于或等于历史竞价("+lastUserMinBid.getBid()+")");
-            return;
+        if (lastUserMinBid != null) {
+            int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
+            if (compareRes== 0 || compareRes == 1) {
+                LOGGER.info("channelRead0-case213: 当前竞价("+bidPrice+")大于或等于历史竞价("+lastUserMinBid.getBid()+")");
+                return;
+            }
         }
 
         //
