@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
@@ -35,7 +35,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         String activityCode = takeQueuemsg.getData().get("activityCode");
         String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         //处理提交是否过时问题(V2.0添加)
-        CurrentActivity currentActivity = activityMap.get(activityCode);
+        ActivityThread currentActivity = activityMap.get(activityCode);
         if (currentActivity == null) {
             LOGGER.info("handler213Problem: 当前活动不存在");return;
         } else {
@@ -70,7 +70,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
     private void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
         try {
-            CurrentActivity currentActivity = activityMap.get(activityCode);
+            ActivityThread currentActivity = activityMap.get(activityCode);
             String bidTime = currentActivity.getRemainingTimeString();
 
             JbxtBiddingVO jbv = new JbxtBiddingVO();

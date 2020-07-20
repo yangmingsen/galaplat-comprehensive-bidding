@@ -1,13 +1,11 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.AdminInfo;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
-import com.galaplat.comprehensive.bidding.netty.BidHandler;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t1;
@@ -57,7 +55,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         Integer goodsId = null;
         if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
-            CurrentActivity currentActivity = activityMap.get(activityCode);
+            ActivityThread currentActivity = activityMap.get(activityCode);
             goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId());
         } else { //不为null 意味着302问题
             try {
@@ -131,7 +129,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
         //处理当管理端点击暂停后无故刷新控制台界面 时间同步问题
         //传递当前活动剩余时长
-        CurrentActivity currentActivity = activityMap.get(activityCode);
+        ActivityThread currentActivity = activityMap.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 Map<String, String> t_map = new HashMap<>();

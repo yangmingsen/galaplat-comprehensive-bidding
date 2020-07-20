@@ -1,10 +1,9 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -109,7 +108,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         notifyOptionSupplier(message ,activityCode, userCode);
 
         //传递当前活动剩余时长
-        CurrentActivity currentActivity = activityMap.get(activityCode);
+        ActivityThread currentActivity = activityMap.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 Map<String, String> t_map = new HashMap<>();

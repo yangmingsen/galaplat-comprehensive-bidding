@@ -3,25 +3,18 @@ package com.galaplat.comprehensive.bidding.activity;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
-import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
-import com.galaplat.comprehensive.bidding.service.impl.JbxtGoodsServiceImpl;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
-import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +22,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class CurrentActivity extends Thread {
+public class ActivityThread extends Thread {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(CurrentActivity.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(ActivityThread.class);
     private final String currentActivityCode;
     private final String currentGoodsId;
     private final Message message = new Message(100,null);
@@ -122,8 +115,8 @@ public class CurrentActivity extends Thread {
      * @param initTime 秒
      * @param status 1 进行 2暂停  3重置 4结束。必须是1
      */
-    public CurrentActivity(String currentActivityCode, String currentGoodsId,
-                           int initTime, int status) {
+    public ActivityThread(String currentActivityCode, String currentGoodsId,
+                          int initTime, int status) {
         this.currentActivityCode = currentActivityCode;
         this.currentGoodsId = currentGoodsId;
         this.initTime = initTime;
@@ -137,7 +130,7 @@ public class CurrentActivity extends Thread {
      * @param currentGoodsId  竞品id
      * @param initTime 初始化时间：以秒计算
      */
-    public CurrentActivity(String currentActivityCode, String currentGoodsId, int initTime) {
+    public ActivityThread(String currentActivityCode, String currentGoodsId, int initTime) {
         this(currentActivityCode,currentGoodsId,initTime,1);
     }
 
@@ -173,12 +166,13 @@ public class CurrentActivity extends Thread {
 
     /***
      * 设置 当前竞品活动状态
-     * @param status 1 进行 2暂停  3重置 4结束
+     * @param status 1 进行 2暂停  3重置  4结束(不可手动设置)
      */
     public void setStatus(int status) {
         if (this.status == status) return; //处理相同status设置
 
         this.status = status;
+
         if (this.status != 2) {
 
             final ReentrantLock lock = this.lock;
@@ -192,27 +186,17 @@ public class CurrentActivity extends Thread {
             }
 
             if (this.status == 3) {
-                IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
-                try {
-                    iJbxtBiddingService.deleteByGoodsIdAndActivityCode(Integer.parseInt(this.getCurrentGoodsId()), this.currentActivityCode);
-                    iJbxtBiddingService.deleteMinbidTableByGoodsIdAndActivityCode(Integer.parseInt(this.getCurrentGoodsId()), this.currentActivityCode);
 
-                    //同步数据（管理端 N，供应商端 Y）
-                    Map<String, String> map = new HashMap<>();
-                    map.put("activityCode",this.currentActivityCode);
-                    map.put("goodsId", this.currentGoodsId);
-                    QueueMessage queueMessage = new QueueMessage(212, map);
+                //同步数据（管理端 N，供应商端 Y）
+                Map<String, String> map = new HashMap<>();
+                map.put("activityCode",this.currentActivityCode);
+                map.put("goodsId", this.currentGoodsId);
+                QueueMessage queueMessage = new QueueMessage(212, map);
+                pushQueue.offer(queueMessage);
 
-                    pushQueue.offer(queueMessage);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    LOGGER.info("setStatusExction(ERROR): "+e.getMessage());
-                } finally {
-                    this.status = 1;
-                    this.remainingTime = this.initTime;
-                    this.reInitTopInfo();
-                }
+                this.status = 1;
+                this.remainingTime = this.initTime;
+                this.reInitTopInfo();
             }
 
             //通知供应商端 继续

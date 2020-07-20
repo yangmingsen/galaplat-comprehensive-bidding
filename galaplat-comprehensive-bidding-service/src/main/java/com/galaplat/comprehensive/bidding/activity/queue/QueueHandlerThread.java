@@ -3,7 +3,7 @@ package com.galaplat.comprehensive.bidding.activity.queue;
 import com.galaplat.comprehensive.bidding.activity.queue.handler.*;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 
-public class QueueHandler extends Thread {
+public class QueueHandlerThread extends Thread {
 
     private final PushQueue pushQueue;
     private final ProblemHandler supplierOutHandler;
@@ -11,13 +11,13 @@ public class QueueHandler extends Thread {
     private final ProblemHandler adminOutHandler;
     private final ProblemHandler adminInHandler;
 
-    private static QueueHandler queueHandler;
+    private static QueueHandlerThread queueHandler;
 
-    public static QueueHandler getInstance() {
+    public static QueueHandlerThread getInstance() {
         if (queueHandler == null) {
-            synchronized (QueueHandler.class) {
+            synchronized (QueueHandlerThread.class) {
                 if (queueHandler == null) {
-                    queueHandler = new QueueHandler();
+                    queueHandler = new QueueHandlerThread();
                     return queueHandler;
                 }
             }
@@ -25,7 +25,7 @@ public class QueueHandler extends Thread {
         return queueHandler;
     }
 
-    private QueueHandler() {
+    private QueueHandlerThread() {
         this.pushQueue = SpringUtil.getBean(PushQueue.class);
         this.supplierOutHandler = new SupplierOutProblemHandler();
         this.supplierInHandler = new SupplierInProblemHandler();

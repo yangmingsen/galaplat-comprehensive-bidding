@@ -2,9 +2,9 @@ package com.galaplat.comprehensive.bidding.netty;
 
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.activity.AdminInfo;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
@@ -73,7 +73,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
                     LOGGER.info("channelRead0: "+"建立用户:" + userCode + "与通道" + ctx.channel().id() + "的关联");
 
-                    CurrentActivity currentActivity = activityMap.get(focusActivity);
+                    ActivityThread currentActivity = activityMap.get(focusActivity);
                     if (currentActivity != null) { //如果当前供应商聚焦的竞品活动存在 则同步数据
                         //同步数据
                         QueueMessage queueMessage = new QueueMessage(211,message.getData());
@@ -188,7 +188,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         map.put("adminCode", adminCode);
 
 
-        CurrentActivity currentActivity = activityMap.get(activityCode);
+        ActivityThread currentActivity = activityMap.get(activityCode);
         if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
             //同步数据
             QueueMessage queueMessage = new QueueMessage(300, map);

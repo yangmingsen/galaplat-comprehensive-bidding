@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
@@ -25,8 +25,6 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 竞品表ServiceImpl
@@ -52,7 +50,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
         List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
-		CurrentActivity currentActivity = activityMap.get(activityCode);
+		ActivityThread currentActivity = activityMap.get(activityCode);
 		jgdList.stream().forEach(goods -> {
             SimpleGoodsVO sgv = new SimpleGoodsVO();
             sgv.setGoodsId(goods.getGoodsId());

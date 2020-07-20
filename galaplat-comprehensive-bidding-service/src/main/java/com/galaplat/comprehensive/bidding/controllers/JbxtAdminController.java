@@ -1,27 +1,22 @@
 package com.galaplat.comprehensive.bidding.controllers;
 
-import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
-import com.galaplat.baseplatform.permissions.vos.UserVO;
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
+import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
-import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,45 +43,82 @@ public class JbxtAdminController extends BaseController {
     private IJbxtActivityService iJbxtActivityService;
 
     @Autowired
+    private IJbxtBiddingService iJbxtBiddingService;
+
+    @Autowired
     private PushQueue pushQueue;
 
 
+    private boolean resetBidData(String activityCode, Integer goodsId) {
+        boolean delOk = true;
+        try {
+            iJbxtBiddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
+            iJbxtBiddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
+        } catch (Exception e) {
+            delOk = false;
+            LOGGER.info("resetBidData(ERROR): "+e.getMessage());
+        }
+
+        return delOk;
+    }
+
+    private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityThread activityThread) {
+        if (status == 3) { //处理重置问题
+            final int remainingTime = activityThread.getRemainingTime();
+            //删除历史竞价数据
+            final boolean delOk = this.resetBidData(activityCode, goodsId);
+            if (delOk) {
+                if (remainingTime < 0) {
+                    final String gid = goodsId.toString();
+                    final int initTime = activityThread.getInitTime();
+                    final boolean startOk = this.startActivityThread(activityCode, gid, initTime);
+
+                    if (!startOk) {
+                        String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
+                        LOGGER.info(info);
+                        return new MyResult(false, info);
+                    }
+                }
+            } else {
+                String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
+                LOGGER.info(info);
+                return new MyResult(false, info);
+            }
+        }
+        activityThread.setStatus(status);
+        return new MyResult(true, "更新成功");
+    }
+
+    private MyResult handlerTheAcitvityThreadNotExistCondition(String activityCode, Integer goodsId) {
+        final JbxtActivityDO activity = iJbxtActivityService.findOneByCode(activityCode);
+        final JbxtGoodsDO goods = iJbxtGoodsService.selectByGoodsId(goodsId);
+        if (activity != null && goods != null) {
+            Integer curActivityStatus = activity.getStatus();
+            if (curActivityStatus == 3) { //如果为进行状态
+                this.startActivityThread(activityCode, goodsId.toString(), goods.getTimeNum());
+            }
+            return new MyResult(true, "更新成功");
+        } else {
+            LOGGER.info("updateCurrentBidActivityStatus(msg): 更新失败 activity 或 goods为 无数据");
+            return new MyResult(false, "更新失败 activity 或 goods为 无数据");
+        }
+    }
+
     @RequestMapping("/activity/goodsStatus")
     @RestfulResult
-    public Object updateCurrentBidActivityStatus(String activityCode, Integer status) {
-
+    public Object updateCurrentActivityStatus(String activityCode, Integer goodsId,  Integer status) {
         if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
         if (status == null) return new MyResult(false, "status不能为null");
 
-        try {
-            CurrentActivity currentActivity = activityMap.get(activityCode);
+        final ActivityThread currentActivity = activityMap.get(activityCode);
 
-            if (currentActivity != null) {
-                if (status == 3) { //处理剩余时间为0 且管理端点击重置问题
-                    int remainingTime = currentActivity.getRemainingTime();
-                    if (remainingTime < 0) {
-                        CurrentActivity newActivity = new CurrentActivity(currentActivity.getCurrentActivityCode(),
-                                currentActivity.getCurrentGoodsId(),
-                                currentActivity.getInitTime());
-                        activityMap.put(currentActivity.getCurrentActivityCode(), newActivity);
-                        newActivity.start();
-
-                        return new MyResult(true, "更新成功");
-                    }
-                }
-
-                currentActivity.setStatus(status);
-            } else {
-                return new MyResult(false, "currentActivity(" + activityCode + ")不存在");
-            }
-
-            return new MyResult(true, "更新成功");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new MyResult(false, "更新faild");
+        MyResult myResult = null;
+        if (currentActivity != null) {
+            myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
+        } else {
+            myResult = this.handlerTheAcitvityThreadNotExistCondition(activityCode, goodsId);
         }
-
+        return myResult;
     }
 
 
@@ -164,7 +196,7 @@ public class JbxtAdminController extends BaseController {
                 }
 
                 if (switchOk) {
-                    startActivity(activityCode, jbxtGoodsDVO1.getGoodsId().toString(), jbxtGoodsDVO1.getTimeNum());
+                    startActivityThread(activityCode, jbxtGoodsDVO1.getGoodsId().toString(), jbxtGoodsDVO1.getTimeNum());
                     notify214Event(activityCode, jbxtGoodsDVO1.getGoodsId());
 
                     return new MyResult(true, "切换成功");
@@ -188,7 +220,7 @@ public class JbxtAdminController extends BaseController {
         }
 
         if (updateActivityStatus) {
-            closeLastActivity(activityCode);
+            closeLastActivityThread(activityCode);
             //通知所有供应商端 退出登录
             notify216Event(activityCode);
         }
@@ -215,28 +247,36 @@ public class JbxtAdminController extends BaseController {
         pushQueue.offer(new QueueMessage(214, map214));
     }
 
-    private void closeLastActivity(String activityCode) {
-        CurrentActivity currentActivity = activityMap.get(activityCode);
-        if (currentActivity != null) { //停止上一个goods的活动
-            currentActivity.setStatus(1);
-            currentActivity.setRemainingTime(0);
-            LOGGER.info("closeLastActivity(msg): 活动" + activityCode + " 商品(" + currentActivity.getCurrentGoodsId() + ")结束");
+    private void closeLastActivityThread(String activityCode) {
+        ActivityThread lastActivityThread = activityMap.get(activityCode);
+        if (lastActivityThread != null) { //停止上一个goods的活动
+            lastActivityThread.setStatus(1);
+            lastActivityThread.setRemainingTime(0);
+            LOGGER.info("closeLastActivity(msg): 活动" + activityCode + " 商品(" + lastActivityThread.getCurrentGoodsId() + ")结束");
         }
     }
 
-    private boolean startActivity(String activityCode, String goodsId, int initTime) {
+    /**
+     * 启动 一个活动线程
+     * @param activityCode
+     * @param goodsId
+     * @param initTime
+     * @return
+     */
+    private boolean startActivityThread(String activityCode, String goodsId, int initTime) {
+        boolean startOK = true;
         try {
-            closeLastActivity(activityCode);
+            closeLastActivityThread(activityCode);
+            ActivityThread newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
+            activityMap.put(activityCode, newActivityThread);
+            newActivityThread.start();
 
-            CurrentActivity ca1 = new CurrentActivity(activityCode, goodsId, initTime * 60, 1);
-            activityMap.put(activityCode, ca1);
-            ca1.start();
-            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + ca1.getCurrentGoodsId() + ")活动成功");
-            return true;
+            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityThread.getCurrentGoodsId() + ")活动成功");
         } catch (Exception e) {
             LOGGER.info("startActivity(ERROR): 启动" + activityCode + " 活动失败" + e.getMessage());
-            return false;
+            startOK = false;
         }
 
+        return startOK;
     }
 }

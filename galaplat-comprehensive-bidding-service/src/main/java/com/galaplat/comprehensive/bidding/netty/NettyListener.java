@@ -1,9 +1,8 @@
 package com.galaplat.comprehensive.bidding.netty;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityMap;
-import com.galaplat.comprehensive.bidding.activity.CurrentActivity;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueHandler;
-import com.galaplat.comprehensive.bidding.controllers.JbxtAdminController;
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
+import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThread;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
@@ -47,7 +46,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
                     IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
                     JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());
                     if (activeGoods != null) {
-                        CurrentActivity currentActivity = new CurrentActivity(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
+                        ActivityThread currentActivity = new ActivityThread(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
                         activityMap.put(jbxtActivityDVO.getCode(), currentActivity);
                         currentActivity.start();
                         LOGGER.info("启动 " + jbxtActivityDVO.getCode() + " 活动");
@@ -56,7 +55,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
                 }
             }
 
-            QueueHandler queueHandler = QueueHandler.getInstance();
+            QueueHandlerThread queueHandler = QueueHandlerThread.getInstance();
             queueHandler.start();
 
             this.isInit = true;

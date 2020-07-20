@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityMap {
-    private final Map<String, CurrentActivity> map; //activityCode => CurrentActivity
+    private final Map<String, ActivityThread> map; //activityCode => ActivityThread
 
     public ActivityMap() {
         map = new HashMap<>();
     }
 
-    public void put(String key, CurrentActivity value) {
+    public void put(String key, ActivityThread value) {
         map.put(key, value);
     }
 
@@ -19,7 +19,7 @@ public class ActivityMap {
      * @param key
      * @return
      */
-    public CurrentActivity get(String key) {
+    public ActivityThread get(String key) {
         return map.get(key);
     }
 
