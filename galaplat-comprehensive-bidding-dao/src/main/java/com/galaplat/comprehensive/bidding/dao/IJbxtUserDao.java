@@ -65,4 +65,6 @@ public interface IJbxtUserDao{
 	 * @return
 	 */
 	List<SupplierAccountExportDVO> getAccountByActivityCode(JbxtUserParam userParam);
+
+	int deleteUser(JbxtUserParam userParam);
 }
