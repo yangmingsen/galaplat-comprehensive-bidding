@@ -37,14 +37,14 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         //处理提交是否过时问题(V2.0添加)
         CurrentActivity currentActivity = activityMap.get(activityCode);
         if (currentActivity == null) {
-            LOGGER.info("SupplierInProblemHandler(handler213Problem): 当前活动不存在");return;
+            LOGGER.info("handler213Problem: 当前活动不存在");return;
         } else {
             String currentGoodsId = currentActivity.getCurrentGoodsId();
             if (!currentGoodsId.equals(goodsIdStr)) {
-                LOGGER.info("SupplierInProblemHandler(handler213Problem): 当前竞品竞价已经结束或者未开始");return;
+                LOGGER.info("handler213Problem: 当前竞品竞价已经结束或者未开始");return;
             }
             if (currentActivity.getRemainingTime() < 1) {
-                LOGGER.info("SupplierInProblemHandler(handler213Problem): 当前竞品竞价已经结束");return;
+                LOGGER.info("handler213Problem: 当前竞品竞价已经结束");return;
             }
         }
 
@@ -60,7 +60,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 //处理提交
                saveBidDataToDB(activityCode, userCode, bid, goodsId, 2);
             } else {
-                LOGGER.info("SupplierInProblemHandler(handler213Problem): 提交竞价低于之前提交"); return;
+                LOGGER.info("handler213Problem: 提交竞价低于之前提交"); return;
             }
         }  else { //如果没有最低报价(意味着数据库中没有该竞品的提交数据) 那么直接插入
             saveBidDataToDB(activityCode, userCode, bid, goodsId,1);
