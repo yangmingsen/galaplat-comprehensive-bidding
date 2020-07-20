@@ -1,6 +1,5 @@
 package com.galaplat.comprehensive.bidding.activity.queue;
 
-import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.handler.*;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 
