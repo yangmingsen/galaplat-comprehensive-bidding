@@ -275,4 +275,14 @@ public interface JbxtUserDOMapper {
     })
     List<SupplierAccountExportDVO> getAccountByActivityCode(@Param("param")JbxtUserParam userParam);
 
+    @Delete({
+            "<script>",
+            "delete from t_jbxt_user",
+            "where 1=1 ",
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode,jdbcType=VARCHAR}",
+            " </if>",
+            "</script>"
+    })
+    int deleteUser(@Param("param")JbxtUserParam userParam);
 }
