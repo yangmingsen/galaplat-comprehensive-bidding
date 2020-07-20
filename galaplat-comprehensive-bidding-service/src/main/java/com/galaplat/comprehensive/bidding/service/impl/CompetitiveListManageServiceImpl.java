@@ -17,13 +17,13 @@ import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
-import com.galaplat.comprehensive.bidding.utils.SpellingUtil;
 import com.galaplat.comprehensive.bidding.vos.RankInfoVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -432,8 +432,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             if (null != userDO) {
                 if (!StringUtils.equals(userDO.getSupplierName(), e.getSupplierName())) {
                     userDO.setSupplierName(e.getSupplierName());
-                    userDO.setUsername(getUserName(e.getSupplierName()));
-                    userDO.setPassword(getPassword(e.getSupplierName()));
+                    userDO.setUsername(getUserName());
+                    userDO.setPassword(getPassword());
                     userDO.setUpdatedTime(new Date());
                     userDO.setUpdator(activityParam.getCreator());
                     JbxtUserParam userParam = new JbxtUserParam();
@@ -450,8 +450,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                         .creator(activityParam.getCreator())
                         .updatedTime(new Date())
                         .updator(activityParam.getCreator())
-                        .username(getUserName(e.getSupplierName()))
-                        .password(getPassword(e.getSupplierName()))
+                        .username(getUserName())
+                        .password(getPassword())
                         .supplierName(e.getSupplierName())
                         .codeName(e.getCodeName())
                         .activityCode(activityParam.getCode())
@@ -471,15 +471,16 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * 获取账号
      * 账号格式：供应商名称拼音首字母大写取前两个字母 + 四位自增数字
      *
-     * @param supplierName 供应商名称
      * @return
      */
-    private String getUserName(String supplierName) {
-        String nameWords = SpellingUtil.chineseToFirstChar(supplierName).toLowerCase().substring(0,2);
-        String userName = nameWords + getShortCode(4);
+    private String getUserName() {
+        String  words = "abcdefghijklmnopqrstuvwxyz";
+        String userName = RandomStringUtils.random(2,words) + getShortCode(3)
+                + RandomStringUtils.random(1,words) ;
         List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         while (CollectionUtils.isNotEmpty(userDOList)) {
-            userName = nameWords + getShortCode(4);
+            userName = RandomStringUtils.random(2,words) + getShortCode(3)
+                    + RandomStringUtils.random(1,words) ;
             userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         }
         return userName;
@@ -489,15 +490,19 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * 获取供应商密码
      * 密码格式 ：供应商名称拼音首字母 + 两位随机数 + 供应商名称拼音首字母/2+1的字母 +  两位随机数 + 供应商名称拼音首字母最后两个字母
      *
-     * @param supplierName
      * @return
      */
-    private String getPassword(String supplierName) {
-        String nameWords = SpellingUtil.chineseToFirstChar(supplierName).toLowerCase();
-        int nameLenth = nameWords.length();
-        nameWords = nameWords.substring(0,1) +  getShortCode(2) +  nameWords.substring(nameLenth / 2, nameLenth / 2 + 1)
-                +  getShortCode(2) + nameWords.substring(nameLenth - 3, nameLenth - 1) ;
-        return nameWords ;
+    private String getPassword() {
+        String  words = "abcdefghijklmnopqrstuvwxyz";
+        String password = RandomStringUtils.random(2,words) + getShortCode(3)
+                + RandomStringUtils.random(2,words) + getShortCode(1);
+        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().password(password).build());
+        while (CollectionUtils.isNotEmpty(userDOList)) {
+            password =  RandomStringUtils.random(2,words) + getShortCode(3)
+                    + RandomStringUtils.random(2,words) + getShortCode(1);
+            userDOList = userDao.getUser(JbxtUserParam.builder().password(password).build());
+        }
+        return password;
     }
 
     /**
