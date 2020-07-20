@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.JsonUtils;
 import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
+import com.galaplat.comprehensive.bidding.annotations.AlisaField;
 import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
@@ -16,13 +17,16 @@ import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
 import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
+import com.galaplat.comprehensive.bidding.utils.Tuple;
 import com.galaplat.comprehensive.bidding.vos.ValidateResultVO;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.galaplat.baseplatform.file.upload.service.IImportSubMethodWithParamService;
+import org.galaplat.baseplatform.file.upload.service.impl.ExportExcelServiceImpl;
 import org.galaplat.baseplatform.file.upload.vos.ImportVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +35,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.constraints.NotNull;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -76,16 +85,19 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         if (null != activityDO) {
             for (Map<String, Object>  goodsMap: list) {
                 JbxtGoodsExcelParam goodsExcelParam = new JbxtGoodsExcelParam();
-                try {
-                    goodsExcelParam = JsonUtils.toObject(JsonUtils.toJson(goodsMap), JbxtGoodsExcelParam.class);
-                } catch (Exception e) {
-                    log.error(" 竞品导入格式化异常【{}】,【{}】",e.getMessage(), e );
-                }
-                ValidateResultVO resultVO =  BeanValidateUtils.validateEntity(goodsExcelParam, InsertParam.class);
-                if (resultVO.isHasErrors()) {
-                    goodsExcelParam.setErrorMsg(resultVO.getErrorMessage());
+                StringBuffer errorMsg = new StringBuffer("");
+                Tuple<String,JbxtGoodsExcelParam> paramTuple =  validateField(goodsExcelParam, goodsMap);
+                errorMsg.append(paramTuple._1);
+                if (StringUtils.isNotEmpty(errorMsg.toString())) {
+                    goodsExcelParam = paramTuple._2;
                     errorList.add(goodsExcelParam);
                 } else {
+                    try {
+                        goodsExcelParam = JsonUtils.toObject(JsonUtils.toJson(goodsMap), JbxtGoodsExcelParam.class);
+                    } catch (Exception e) {
+                        log.error(" 竞品导入格式化异常【{}】,【{}】",e.getMessage(), e );
+                    }
+
                     List<JbxtGoodsDO> goodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode)
                             .name(goodsExcelParam.getName()).code(goodsExcelParam.getCode()).build());
                     if (CollectionUtils.isEmpty(goodsDOList)) {
@@ -153,5 +165,102 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                     log.error(e.getMessage(),e);
                 }
                 return creatorName;
+    }
+
+
+    /**
+     * 校验导入数据,返回有异常的行
+     * @param param
+     * @param excelDataMap
+     * @return
+     */
+    private <T> Tuple<String,T> validateField(T param, Map<String, Object> excelDataMap) {
+        Field[] fileds = param.getClass().getDeclaredFields();
+        StringBuffer errorMsg = new StringBuffer("");
+        for (Field field : fileds) {
+            AlisaField  annotation = field.getAnnotation(AlisaField.class);
+            NotNull  notNull = field.getAnnotation(NotNull.class);
+            String  fieldName  = field.getName();
+            String  excelTitle;
+            StringBuffer  temErrorMsg  = new StringBuffer("") ;
+            if (annotation != null) {
+                excelTitle = annotation.value();
+                Class superclass = field.getType().getSuperclass();
+                Class clazz = field.getType();
+                String  fieldValue  = (String) excelDataMap.get(fieldName);
+                if (superclass  == Number.class
+                        || clazz == int.class
+                        || clazz == short.class
+                        || clazz == long.class
+                        || clazz == double.class
+                        || clazz == float.class ) {
+                    fieldValue = StringUtils.replace(fieldValue, ".","");
+                    if (!StringUtils.isNumeric(fieldValue)) {
+                        temErrorMsg.append(excelTitle).append("必须为数字！ ");
+                    }
+                }
+                if (notNull != null && StringUtils.isEmpty(fieldValue)) {
+                    temErrorMsg.append(notNull.message());
+                }
+                    try {
+                        String methodName = "set"+ capitalize(fieldName);
+                        Method method = param.getClass().getDeclaredMethod(methodName,clazz);
+                        if (null != method && StringUtils.isEmpty(temErrorMsg.toString())) {
+                            if (superclass == Number.class) {
+                                String valurStr = (String) excelDataMap.get(fieldName);
+                                method.invoke(param, getNumberValue(valurStr, clazz));
+                            } else {
+                                method.invoke(param, excelDataMap.get(fieldName));
+                            }
+                        }
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        log.error("导入校验异常{}{}",e.getMessage(),e );
+                    }
+                errorMsg.append(temErrorMsg);
+            }// if
+        }
+
+        if (StringUtils.isNotEmpty(errorMsg.toString())) {
+            try {
+                Method method = param.getClass().getDeclaredMethod("setErrorMsg",String.class);
+                    method.invoke(param,errorMsg.toString());
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+        return new Tuple<>(errorMsg.toString(), param);
+    }
+
+    private String capitalize(String str) {
+        int strLen;
+        if (str != null && (strLen = str.length()) != 0) {
+            char firstChar = str.charAt(0);
+            char newChar = Character.toTitleCase(firstChar);
+            if (firstChar == newChar) {
+                return str;
+            } else {
+                char[] newChars = new char[strLen];
+                newChars[0] = newChar;
+                str.getChars(1, strLen, newChars, 1);
+                return String.valueOf(newChars);
+            }
+        } else {
+            return str;
+        }
+    }
+
+    private Object getNumberValue(String value, Class clazz) {
+        if (StringUtils.isNotEmpty(value) && clazz == BigDecimal.class) {
+            return new BigDecimal(value);
+        } else if (StringUtils.isNotEmpty(value) && clazz == Integer.class || clazz == int.class) {
+            return new Integer(value);
+        } else if (StringUtils.isNotEmpty(value) && clazz == Double.class || clazz == double.class) {
+            return new Double(value);
+        } else if (StringUtils.isNotEmpty(value) && clazz == Long.class || clazz == long.class) {
+            return new Long(value);
+        } else if (StringUtils.isNotEmpty(value) && clazz == Short.class || clazz == short.class) {
+            return new Short(value);
+        }
+        return null;
     }
 }
