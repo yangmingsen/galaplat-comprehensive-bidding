@@ -217,14 +217,14 @@ public interface JbxtUserDOMapper {
             "<if test='param.supplierName != null' > " ,
             " and supplier_name = #{param.supplierName,jdbcType=VARCHAR}",
             "</if>",
-            "<if test='param.supplierName != null' > " ,
-            " and supplier_name = #{param.supplierName,jdbcType=VARCHAR}",
-            "</if>",
             "<if test='param.codeName != null' > " ,
             " and code_name = #{param.codeName,jdbcType=VARCHAR}",
             "</if>",
             "<if test='param.activityCode != null' > " ,
             " and activity_code = #{param.activityCode,jdbcType=VARCHAR}",
+            "</if>",
+            "<if test='param.password != null' > " ,
+            " and password = #{param.password,jdbcType=VARCHAR}",
             "</if>",
             "</script>"
     })
