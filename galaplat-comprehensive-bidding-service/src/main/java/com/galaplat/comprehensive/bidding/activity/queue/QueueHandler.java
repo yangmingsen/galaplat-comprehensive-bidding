@@ -79,6 +79,10 @@ public class QueueHandler extends Thread {
                     supplierOutHandler.problem(takeQueuemsg.getType(), takeQueuemsg);
                     break;
 
+                case 216: //处理当本场活动结束，通知供应商端退出登录
+                    supplierOutHandler.problem(takeQueuemsg.getType(), takeQueuemsg);
+                    break;
+
                 case 300: //当某个管理端中途加入（或掉线从新加入） 同步数据给管理端
                     adminOutHandler.problem(takeQueuemsg.getType(),takeQueuemsg);
                     break;

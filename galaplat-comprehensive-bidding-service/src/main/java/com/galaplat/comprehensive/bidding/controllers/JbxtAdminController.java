@@ -179,11 +179,34 @@ public class JbxtAdminController extends BaseController {
         JbxtActivityDO tActivity = new JbxtActivityDO();
         tActivity.setCode(activityCode);
         tActivity.setStatus(4);
-        iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
-        closeLastActivity(activityCode);
+        boolean updateActivityStatus = false;
+        try {
+            iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
+            updateActivityStatus = true;
+        } catch (Exception e) {
+            LOGGER.info("switchActivityGoods(ERROR): 更新活动("+activityCode+")结束结束失败");
+        }
+
+        if (updateActivityStatus) {
+            closeLastActivity(activityCode);
+            //通知所有供应商端 退出登录
+            notify216Event(activityCode);
+        }
+
         return new MyResult(false, "所有竞品已结束", map);
     }
 
+    private void notify216Event(String activityCode) {
+        Map<String, String> map216 = new HashMap();
+        map216.put("activityCode", activityCode);
+        pushQueue.offer(new QueueMessage(216, map216));
+    }
+
+    /***
+     * 通知所有供应商端 更新下一个竞品活动
+     * @param activityCode
+     * @param goodsId
+     */
     private void notify214Event(String activityCode, Integer goodsId) {
         Map<String, String> map214 = new HashMap();
 

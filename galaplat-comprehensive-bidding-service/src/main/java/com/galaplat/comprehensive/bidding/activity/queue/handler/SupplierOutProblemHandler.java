@@ -34,8 +34,18 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
             case 215: ////处理当管理端点击暂停或者继续后，通知供应商端暂停某个正在进行的竞品
                 handler215Problem(queuemsg);
                 break;
+            case 216: //处理当本场活动结束，通知供应商端退出登录
+                handler216Problem(queuemsg);
+                break;
         }
     }
+
+    private void handler216Problem(QueueMessage queuemsg) {
+        Message message = new Message(216, queuemsg.getData());
+        String activityCode = queuemsg.getData().get("activityCode");
+        notifyAllSupplier(message, activityCode);
+    }
+
 
     private void handler215Problem(QueueMessage queuemsg) {
         Message message = new Message(215, queuemsg.getData());
@@ -50,7 +60,12 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     }
 
 
-
+    /***
+     * 推送排名信息到指定供应商
+     * @param activityCode
+     * @param goodsId
+     * @param userCode
+     */
     private void handlerSendOneSupplier(String activityCode, Integer goodsId, String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode);
