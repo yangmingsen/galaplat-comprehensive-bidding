@@ -155,6 +155,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         } else {
             activityDao.updateBidActivity(activityDO);
         }
+        if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
+            userDao.deleteUser(JbxtUserParam.builder().activityCode(activityCode).build());
+        }
         activityParam.setCode(activityCode);
         batchInsertOrUpdate(activityParam, supplierAccountParamList, bidActivityCode);
         return activityCode;
