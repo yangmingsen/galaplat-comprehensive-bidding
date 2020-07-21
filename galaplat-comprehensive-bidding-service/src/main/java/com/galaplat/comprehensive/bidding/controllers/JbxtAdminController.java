@@ -34,7 +34,7 @@ public class JbxtAdminController extends BaseController {
     Logger LOGGER = LoggerFactory.getLogger(JbxtAdminController.class);
 
     @Autowired
-    private ActivityThreadManager activityMap;
+    private ActivityThreadManager activityThreadManager;
 
     @Autowired
     private IJbxtGoodsService iJbxtGoodsService;
@@ -92,6 +92,8 @@ public class JbxtAdminController extends BaseController {
                         LOGGER.info(info);
                         return new MyResult(false, info);
                     }
+
+                    activityThreadManager.get(activityCode).setStatus(3);
                     return new MyResult(true, "更新成功");
                 }
             } else {
@@ -131,7 +133,7 @@ public class JbxtAdminController extends BaseController {
         if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
         if (status == null) return new MyResult(false, "status不能为null");
 
-        final ActivityThread currentActivity = activityMap.get(activityCode);
+        final ActivityThread currentActivity = activityThreadManager.get(activityCode);
         MyResult myResult = null;
         if (currentActivity != null) {
             myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
@@ -275,7 +277,7 @@ public class JbxtAdminController extends BaseController {
     }
 
     private void closeLastActivityThread(String activityCode) {
-        final ActivityThread lastActivityThread = activityMap.get(activityCode);
+        final ActivityThread lastActivityThread = activityThreadManager.get(activityCode);
         if (lastActivityThread != null) { //停止上一个goods的活动
             lastActivityThread.setStatus(1);
             lastActivityThread.setRemainingTime(0);
@@ -295,7 +297,7 @@ public class JbxtAdminController extends BaseController {
         try {
             closeLastActivityThread(activityCode);
             final ActivityThread newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
-            activityMap.put(activityCode, newActivityThread);
+            activityThreadManager.put(activityCode, newActivityThread);
             newActivityThread.start();
 
             LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityThread.getCurrentGoodsId() + ")活动成功");
