@@ -87,5 +87,10 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 		return mapper.deleteUser(userParam);
 	}
 
+	@Override
+	public int batchDeleteUser(List<String> userCodes, String activityCode) {
+		return mapper.batchDeleteUser(userCodes, activityCode);
+	}
+
 
 }

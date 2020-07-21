@@ -108,14 +108,24 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)
-    public String addAndUpdate(JbxtActivityParam activityParam, String type, String bidActivityCode) throws BaseException {
+    public String addAndUpdate(JbxtActivityParam activityParam, String type, String bidActivityCode) throws Exception {
         String activityCode = bidActivityCode;
         List<SupplierAccountParam> supplierAccountParamList = activityParam.getSupplierAccountParams();
+        // 校验代号重复
         Map<String, List<SupplierAccountParam>> supplierAccountParamMap = supplierAccountParamList.stream().collect(Collectors.groupingBy(o -> o.getCodeName()));
         for (Map.Entry<String, List<SupplierAccountParam>> m : supplierAccountParamMap.entrySet()) {
             List<SupplierAccountParam> paramList = m.getValue();
             if (paramList.size() > 1) {
-                throw new BaseException(m.getKey() + "代号重复,请重新填写!", m.getKey() + "代号重复，请重新填写!");
+                throw new BaseException("【" + m.getKey() + "】代号重复,请重新填写!", "【" + m.getKey() + "】代号重复,请重新填写!");
+            }
+        }
+
+        // 校验供应商重复
+        Map<String, List<SupplierAccountParam>> supplierNameMap = supplierAccountParamList.stream().collect(Collectors.groupingBy(o -> o.getSupplierName()));
+        for (Map.Entry<String, List<SupplierAccountParam>> m : supplierNameMap.entrySet()) {
+            List<SupplierAccountParam> paramList = m.getValue();
+            if (paramList.size() > 1) {
+                throw new BaseException("供应商【" + m.getKey() + "】重复,请重新填写!","供应商【" + m.getKey() + "】重复,请重新填写!");
             }
         }
         // 校验为空
@@ -134,8 +144,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             activityCode = worker.nextId();
         } else if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
             JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
-            if (null != activityDO && activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
-                throw new BaseException("该竞标活动已结束不允许编辑！", "该竞标活动已结束不允许编辑！");
+            if (null != activityDO) {
+                activityParam.setStatus(activityDO.getStatus());
+                if (activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
+                    throw new BaseException("该竞标活动已结束不允许编辑！", "该竞标活动已结束不允许编辑！");
+                }
             }
         }
         JbxtActivityDO activityDO = JbxtActivityDO.builder()
@@ -155,11 +168,13 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         } else {
             activityDao.updateBidActivity(activityDO);
         }
-        if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
-            userDao.deleteUser(JbxtUserParam.builder().activityCode(activityCode).build());
-        }
+        // 保存或更新
         activityParam.setCode(activityCode);
         batchInsertOrUpdate(activityParam, supplierAccountParamList, bidActivityCode);
+        if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
+            // 删除多余的供应商
+            batchDeleteUser(activityParam, supplierAccountParamList, bidActivityCode);
+        }
         return activityCode;
     }
 
@@ -424,26 +439,16 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @return
      */
     private int batchInsertOrUpdate(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) {
-        List<JbxtUserParam> userParamList = Lists.newArrayList();
+        List<JbxtUserParam> saveUserParamList = Lists.newArrayList();
         supplierAccountParamList.forEach(e -> {
-            JbxtUserDO userDO = null;
+            List<JbxtUserDO> userDOList = null;
+            // 修改的的时候
             if (StringUtils.isNotEmpty(bidActivityCode)) {
-                List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
-                        .username(e.getSupplierAccount()).activityCode(bidActivityCode).build());
-                userDO = CollectionUtils.isNotEmpty(userDOList) ? userDOList.get(0) : null;
+                 userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
+                        .supplierName(e.getSupplierName()).activityCode(bidActivityCode).build());
             }
-            if (null != userDO) {
-                if (!StringUtils.equals(userDO.getSupplierName(), e.getSupplierName())) {
-                    userDO.setSupplierName(e.getSupplierName());
-                    userDO.setUsername(getUserName());
-                    userDO.setPassword(getPassword());
-                    userDO.setUpdatedTime(new Date());
-                    userDO.setUpdator(activityParam.getCreator());
-                    JbxtUserParam userParam = new JbxtUserParam();
-                    CopyUtil.copyPropertiesExceptEmpty(userDO, userParam);
-                    userParamList.add(userParam);
-                }
-            } else {
+            // 新增时userDOList必为空，修改时 userDOList可能为空
+            if(CollectionUtils.isEmpty(userDOList)) {
                 JbxtUserParam userParam = JbxtUserParam.builder()
                         .code(worker.nextId())
                         .admin("0")
@@ -459,16 +464,58 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                         .codeName(e.getCodeName())
                         .activityCode(activityParam.getCode())
                         .build();
-                userParamList.add(userParam);
+                saveUserParamList.add(userParam);
             }
         });
-        int count = 0;
-        if (CollectionUtils.isNotEmpty(userParamList)) {
-            count = userDao.btachInsertAndUpdate(userParamList);
+
+        int insertCount = 0;
+        if (CollectionUtils.isNotEmpty(saveUserParamList)) {
+            insertCount = userDao.btachInsertAndUpdate(saveUserParamList);
         }
-        return count;
+        return insertCount;
     }
 
+    /**
+     * 批量删除供应商
+     * @param activityParam 竞标活动
+     * @param supplierAccountParamList 供应商信息
+     * @param bidActivityCode 竞标活动编码
+     * @return
+     * @throws Exception
+     */
+    private int batchDeleteUser(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) throws  Exception {
+        List<String> deleteUserList = Lists.newArrayList();
+        List<JbxtUserDO> currentUserDOList = null;
+        currentUserDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+        currentUserDOList.stream().forEach(e->{
+            int time = 0;
+            boolean exists = false;
+            for (SupplierAccountParam accountParam : supplierAccountParamList) {
+                time ++ ;
+                if (StringUtils.equals(e.getSupplierName(), accountParam.getSupplierName())
+                        && StringUtils.equals(e.getCodeName(), accountParam.getCodeName())) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (time == supplierAccountParamList.size() && !exists) {
+                deleteUserList.add(e.getCode());
+            }
+        });
+
+        int deleteCount = 0;
+
+        if ( (activityParam.getStatus().equals(ActivityStatusEnum.BIDING.getCode())
+                || activityParam.getStatus().equals(ActivityStatusEnum.FINISH.getCode()))
+        && CollectionUtils.isNotEmpty(deleteUserList)) {
+            throw  new BaseException("竞标中或者竞标结束的活动不允许删减供应商！","竞标中或者竞标结束的活动不允许删减供应商！");
+        }
+
+        if (CollectionUtils.isNotEmpty(deleteUserList)) {
+            deleteCount = userDao.batchDeleteUser(deleteUserList, bidActivityCode);
+        }
+        return deleteCount;
+    }
 
     /**
      * 获取账号
