@@ -258,10 +258,10 @@ public class ActivityThread extends Thread {
             Thread.sleep(1*1000);
             remainingTime --;
         }
-//        if (isfinallyGoods()) {
-//            endTheCurrentGoodsActivity();
-//            autoCloseCurrentActivity();
-//        }
+        if (isfinallyGoods()) {
+            endTheCurrentGoodsActivity();
+            autoCloseCurrentActivity();
+        }
     }
 
     /***
