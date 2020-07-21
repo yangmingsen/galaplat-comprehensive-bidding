@@ -84,7 +84,7 @@ public class JbxtAdminController extends BaseController {
             if (delOk) {
                 if (remainingTime < 0) {
                     final String gid = goodsId.toString();
-                    final int initTime = activityThread.getInitTime();
+                    final int initTime = activityThread.getInitTime() / 60;
                     final boolean startOk = this.startActivityThread(activityCode, gid, initTime);
 
                     if (!startOk) {

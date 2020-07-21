@@ -257,7 +257,10 @@ public class ActivityThread extends Thread {
             Thread.sleep(1*1000);
             remainingTime --;
         }
-       // this.endTheCurrentGoodsActivity();
+//        if (isfinallyGoods()) {
+//            endTheCurrentGoodsActivity();
+//            autoCloseCurrentActivity();
+//        }
     }
 
     /***
@@ -300,7 +303,7 @@ public class ActivityThread extends Thread {
             } catch (Exception e) {
                 LOGGER.info("endTheCurrentGoodsActivity(ERROR): "+e.getMessage());
             }
-            this.status = 4;
+//            this.status = 4;
         }
     }
 
