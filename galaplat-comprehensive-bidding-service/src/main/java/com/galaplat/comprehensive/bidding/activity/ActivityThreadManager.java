@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ActivityThreadManager {
-    private final Map<String, ActivityThread> map = new HashMap<>();; //activityCode => ActivityThread
+    private final Map<String, ActivityThread> map = new HashMap<>(); //activityCode => ActivityThread
 
     /***
      * 建立活动与活动线程的关联

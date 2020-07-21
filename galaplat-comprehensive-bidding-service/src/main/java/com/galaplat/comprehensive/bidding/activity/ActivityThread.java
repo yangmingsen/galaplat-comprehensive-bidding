@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
@@ -37,7 +37,7 @@ public class ActivityThread extends Thread {
     private final IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
     private final ReentrantLock lock =  new ReentrantLock();
     private final Condition continueRun = lock.newCondition();
-    private final PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
+    private final MessageQueue messageQueue = SpringUtil.getBean(MessageQueue.class);
     private int initTime; //秒
     private int status;//1 进行 2暂停  3//重置 4 结束
     private int remainingTime;  //秒
@@ -196,7 +196,7 @@ public class ActivityThread extends Thread {
                 map.put("goodsId", this.currentGoodsId);
 
                 final QueueMessage queueMessage = new QueueMessage(212, map);
-                pushQueue.offer(queueMessage);
+                messageQueue.offer(queueMessage);
 
                 this.status = 1;
                 this.remainingTime = this.initTime;
@@ -210,7 +210,7 @@ public class ActivityThread extends Thread {
             map.put("status", "1");
 
             final QueueMessage queueMessage = new QueueMessage(215, map);
-            pushQueue.offer(queueMessage);
+            messageQueue.offer(queueMessage);
         }
     }
 
@@ -240,7 +240,7 @@ public class ActivityThread extends Thread {
                 map.put("goodsId", this.currentGoodsId);
                 map.put("status", "3");
                 QueueMessage queueMessage = new QueueMessage(215, map);
-                pushQueue.offer(queueMessage);
+                messageQueue.offer(queueMessage);
 
                 this.whenAcitvityPause();
 
@@ -258,10 +258,10 @@ public class ActivityThread extends Thread {
             Thread.sleep(1*1000);
             remainingTime --;
         }
-        if (isfinallyGoods()) {
-            endTheCurrentGoodsActivity();
-            autoCloseCurrentActivity();
-        }
+//        if (isfinallyGoods()) {
+//            endTheCurrentGoodsActivity();
+//            autoCloseCurrentActivity();
+//        }
     }
 
     /***
@@ -357,7 +357,7 @@ public class ActivityThread extends Thread {
     private void notify216Event(String activityCode) {
         final Map<String, String> map216 = new HashMap();
         map216.put("activityCode", activityCode);
-        pushQueue.offer(new QueueMessage(216, map216));
+        messageQueue.offer(new QueueMessage(216, map216));
     }
 
 
@@ -371,7 +371,7 @@ public class ActivityThread extends Thread {
         supplierInfo.put("activityCode", this.currentActivityCode);
         //同步数据 给 供应商
         final QueueMessage queueMessage = new QueueMessage(200,supplierInfo);
-        pushQueue.offer(queueMessage);
+        messageQueue.offer(queueMessage);
 
     }
 
@@ -409,7 +409,7 @@ public class ActivityThread extends Thread {
         map.put("goodsId", this.currentGoodsId);
 
         final QueueMessage queueMessage = new QueueMessage(111, map);
-        pushQueue.offer(queueMessage);
+        messageQueue.offer(queueMessage);
     }
 
 }

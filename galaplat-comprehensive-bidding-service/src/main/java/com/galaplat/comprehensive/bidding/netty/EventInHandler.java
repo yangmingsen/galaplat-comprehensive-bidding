@@ -3,7 +3,7 @@ package com.galaplat.comprehensive.bidding.netty;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
@@ -26,13 +26,13 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
+public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     // 用来保存所有的客户端连接
     private static ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
-    private final Logger LOGGER = LoggerFactory.getLogger(BidHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(EventInHandler.class);
 
     private final AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private final UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
@@ -40,7 +40,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
     private final IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
     private final IJbxtActivityService iJbxtActivityService = SpringUtil.getBean(IJbxtActivityService.class);
     private final ActivityThreadManager activityManager = SpringUtil.getBean(ActivityThreadManager.class);
-    private final PushQueue pushQueue = SpringUtil.getBean(PushQueue.class);
+    private final MessageQueue messageQueue = SpringUtil.getBean(MessageQueue.class);
 
     private boolean eventInterceptor(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
         return false;
@@ -79,7 +79,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                         final Map<String, String> map216 = new HashMap();
                         map216.put("activityCode", focusActivity);
                         map216.put("userCode", userCode);
-                        pushQueue.offer(new QueueMessage(216, map216));
+                        messageQueue.offer(new QueueMessage(216, map216));
 
                         return; //返回不同步数据
                     }
@@ -88,7 +88,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                     if (currentActivity != null) { //如果当前供应商聚焦的竞品活动存在 则同步数据
                         //同步数据
                         final QueueMessage queueMessage = new QueueMessage(211,message.getData());
-                        pushQueue.offer(queueMessage);
+                        messageQueue.offer(queueMessage);
                     }
 
                 } else { //断开该链接
@@ -130,7 +130,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
                 message.getData().put("adminCode", adminCode);
 
                 final QueueMessage queueMessage = new QueueMessage(300, message.getData());
-                pushQueue.offer(queueMessage);
+                messageQueue.offer(queueMessage);
             }
         }
 
@@ -185,7 +185,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
 
         //
         final QueueMessage queueMessage = new QueueMessage(213,message.getData());
-        pushQueue.offer(queueMessage);
+        messageQueue.offer(queueMessage);
     }
 
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
@@ -204,7 +204,7 @@ public class BidHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> 
         if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
             //同步数据
             QueueMessage queueMessage = new QueueMessage(300, map);
-            pushQueue.offer(queueMessage);
+            messageQueue.offer(queueMessage);
         }
 
     }

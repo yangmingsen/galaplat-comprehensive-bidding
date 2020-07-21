@@ -7,7 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class PushQueue {
+public class MessageQueue {
     private final BlockingQueue<QueueMessage> blockingQueue = new ArrayBlockingQueue<>(1000);;
 
     /***

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.AdminInfo;
-import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
@@ -18,7 +18,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
 
     protected final UserChannelMap userChannelMap;
     protected final AdminChannelMap adminChannel;
-    protected final PushQueue pushQueue;
+    protected final MessageQueue messageQueue;
     protected final IJbxtGoodsService iJbxtGoodsService; //竞品服务
     protected final ActivityThreadManager activityManager;
     protected final IJbxtUserService iJbxtUserService;
@@ -27,7 +27,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     public BaseProblemHandler() {
         this.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
         this.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
-        this.pushQueue = SpringUtil.getBean(PushQueue.class);
+        this.messageQueue = SpringUtil.getBean(MessageQueue.class);
         this.iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
         this.activityManager = SpringUtil.getBean(ActivityThreadManager.class);
         this.iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);

@@ -5,7 +5,7 @@ import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 
 public class QueueHandlerThread extends Thread {
 
-    private final PushQueue pushQueue;
+    private final MessageQueue messageQueue;
     private final ProblemHandler supplierOutHandler;
     private final ProblemHandler supplierInHandler;
     private final ProblemHandler adminOutHandler;
@@ -26,7 +26,7 @@ public class QueueHandlerThread extends Thread {
     }
 
     private QueueHandlerThread() {
-        this.pushQueue = SpringUtil.getBean(PushQueue.class);
+        this.messageQueue = SpringUtil.getBean(MessageQueue.class);
         this.supplierOutHandler = new SupplierOutProblemHandler();
         this.supplierInHandler = new SupplierInProblemHandler();
         this.adminOutHandler = new AdminOutProblemHandler();
@@ -36,7 +36,7 @@ public class QueueHandlerThread extends Thread {
 
     public void run() {
         while (true) {
-            QueueMessage takeQueuemsg = pushQueue.take();
+            QueueMessage takeQueuemsg = messageQueue.take();
 
             //System.out.println("QueueMessage: "+JSON.toJSONString(takeQueuemsg));
 
@@ -47,6 +47,7 @@ public class QueueHandlerThread extends Thread {
             //{type: 213, data: {bidPrice: 32.345, goodsId: 234, userCode: "235235345", activityCode: "s34534534"}}
             //{type: 214, data: {activityCode: "s34534534", goodsId: 234235}}
             //{type: 215, data: {activityCode: "s34534534", goodsId: 234235, status: 3 or 1 }}
+            //{type: 216, data: {activityCode: "s34534534"}} or {type: 216, data: {activityCode: "s34534534", userCode: 234235}}
             //{type: 300, data: {adminCode: "235235345", activityCode: "s34534534"}}
             //{type: 301, data: { activityCode: 23423345, bidTime: 15:32, bid: 2.345, supplierCode: 234903945834, CodeName: '小红', supplierName: '小米科技电子有限公司'}}
             //{type: 302, data: {activityCode: "s34534534", goodsId: 234235, adminCode: 345dfg}}

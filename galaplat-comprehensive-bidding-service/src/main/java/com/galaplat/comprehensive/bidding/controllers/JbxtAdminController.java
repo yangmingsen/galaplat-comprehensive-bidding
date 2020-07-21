@@ -4,7 +4,7 @@ import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
@@ -46,7 +46,7 @@ public class JbxtAdminController extends BaseController {
     private IJbxtBiddingService iJbxtBiddingService;
 
     @Autowired
-    private PushQueue pushQueue;
+    private MessageQueue messageQueue;
 
 
     /***
@@ -148,7 +148,7 @@ public class JbxtAdminController extends BaseController {
         if (activityCode != null && (!activityCode.equals(""))) {
             return new MyResult(true, "获取data成功", jbxtgoodsService.findAll(activityCode));
         } else {
-            return new MyResult(false, "出错: activityCode不能为空哦(*￣︶￣)", null);
+            return new MyResult(false, "出错: activityCode不能为空哦(*￣︶￣)");
         }
     }
 
@@ -258,7 +258,7 @@ public class JbxtAdminController extends BaseController {
     private void notify216Event(String activityCode) {
         final Map<String, String> map216 = new HashMap();
         map216.put("activityCode", activityCode);
-        pushQueue.offer(new QueueMessage(216, map216));
+        messageQueue.offer(new QueueMessage(216, map216));
     }
 
     /***
@@ -271,7 +271,7 @@ public class JbxtAdminController extends BaseController {
 
         map214.put("activityCode", activityCode);
         map214.put("goodsId", goodsId.toString());
-        pushQueue.offer(new QueueMessage(214, map214));
+        messageQueue.offer(new QueueMessage(214, map214));
     }
 
     private void closeLastActivityThread(String activityCode) {
