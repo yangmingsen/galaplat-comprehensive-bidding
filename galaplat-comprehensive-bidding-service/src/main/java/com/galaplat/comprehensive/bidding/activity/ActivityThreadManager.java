@@ -3,13 +3,14 @@ package com.galaplat.comprehensive.bidding.activity;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ActivityMap {
-    private final Map<String, ActivityThread> map; //activityCode => ActivityThread
+public class ActivityThreadManager {
+    private final Map<String, ActivityThread> map = new HashMap<>();; //activityCode => ActivityThread
 
-    public ActivityMap() {
-        map = new HashMap<>();
-    }
-
+    /***
+     * 建立活动与活动线程的关联
+     * @param key
+     * @param value
+     */
     public void put(String key, ActivityThread value) {
         map.put(key, value);
     }

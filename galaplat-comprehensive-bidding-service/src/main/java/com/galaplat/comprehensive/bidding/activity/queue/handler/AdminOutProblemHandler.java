@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class AdminOutProblemHandler extends BaseProblemHandler {
 
-    private Logger LOGGER = LoggerFactory.getLogger(AdminOutProblemHandler.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(AdminOutProblemHandler.class);
 
     @Override
     public void handlerProblem(int type, QueueMessage queuemsg) {
@@ -48,53 +48,45 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
     private void handler300Problem(QueueMessage takeQueuemsg) {
 
-        String activityCode = takeQueuemsg.getData().get("activityCode");
-        String adminCode = takeQueuemsg.getData().get("adminCode");
-        Channel caChannel = adminChannel.get(adminCode).getChannel();
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final String adminCode = takeQueuemsg.getData().get("adminCode");
+        final Channel caChannel = adminChannel.get(adminCode).getChannel();
 
-        String goodsIdStr = takeQueuemsg.getData().get("goodsId");
-        Integer goodsId = null;
+        final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
+        final Integer goodsId ;
         if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
-            ActivityThread currentActivity = activityMap.get(activityCode);
+            ActivityThread currentActivity = activityManager.get(activityCode);
             goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId());
         } else { //不为null 意味着302问题
             try {
                 goodsId = Integer.parseInt(goodsIdStr);
             } catch (NumberFormatException e) {
-                e.printStackTrace();
                 LOGGER.info("handler300Problem(ERROR): "+e.getMessage());
                 return;
             }
 
         }
-
-        List<JbxtUserDVO> userLists = iJbxtUserService.findAllByActivityCode(activityCode);
-
-
-        List<Res300t1> t1s = new ArrayList<>();
-        for (int i = 0; i < userLists.size(); i++) {
-            JbxtUserDVO user1 = userLists.get(i);
-
-            Res300t1 res300t1 = new Res300t1();
+        final List<JbxtUserDVO> userLists = iJbxtUserService.findAllByActivityCode(activityCode);
+        final List<Res300t1> t1s = new ArrayList<>();
+        for (final JbxtUserDVO user1 : userLists) {
+            final Res300t1 res300t1 = new Res300t1();
             res300t1.setSupplierName(user1.getSupplierName());
             res300t1.setCodeName(user1.getCodeName());
             res300t1.setSupplierCode(user1.getCode());
 
-            JbxtBiddingDO cUserMinBid = iJbxtBiddingService.selectMinBidTableBy(user1.getCode(), goodsId, activityCode);
+            final JbxtBiddingDO cUserMinBid = iJbxtBiddingService.selectMinBidTableBy(user1.getCode(), goodsId, activityCode);
             if (cUserMinBid != null) {
                 res300t1.setMinBid(cUserMinBid.getBid());
             } else {
                 res300t1.setMinBid(new BigDecimal("0.000"));
             }
 
-            List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
-            List<Res300t2> t2s = new ArrayList<>();
+            final List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
+            final List<Res300t2> t2s = new ArrayList<>();
             if (cUserBidHistory.size() > 0) {
 
-                for (int j = 0; j <cUserBidHistory.size(); j++) {
-                    JbxtBiddingDVO ubid1 = cUserBidHistory.get(j);
-
-                    Res300t2 res300t2 = new Res300t2();
+                for (final JbxtBiddingDVO ubid1 : cUserBidHistory) {
+                    final Res300t2 res300t2 = new Res300t2();
                     res300t2.setBid(ubid1.getBid());
                     res300t2.setBidTime(ubid1.getBidTime());
 
@@ -105,10 +97,8 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
             t1s.add(res300t1);
         }
-
-        List<Res300t1> t1sCollect = t1s.stream().sorted(Comparator.comparing(Res300t1::getMinBid)).collect(Collectors.toList());
-
-        Res300 res300 = new Res300();
+        final List<Res300t1> t1sCollect = t1s.stream().sorted(Comparator.comparing(Res300t1::getMinBid)).collect(Collectors.toList());
+        final Res300 res300 = new Res300();
         res300.setGoodsId(goodsId);
 
         BigDecimal minPrice = new BigDecimal("0.000");
@@ -124,17 +114,17 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
 
         //处理返回数据
-        Message tmsg = new Message(300, res300);
+        final Message tmsg = new Message(300, res300);
         caChannel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(tmsg)));
 
         //处理当管理端点击暂停后无故刷新控制台界面 时间同步问题
         //传递当前活动剩余时长
-        ActivityThread currentActivity = activityMap.get(activityCode);
+        final ActivityThread currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
-                Map<String, String> t_map = new HashMap<>();
+                final Map<String, String> t_map = new HashMap<>();
                 t_map.put("remainingTime",currentActivity.getRemainingTimeString());
-                Message remainingTimeMessage = new Message(100, t_map);
+                final Message remainingTimeMessage = new Message(100, t_map);
                 notifyOptionAdmin(remainingTimeMessage ,activityCode, adminCode);
             }
         }
@@ -143,10 +133,10 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
 
     private void handler301Problem( QueueMessage takeQueuemsg) {
-        String activityCode = takeQueuemsg.getData().get("activityCode");
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
 
         //推数据给管理端
-        Message message = new Message(301, takeQueuemsg.getData());
+        final Message message = new Message(301, takeQueuemsg.getData());
         notifyAllAdmin(message,activityCode);
     }
 

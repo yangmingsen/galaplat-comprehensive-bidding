@@ -30,12 +30,12 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
 
     private void handler213Problem(QueueMessage takeQueuemsg) {
-        String bidPriceStr = takeQueuemsg.getData().get("bidPrice");
-        String userCode = takeQueuemsg.getData().get("userCode");
-        String activityCode = takeQueuemsg.getData().get("activityCode");
-        String goodsIdStr = takeQueuemsg.getData().get("goodsId");
+        final String bidPriceStr = takeQueuemsg.getData().get("bidPrice");
+        final String userCode = takeQueuemsg.getData().get("userCode");
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         //处理提交是否过时问题(V2.0添加)
-        ActivityThread currentActivity = activityMap.get(activityCode);
+        final ActivityThread currentActivity = activityManager.get(activityCode);
         if (currentActivity == null) {
             LOGGER.info("handler213Problem: 当前活动不存在");return;
         } else {
@@ -50,9 +50,9 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
 
         // business start
-        Integer goodsId = Integer.parseInt(goodsIdStr);
-        BigDecimal bid = new BigDecimal(bidPriceStr);
-        JbxtBiddingDO curBidInfo =
+        final Integer goodsId = Integer.parseInt(goodsIdStr);
+        final BigDecimal bid = new BigDecimal(bidPriceStr);
+        final JbxtBiddingDO curBidInfo =
                 iJbxtBiddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
         if (curBidInfo != null) {
@@ -70,8 +70,8 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
     private void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
         try {
-            ActivityThread currentActivity = activityMap.get(activityCode);
-            String bidTime = currentActivity.getRemainingTimeString();
+            final ActivityThread currentActivity = activityManager.get(activityCode);
+            final String bidTime = currentActivity.getRemainingTimeString();
 
             JbxtBiddingVO jbv = new JbxtBiddingVO();
             jbv.setBid(bid);
@@ -86,9 +86,9 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
             if (status == 1) { //插入
                 iJbxtBiddingService.insertMinBidTableSelective(jbv);
             } else if (status == 2) { //更新
-                JbxtBiddingDO minbidE = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                final JbxtBiddingDO minbidE = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
 
-                JbxtBiddingVO var1 = new JbxtBiddingVO();
+                final JbxtBiddingVO var1 = new JbxtBiddingVO();
                 var1.setCode(minbidE.getCode());
                 var1.setBid(bid);
                 var1.setUpdatedTime(new Date());
@@ -96,25 +96,25 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(var1);
             }
             //
-            Map<String, String> map301 = new HashMap();
+            final Map<String, String> map301 = new HashMap();
             map301.put("bidTime",bidTime);
             map301.put("bid",bid.toString());
             map301.put("activityCode", activityCode);
-            JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, activityCode);
+            final JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, activityCode);
             map301.put("supplierCode",jbxtUserDO.getCode());
             map301.put("CodeName", jbxtUserDO.getCodeName());
             map301.put("supplierName", jbxtUserDO.getSupplierName());
             pushQueue.offer(new QueueMessage(301, map301));
 
             //
-            Map<String, String> map200 = new HashMap();
+            final Map<String, String> map200 = new HashMap();
             map200.put("activityCode", activityCode);
             map200.put("goodsId", goodsId.toString());
             pushQueue.offer(new QueueMessage(200,map200));
 
             //检查是否更新top提示
-            List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
-            activityMap.get(activityCode).updateTopMinBid(theTopBids);
+            final List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
+            activityManager.get(activityCode).updateTopMinBid(theTopBids);
 
         }catch (Exception e) {
             e.printStackTrace();

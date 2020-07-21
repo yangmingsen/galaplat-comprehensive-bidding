@@ -1,9 +1,9 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.ActivityMap;
-import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
-import com.galaplat.comprehensive.bidding.activity.AdminInfo;
+import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
+import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
+import com.galaplat.comprehensive.bidding.netty.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
@@ -16,21 +16,20 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 public abstract class BaseProblemHandler implements ProblemHandler {
 
-
-    protected UserChannelMap userChannelMap;
-    protected AdminChannelMap adminChannel;
-    protected PushQueue pushQueue;
-    protected IJbxtGoodsService iJbxtGoodsService; //竞品服务
-    protected ActivityMap activityMap;
-    protected IJbxtUserService iJbxtUserService;
-    protected IJbxtBiddingService iJbxtBiddingService;
+    protected final UserChannelMap userChannelMap;
+    protected final AdminChannelMap adminChannel;
+    protected final PushQueue pushQueue;
+    protected final IJbxtGoodsService iJbxtGoodsService; //竞品服务
+    protected final ActivityThreadManager activityManager;
+    protected final IJbxtUserService iJbxtUserService;
+    protected final IJbxtBiddingService iJbxtBiddingService;
 
     public BaseProblemHandler() {
         this.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
         this.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
         this.pushQueue = SpringUtil.getBean(PushQueue.class);
         this.iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
-        this.activityMap = SpringUtil.getBean(ActivityMap.class);
+        this.activityManager = SpringUtil.getBean(ActivityThreadManager.class);
         this.iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
         this.iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
     }

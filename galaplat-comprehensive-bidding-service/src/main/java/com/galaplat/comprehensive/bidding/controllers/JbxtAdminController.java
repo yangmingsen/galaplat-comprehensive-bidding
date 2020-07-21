@@ -2,7 +2,7 @@ package com.galaplat.comprehensive.bidding.controllers;
 
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
-import com.galaplat.comprehensive.bidding.activity.ActivityMap;
+import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
@@ -34,7 +34,7 @@ public class JbxtAdminController extends BaseController {
     Logger LOGGER = LoggerFactory.getLogger(JbxtAdminController.class);
 
     @Autowired
-    private ActivityMap activityMap;
+    private ActivityThreadManager activityMap;
 
     @Autowired
     private IJbxtGoodsService iJbxtGoodsService;
@@ -95,7 +95,7 @@ public class JbxtAdminController extends BaseController {
                     return new MyResult(true, "更新成功");
                 }
             } else {
-                String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
+                final String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
                 LOGGER.info(info);
                 return new MyResult(false, info);
             }
@@ -114,7 +114,7 @@ public class JbxtAdminController extends BaseController {
         final JbxtActivityDO activity = iJbxtActivityService.findOneByCode(activityCode);
         final JbxtGoodsDO goods = iJbxtGoodsService.selectByGoodsId(goodsId);
         if (activity != null && goods != null) {
-            Integer curActivityStatus = activity.getStatus();
+            final Integer curActivityStatus = activity.getStatus();
             if (curActivityStatus == 3) { //如果为进行状态
                 this.startActivityThread(activityCode, goodsId.toString(), goods.getTimeNum());
             }

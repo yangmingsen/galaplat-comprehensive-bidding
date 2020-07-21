@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.netty;
 
-import com.galaplat.comprehensive.bidding.activity.ActivityMap;
+import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThread;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
@@ -38,15 +38,15 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
             websocketServer.start();
             LOGGER.info("onApplicationEvent(msg): WebSocket started");
 
-            IJbxtActivityService iJbxtActivityServiceBeans = springUtil.getBean(IJbxtActivityService.class);
-            ActivityMap activityMap = springUtil.getBean(ActivityMap.class);
-            List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
+            final IJbxtActivityService iJbxtActivityServiceBeans = springUtil.getBean(IJbxtActivityService.class);
+            final ActivityThreadManager activityMap = springUtil.getBean(ActivityThreadManager.class);
+            final List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
             for (JbxtActivityDVO jbxtActivityDVO : lists) {
                 if (jbxtActivityDVO.getStatus() == 3) {
-                    IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
-                    JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());
+                    final IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
+                    final JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());
                     if (activeGoods != null) {
-                        ActivityThread currentActivity = new ActivityThread(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
+                        final ActivityThread currentActivity = new ActivityThread(jbxtActivityDVO.getCode(), activeGoods.getGoodsId().toString(), activeGoods.getTimeNum() * 60, 1);
                         activityMap.put(jbxtActivityDVO.getCode(), currentActivity);
                         currentActivity.start();
                         LOGGER.info("启动 " + jbxtActivityDVO.getCode() + " 活动");

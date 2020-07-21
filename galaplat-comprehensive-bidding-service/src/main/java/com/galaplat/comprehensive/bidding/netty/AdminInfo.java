@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.bidding.activity;
+package com.galaplat.comprehensive.bidding.netty;
 
 import io.netty.channel.Channel;
 

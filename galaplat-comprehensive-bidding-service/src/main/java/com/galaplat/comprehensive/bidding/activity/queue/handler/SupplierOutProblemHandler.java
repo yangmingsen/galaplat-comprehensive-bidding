@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class SupplierOutProblemHandler extends BaseProblemHandler {
     @Override
-    public void handlerProblem(int type, QueueMessage queuemsg) {
+    public void handlerProblem(final int type, final QueueMessage queuemsg) {
         switch (type) {
             case 111: //处理第一名发生变化时
                 handler111Problem(queuemsg);
@@ -39,22 +39,28 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         }
     }
 
-    private void handler216Problem(QueueMessage queuemsg) {
-        Message message = new Message(216, queuemsg.getData());
-        String activityCode = queuemsg.getData().get("activityCode");
-        notifyAllSupplier(message, activityCode);
+    private void handler216Problem(final QueueMessage queuemsg) {
+        final Message message = new Message(216, queuemsg.getData());
+        final String activityCode = queuemsg.getData().get("activityCode");
+        final String userCode = queuemsg.getData().get("userCode");
+
+        if (userCode != null) { //发给指定的供应商
+            notifyOptionSupplier(message,activityCode,userCode);
+        } else {
+            notifyAllSupplier(message, activityCode);
+        }
     }
 
 
-    private void handler215Problem(QueueMessage queuemsg) {
-        Message message = new Message(215, queuemsg.getData());
-        String activityCode = queuemsg.getData().get("activityCode");
+    private void handler215Problem(final QueueMessage queuemsg) {
+        final Message message = new Message(215, queuemsg.getData());
+        final String activityCode = queuemsg.getData().get("activityCode");
         notifyAllSupplier(message, activityCode);
     }
 
-    private void handler214Problem(QueueMessage queuemsg) {
-        Message message = new Message(214, queuemsg.getData());
-        String activityCode = queuemsg.getData().get("activityCode");
+    private void handler214Problem(final QueueMessage queuemsg) {
+        final Message message = new Message(214, queuemsg.getData());
+        final String activityCode = queuemsg.getData().get("activityCode");
         notifyAllSupplier(message, activityCode);
     }
 
@@ -65,32 +71,32 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
      * @param goodsId
      * @param userCode
      */
-    private void handlerSendOneSupplier(String activityCode, Integer goodsId, String userCode) {
+    private void handlerSendOneSupplier(final String activityCode, final Integer goodsId, final String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode);
-            Map<String, String> map = new HashMap<>();
+            final CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode);
+            final Map<String, String> map = new HashMap<>();
             map.put("userRank", info.getUserRank().toString());
             map.put("goodsPrice", info.getGoodsPrice().toString());
             map.put("goodsId", info.getGoodsId().toString());
 
             //推流到供应商客户端
-            Message message = new Message(200, map);
+            final Message message = new Message(200, map);
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
     }
 
 
-    private void handler111Problem(QueueMessage takeQueuemsg) {
-        String activityCode = takeQueuemsg.getData().get("activityCode");
+    private void handler111Problem(final QueueMessage takeQueuemsg) {
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
 
-        Message message = new Message(111, takeQueuemsg.getData());
+        final Message message = new Message(111, takeQueuemsg.getData());
         notifyAllSupplier(message, activityCode);
     }
 
 
-    private void handler200Problem(QueueMessage takeQueuemsg) {
-        String activityCode = takeQueuemsg.getData().get("activityCode");
-        Integer goodsId = Integer.parseInt(takeQueuemsg.getData().get("goodsId"));
+    private void handler200Problem(final QueueMessage takeQueuemsg) {
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final Integer goodsId = Integer.parseInt(takeQueuemsg.getData().get("goodsId"));
         userChannelMap.getAllUser().forEach(supplier -> handlerSendOneSupplier(activityCode, goodsId, supplier));
     }
 
@@ -99,16 +105,16 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
      * 同步当前竞品状态() 给 指定供应商端
      * @param takeQueuemsg
      */
-    private void sendStatusToSomeOne(QueueMessage takeQueuemsg) {
-        String activityCode = takeQueuemsg.getData().get("activityCode");
-        String userCode = takeQueuemsg.getData().get("userCode");
+    private void sendStatusToSomeOne(final QueueMessage takeQueuemsg) {
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final String userCode = takeQueuemsg.getData().get("userCode");
         takeQueuemsg.getData().put("userCode", null);
 
-        Message message = new Message(215, takeQueuemsg.getData());
+        final Message message = new Message(215, takeQueuemsg.getData());
         notifyOptionSupplier(message ,activityCode, userCode);
 
         //传递当前活动剩余时长
-        ActivityThread currentActivity = activityMap.get(activityCode);
+        final ActivityThread currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 Map<String, String> t_map = new HashMap<>();
@@ -119,12 +125,12 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         }
     }
 
-    private void handler211Problem(QueueMessage takeQueuemsg) {
-        String activityCode = takeQueuemsg.getData().get("activityCode");
-        String userCode = takeQueuemsg.getData().get("userCode");
-        String goodsId = activityMap.get(activityCode).getCurrentGoodsId();
+    private void handler211Problem(final QueueMessage takeQueuemsg) {
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final String userCode = takeQueuemsg.getData().get("userCode");
+        final String goodsId = activityManager.get(activityCode).getCurrentGoodsId();
         takeQueuemsg.getData().put("goodsId", goodsId);
-        int status = activityMap.get(activityCode).getStatus();
+        final int status = activityManager.get(activityCode).getStatus();
         if (status == 2) {
             takeQueuemsg.getData().put("status","3");
         } else {
@@ -137,10 +143,9 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
 
 
 
-    private void handler212Problem(QueueMessage takeQueuemsg) {
-        String activityCode = takeQueuemsg.getData().get("activityCode");
-
-        Message message = new Message(212, takeQueuemsg.getData());
+    private void handler212Problem(final QueueMessage takeQueuemsg) {
+        final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final Message message = new Message(212, takeQueuemsg.getData());
         notifyAllSupplier(message,activityCode);
     }
 
