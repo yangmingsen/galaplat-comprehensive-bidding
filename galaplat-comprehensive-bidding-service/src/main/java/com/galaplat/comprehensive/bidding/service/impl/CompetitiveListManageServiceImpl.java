@@ -223,9 +223,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
 
         for (JbxtGoodsDO goods : goodsList) {
+            // 查询某竞标活动某竞品的所有用户
             List<String> allBidUserCodes = biddingDao.listBidActivityUsers(JbxtBiddingParam.builder().goodsId(goods.getGoodsId())
                     .activityCode(goods.getActivityCode()).build());
 
+            // 竞价等级
             Map<String,Object>  map = getBidPriceFinalRank(goods, allBidUserCodes);
             int size  = (int) map.get("size");
             if (maxBidNum <  size) {
@@ -233,6 +235,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             }
             bidPriceRankData.add((List<String>)map.get("list"));
 
+            // 竞价详情获取
             for (int i = 0; i < allBidUserCodes.size(); i++) {
                 String userCode = allBidUserCodes.get(i);
                 bidPriceDdetailData.add(getBidPriceDetail(userCode, goods, bidActivityCode));
@@ -346,7 +349,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             BidDVO bid = bids.get(i);
             RankInfoVO rankInfo = map.get(bid.getBid());
             JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(bid.getUserCode()).build());
-            String userName = null != userDO && userDO.getUsername() != null ? userDO.getUsername() : bid.getUserCode();
+            String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName() : bid.getUserCode();
             if (rankInfo == null) {
                 RankInfoVO newRankInfo = new RankInfoVO();
                 newRankInfo.setBid(bid.getBid());
@@ -418,7 +421,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         res.add(goods.getName());
 
         JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(userCode).build());
-        String userName = null != userDO && userDO.getUsername() != null ? userDO.getUsername() : userCode;
+        String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName()  : userCode;
         res.add((userName));
 
         bids.forEach(bid -> {
