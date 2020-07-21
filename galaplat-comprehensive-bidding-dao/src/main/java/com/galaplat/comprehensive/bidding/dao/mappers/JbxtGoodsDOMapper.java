@@ -190,4 +190,15 @@ public interface JbxtGoodsDOMapper {
             @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtGoodsDO> listGoods(@Param("param") JbxtGoodsParam goodsParam);
+
+    @Delete({
+            " <script>",
+            " delete from t_jbxt_goods",
+            " where  1=1 " ,
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode,jdbcType=VARCHAR}",
+            " </if>",
+            " </script>",
+    })
+    int delete(@Param("param") JbxtGoodsParam goodsParam);
 }

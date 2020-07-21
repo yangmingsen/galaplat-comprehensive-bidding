@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -270,9 +272,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     public  Workbook createMultiSheet(Map<String, List<List<String>>> sheetData)  throws Exception {
-        final  String excelType = "org.apache.poi.xssf.usermodel.XSSFWorkbook";
         //根据 type 参数生成工作簿实例对象
-        Workbook workbook = (Workbook) Class.forName(excelType).newInstance();
+        Workbook workbook = new XSSFWorkbook();
 
         for (Map.Entry<String, List<List<String>>> entry: sheetData.entrySet()) {
             Sheet sheet = workbook.createSheet(entry.getKey());
@@ -294,7 +295,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     private void exportBidPriceRankAndDetail(Workbook workbook, HttpServletResponse response,  String bidActivityCode) {
-        String fileName = bidActivityCode + LocalDate.now().toString() + ".xls";
+        String fileName = MessageFormat.format("[{0}]-{1}{2}", bidActivityCode, LocalDate.now().toString(), ".xls");
         try {
             response.setContentType("application/vnd.ms-excel;charset=UTF-8");
             response.setHeader("Content-disposition",
