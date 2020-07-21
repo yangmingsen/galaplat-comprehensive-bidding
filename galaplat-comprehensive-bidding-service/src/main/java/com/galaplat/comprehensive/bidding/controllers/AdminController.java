@@ -26,12 +26,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/jbxt/admin")
-public class JbxtAdminController extends BaseController {
+public class AdminController extends BaseController {
 
     @Autowired
     IJbxtGoodsService jbxtgoodsService;
 
-    Logger LOGGER = LoggerFactory.getLogger(JbxtAdminController.class);
+    Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private ActivityThreadManager activityThreadManager;
