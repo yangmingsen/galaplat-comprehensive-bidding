@@ -13,20 +13,15 @@ import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
-import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
-import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
 import com.galaplat.comprehensive.bidding.utils.Tuple;
-import com.galaplat.comprehensive.bidding.vos.ValidateResultVO;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.galaplat.baseplatform.file.upload.service.IImportSubMethodWithParamService;
-import org.galaplat.baseplatform.file.upload.service.impl.ExportExcelServiceImpl;
 import org.galaplat.baseplatform.file.upload.vos.ImportVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +77,13 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
             activityCode = (String) mapVO.get("bidActivityCode");
         }
         JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
-        if (null != activityDO) {
+        // 如果竞标活动的状态时竞标中或者已结束时，不允许导入
+        if (activityDO.getStatus().equals(ActivityStatusEnum.BIDING.getCode())
+                || activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())){
+            return Collections.emptyList();
+        }
+
+        if (null != activityDO && CollectionUtils.isNotEmpty(list)) {
             for (Map<String, Object>  goodsMap: list) {
                 JbxtGoodsExcelParam goodsExcelParam = new JbxtGoodsExcelParam();
                 StringBuffer errorMsg = new StringBuffer("");
@@ -97,10 +98,6 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                     } catch (Exception e) {
                         log.error(" 竞品导入格式化异常【{}】,【{}】",e.getMessage(), e );
                     }
-
-                    List<JbxtGoodsDO> goodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode)
-                            .name(goodsExcelParam.getName()).code(goodsExcelParam.getCode()).build());
-                    if (CollectionUtils.isEmpty(goodsDOList)) {
                         goodsExcelParam.setActivityCode(activityCode);
                         goodsExcelParam.setCreatedTime(new Date());
                         goodsExcelParam.setUpdatedTime(new Date());
@@ -109,22 +106,13 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                         JbxtGoodsParam goodsParam = new JbxtGoodsParam();
                         CopyUtil.copyPropertiesExceptEmpty(goodsExcelParam, goodsParam);
                         saveList.add(goodsParam);
-                    } else {
-                        JbxtGoodsDO jbxtGoodsDO = goodsDOList.get(0);
-                        jbxtGoodsDO.setTimeNum(goodsExcelParam.getTimeNum());
-                        jbxtGoodsDO.setFirstPrice(goodsExcelParam.getFirstPrice());
-                        jbxtGoodsDO.setNum(goodsExcelParam.getNum());
-                        jbxtGoodsDO.setUpdatedTime(new Date());
-                        jbxtGoodsDO.setUpdator(creatorName);
-                        goodsDao.updateJbxtGoods(jbxtGoodsDO);
-                    }
                 }
             }
             int insertCount = 0;
             if (CollectionUtils.isNotEmpty(saveList)) {
+                goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
                 insertCount = goodsDao.batchInsert(saveList);
             }
-
             List<JbxtGoodsDO> activityGoodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode).build());
             if (activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())
                     && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
