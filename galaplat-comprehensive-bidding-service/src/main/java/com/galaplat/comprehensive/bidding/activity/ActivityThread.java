@@ -3,13 +3,16 @@ package com.galaplat.comprehensive.bidding.activity;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
+import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
+import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +30,7 @@ public class ActivityThread extends Thread {
     private final Logger LOGGER = LoggerFactory.getLogger(ActivityThread.class);
     private final String currentActivityCode;
     private final String currentGoodsId;
-    private final Message message = new Message(100,null);
+    private final Message remainingTimeMessage = new Message(100,null);
     private final UserChannelMap userChannelMap = SpringUtil.getBean(UserChannelMap.class);
     private final AdminChannelMap adminChannel = SpringUtil.getBean(AdminChannelMap.class);
     private final IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
@@ -186,26 +189,26 @@ public class ActivityThread extends Thread {
             }
 
             if (this.status == 3) {
-
                 //同步数据（管理端 N，供应商端 Y）
-                Map<String, String> map = new HashMap<>();
+                final Map<String, String> map = new HashMap<>();
                 map.put("activityCode",this.currentActivityCode);
                 map.put("goodsId", this.currentGoodsId);
-                QueueMessage queueMessage = new QueueMessage(212, map);
+
+                final QueueMessage queueMessage = new QueueMessage(212, map);
                 pushQueue.offer(queueMessage);
 
                 this.status = 1;
                 this.remainingTime = this.initTime;
-                this.reInitTopInfo();
+                this.resetTopInfo();
             }
 
             //通知供应商端 继续
-            Map<String, String> map = new HashMap<>();
+            final Map<String, String> map = new HashMap<>();
             map.put("activityCode",this.currentActivityCode);
             map.put("goodsId", this.currentGoodsId);
             map.put("status", "1");
-            QueueMessage queueMessage = new QueueMessage(215, map);
 
+            final QueueMessage queueMessage = new QueueMessage(215, map);
             pushQueue.offer(queueMessage);
         }
     }
@@ -254,27 +257,27 @@ public class ActivityThread extends Thread {
             Thread.sleep(1*1000);
             remainingTime --;
         }
-        this.endTheCurrentGoodsActivity();
+       // this.endTheCurrentGoodsActivity();
     }
 
     /***
      * 发送剩余时长到所有通道（supplier,admin）
      */
     private void sendRemainingTimeToAll() {
-        String remainingTimeString = getRemainingTimeString();
+        final String remainingTimeString = getRemainingTimeString();
 //           System.out.println("currentActivityCode="+currentActivityCode+" goodsId="+currentGoodsId+" 剩余时间:"+remainingTimeString);
         t_map.put("remainingTime",remainingTimeString);
-        message.setData(t_map);
+        remainingTimeMessage.setData(t_map);
 
         userChannelMap.getAllUser().forEach(supplier -> {
             if (userChannelMap.getUserFocusActivity(supplier).equals(this.currentActivityCode)) {
-                userChannelMap.get(supplier).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+                userChannelMap.get(supplier).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(remainingTimeMessage)));
             }
         });
 
         adminChannel.getAllAdmin().forEach(admin -> {
             if (adminChannel.get(admin).getFocusActivity().equals(this.currentActivityCode)) {
-                adminChannel.get(admin).getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+                adminChannel.get(admin).getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(remainingTimeMessage)));
             }
         });
 
@@ -285,7 +288,7 @@ public class ActivityThread extends Thread {
      *
      */
     private void endTheCurrentGoodsActivity() {
-        JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectByGoodsId(Integer.parseInt(currentGoodsId));
+        final JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectByGoodsId(Integer.parseInt(currentGoodsId));
         if (jbxtGoodsDO != null) {
             JbxtGoodsVO jbxtgoodsVO = new JbxtGoodsVO();
             jbxtgoodsVO.setGoodsId(Integer.parseInt(currentGoodsId));
@@ -293,24 +296,77 @@ public class ActivityThread extends Thread {
 
             try {
                 iJbxtGoodsService.updateJbxtGoods(jbxtgoodsVO);
-                this.status = 4;
                 LOGGER.info("endTheCurrentGoodsActivity(msg): 活动: "+currentActivityCode+" 竞品id: "+currentGoodsId+" 结束");
             } catch (Exception e) {
                 LOGGER.info("endTheCurrentGoodsActivity(ERROR): "+e.getMessage());
             }
+            this.status = 4;
         }
     }
+
+    /***
+     * 判断当前竞品是否为当前活动的最后一个竞品
+     * @return
+     */
+    private boolean isfinallyGoods() {
+        final String activitCode = this.currentActivityCode;
+        final Integer goodsId = Integer.parseInt(this.currentGoodsId);
+        final List<SimpleGoodsVO> goods = iJbxtGoodsService.findAll(activitCode);
+        final int goodsLength = goods.size();
+        if (goodsLength > 0) {
+            final int endGoodsIdx =goodsLength-1;
+            if (goodsId == goods.get(endGoodsIdx).getGoodsId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void autoCloseCurrentActivity() {
+        final IJbxtActivityService iJbxtActivityService = SpringUtil.getBean(IJbxtActivityService.class);
+        final String activityCode = this.currentActivityCode;
+        final JbxtActivityDO activity = iJbxtActivityService.findOneByCode(activityCode);
+
+        if (activity != null) {
+            if (activity.getStatus() == 3) {
+                final JbxtActivityDO tActivity = new JbxtActivityDO();
+                tActivity.setCode(activityCode);
+                tActivity.setStatus(4);
+                boolean updateActivityStatus = false;
+
+                try {
+                    iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
+                    updateActivityStatus = true;
+                } catch (Exception e) {
+                    LOGGER.info("switchActivityGoods(ERROR): 更新活动("+activityCode+")结束结束失败");
+                }
+
+                if (updateActivityStatus) {
+                    //通知所有供应商端 退出登录
+                    notify216Event(activityCode);
+                }
+            }
+        }
+    }
+
+    private void notify216Event(String activityCode) {
+        final Map<String, String> map216 = new HashMap();
+        map216.put("activityCode", activityCode);
+        pushQueue.offer(new QueueMessage(216, map216));
+    }
+
 
     /***
      * 同步数据给所有供应商端
      */
     private void syncInfoToAll() {
         //{type: 200, data: {goodsId: 23423, activityCode: 23423345}}
-        Map<String, String> supplierInfo = new HashMap<>();
+        final Map<String, String> supplierInfo = new HashMap<>();
         supplierInfo.put("goodsId", this.currentGoodsId);
         supplierInfo.put("activityCode", this.currentActivityCode);
         //同步数据 给 供应商
-        QueueMessage queueMessage = new QueueMessage(200,supplierInfo);
+        final QueueMessage queueMessage = new QueueMessage(200,supplierInfo);
         pushQueue.offer(queueMessage);
 
     }
@@ -325,7 +381,7 @@ public class ActivityThread extends Thread {
     /***
      *  清除榜首信息
      */
-    private void reInitTopInfo() {
+    private void resetTopInfo() {
         minBid = new BigDecimal("0.0");
         haveMinBid = false;
         minSubmitMap.clear();
@@ -338,17 +394,17 @@ public class ActivityThread extends Thread {
     private void updateMinSubmitInfo(List<JbxtBiddingDVO> theTopBids) {
         this.minSubmitMap.clear();
         for (int i = 0; i < theTopBids.size(); i++) {
-            JbxtBiddingDVO ttBid = theTopBids.get(i);
+            final JbxtBiddingDVO ttBid = theTopBids.get(i);
             this.minSubmitMap.put(ttBid.getUserCode(), ttBid.getBid());
         }
         this.minBid = theTopBids.get(0).getBid();
 
         //notity all supplier the top updated
-        Map<String, String> map = new HashMap<>();
+        final Map<String, String> map = new HashMap<>();
         map.put("activityCode",this.currentActivityCode);
         map.put("goodsId", this.currentGoodsId);
-        QueueMessage queueMessage = new QueueMessage(111, map);
 
+        final QueueMessage queueMessage = new QueueMessage(111, map);
         pushQueue.offer(queueMessage);
     }
 
