@@ -81,4 +81,11 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 	public List<SupplierAccountExportDVO> getAccountByActivityCode(JbxtUserParam userParam) {
 		return mapper.getAccountByActivityCode(userParam);
 	}
+
+	@Override
+	public int deleteUser(JbxtUserParam userParam) {
+		return mapper.deleteUser(userParam);
+	}
+
+
 }
