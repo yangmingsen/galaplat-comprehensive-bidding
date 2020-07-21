@@ -7,7 +7,6 @@ import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
 import com.github.pagehelper.PageInfo;
-import org.apache.ibatis.annotations.Param;
 
 /**
  * 竞价表Dao
@@ -128,4 +127,11 @@ public interface IJbxtBiddingDao{
 	 * @return
 	 */
 	List<BidDVO> getOneSupplierBidPriceDeatil(JbxtBiddingParam biddingParam);
+
+	/**
+	 * 删除竞价
+	 * @param biddingParam
+	 * @return
+	 */
+	int  deleteBidding(JbxtBiddingParam biddingParam);
 }
