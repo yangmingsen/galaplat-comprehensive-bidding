@@ -42,7 +42,7 @@ public class CompetitiveListManageController extends BaseController {
 
     @PostMapping("/operate")
     @RestfulResult
-    public Object addAndUpdate(String activitySupplierAccount, String type, String bidActivityCode) throws BaseException {
+    public Object addAndUpdate(String activitySupplierAccount, String type, String bidActivityCode) throws Exception {
         List<SupplierAccountParam> supplierAccountParamList =   JSON.parseArray(activitySupplierAccount, SupplierAccountParam.class);
         JbxtActivityParam activityParam = new JbxtActivityParam();
         activityParam.setCreator(getUser().getName());

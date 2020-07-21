@@ -35,7 +35,7 @@ public interface ICompetitiveListManageService {
      * @return
      * @throws BaseException
      */
-    String   addAndUpdate(JbxtActivityParam activityParam, String type, String bidActivityCode) throws BaseException;
+    String   addAndUpdate(JbxtActivityParam activityParam, String type, String bidActivityCode) throws Exception;
 
 
     /**

@@ -62,6 +62,18 @@ public interface IJbxtGoodsDao{
 	 */
 	int batchInsert(List<JbxtGoodsParam> jbxtgoodsParam);
 
+	/**
+	 * 查询竞品
+	 * @param jbxtgoodsParam
+	 * @return
+	 */
 	List<JbxtGoodsDO> listGoods(JbxtGoodsParam jbxtgoodsParam);
+
+	/**
+	 * 删除竞品
+	 * @param jbxtgoodsParam 竞品信息
+	 * @return
+	 */
+	int delete(JbxtGoodsParam jbxtgoodsParam);
 
 }

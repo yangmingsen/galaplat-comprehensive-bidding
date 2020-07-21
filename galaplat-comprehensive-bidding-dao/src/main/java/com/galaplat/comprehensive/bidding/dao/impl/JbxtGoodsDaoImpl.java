@@ -70,4 +70,9 @@ public   class JbxtGoodsDaoImpl implements IJbxtGoodsDao  {
 	public List<JbxtGoodsDO> listGoods(JbxtGoodsParam jbxtgoodsParam) {
 		return mapper.listGoods(jbxtgoodsParam);
 	}
+
+	@Override
+	public int delete(JbxtGoodsParam jbxtgoodsParam) {
+		return  mapper.delete(jbxtgoodsParam);
+	}
 }

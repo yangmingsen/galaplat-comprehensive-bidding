@@ -285,4 +285,22 @@ public interface JbxtUserDOMapper {
             "</script>"
     })
     int deleteUser(@Param("param")JbxtUserParam userParam);
+
+
+    @Delete({
+            "<script>",
+            "delete from t_jbxt_user",
+            "where 1=1 ",
+            "<if test='list !=null '>",
+            "  and code in " ,
+            " <foreach item='item' index='index' collection='list' open='(' separator=',' close=')'> ",
+            "  #{item} ",
+            " </foreach>",
+            "</if>",
+            " <if test='activityCode != null' > " ,
+            " and activity_code = #{activityCode,jdbcType=VARCHAR}",
+            " </if>",
+            "</script>"
+    })
+    int batchDeleteUser(@Param("list")List<String> userCodes,@Param("activityCode")String activityCode);
 }
