@@ -52,6 +52,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
         // 获取客户端发送过来的文本消息
         final String text = msg.text();
+        LOGGER.info("channelRead0(reve msg): "+text);
         //System.out.println("接收到消息数据为：" + text);
         final RequestMessage message = JSON.parseObject(text, RequestMessage.class);
 
