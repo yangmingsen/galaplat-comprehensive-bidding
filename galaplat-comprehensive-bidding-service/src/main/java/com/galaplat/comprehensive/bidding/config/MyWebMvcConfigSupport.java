@@ -32,9 +32,9 @@ public class MyWebMvcConfigSupport extends WebMvcConfigurationSupportConfigurer 
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginSecurityInterceptor()).addPathPatterns("/**").excludePathPatterns("/api/**","/actuator/**","/favicon.ico");
-        registry.addInterceptor(getDatabaseSchemaInterceptor()).addPathPatterns("/**").excludePathPatterns("/actuator/**","/favicon.ico");
-        registry.addInterceptor(getAppAccountInterceptor()).addPathPatterns("/api/**").excludePathPatterns("/actuator/**","/favicon.ico");
+        registry.addInterceptor(new LoginSecurityInterceptor()).addPathPatterns("/**").excludePathPatterns("/api/**","/actuator/**","/favicon.ico","/health");
+        registry.addInterceptor(getDatabaseSchemaInterceptor()).addPathPatterns("/**").excludePathPatterns("/actuator/**","/favicon.ico","/health");
+        registry.addInterceptor(getAppAccountInterceptor()).addPathPatterns("/api/**").excludePathPatterns("/actuator/**","/favicon.ico","/health");
         super.addInterceptors(registry);
     }
 
