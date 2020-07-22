@@ -1,10 +1,7 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
-import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
-import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
-import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
+import com.galaplat.comprehensive.bidding.dao.*;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
@@ -56,6 +53,12 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
     private static final Logger log = LoggerFactory.getLogger(CompetitiveListManageServiceImpl.class);
 
+    /* 新增操作类型*/
+    private static final String OPRATETYPE_ADD = "add";
+
+    /* 修改操作类型*/
+    private static final String OPRATETYPE_UPDATE = "update";
+
     @Autowired
     private IJbxtActivityDao activityDao;
 
@@ -71,11 +74,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Autowired
     private IdWorker worker;
 
-    /* 新增操作类型*/
-    private static final String OPRATETYPE_ADD = "add";
-
-    /* 修改操作类型*/
-    private static final String OPRATETYPE_UPDATE = "update";
+    @Autowired
+    private IJbxtMinbidDao minbidDao;
 
     @Override
     public PageInfo listCompetitiveListPage(CompetitiveListQuery query) throws BaseException {
@@ -223,9 +223,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
 
         for (JbxtGoodsDO goods : goodsList) {
+            // 查询某竞标活动某竞品的所有用户
             List<String> allBidUserCodes = biddingDao.listBidActivityUsers(JbxtBiddingParam.builder().goodsId(goods.getGoodsId())
                     .activityCode(goods.getActivityCode()).build());
 
+            // 竞价等级
             Map<String,Object>  map = getBidPriceFinalRank(goods, allBidUserCodes);
             int size  = (int) map.get("size");
             if (maxBidNum <  size) {
@@ -233,6 +235,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             }
             bidPriceRankData.add((List<String>)map.get("list"));
 
+            // 竞价详情获取
             for (int i = 0; i < allBidUserCodes.size(); i++) {
                 String userCode = allBidUserCodes.get(i);
                 bidPriceDdetailData.add(getBidPriceDetail(userCode, goods, bidActivityCode));
@@ -271,7 +274,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         return "导出成功";
     }
 
-    public  Workbook createMultiSheet(Map<String, List<List<String>>> sheetData)  throws Exception {
+    public  Workbook createMultiSheet(Map<String, List<List<String>>> sheetData)  {
         //根据 type 参数生成工作簿实例对象
         Workbook workbook = new XSSFWorkbook();
 
@@ -346,7 +349,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             BidDVO bid = bids.get(i);
             RankInfoVO rankInfo = map.get(bid.getBid());
             JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(bid.getUserCode()).build());
-            String userName = userDO.getUsername() != null ? userDO.getUsername() : userDO.getCode();
+            String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName() : bid.getUserCode();
             if (rankInfo == null) {
                 RankInfoVO newRankInfo = new RankInfoVO();
                 newRankInfo.setBid(bid.getBid());
@@ -356,7 +359,6 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             } else {
                 rankInfo.setNames(rankInfo.getNames() + "-" + userName);
                 map.put(bid.getBid(), rankInfo);
-
             }
         }
         List<RankInfoVO> res = new ArrayList<>();
@@ -419,7 +421,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         res.add(goods.getName());
 
         JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(userCode).build());
-        String userName = userDO.getUsername() != null ? userDO.getUsername() : userDO.getCode();
+        String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName()  : userCode;
         res.add((userName));
 
         bids.forEach(bid -> {
@@ -514,6 +516,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
         if (CollectionUtils.isNotEmpty(deleteUserList)) {
             deleteCount = userDao.batchDeleteUser(deleteUserList, bidActivityCode);
+            // 删除竞价中的供应商的信息
+          /*   biddingDao.deleteBidding(JbxtBiddingParam.builder().activityCode(bidActivityCode).userCodeList(deleteUserList).build());
+             minbidDao.deleteBidding(JbxtMinbidParam.builder().activityCode(bidActivityCode).userCodeList(deleteUserList).build());*/
         }
         return deleteCount;
     }

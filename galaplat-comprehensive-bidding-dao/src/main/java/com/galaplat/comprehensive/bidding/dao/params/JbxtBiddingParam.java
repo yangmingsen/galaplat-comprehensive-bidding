@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 
-
- /**
+/**
  * 竞价表Param
  * @author esr
  * @date: 2020年06月17日
@@ -46,6 +46,8 @@ public class JbxtBiddingParam extends Param {
     private String sysCode;
 
      private String bidTime;
+
+    private List<String> userCodeList;
 
      public String getBidTime() {
          return bidTime;

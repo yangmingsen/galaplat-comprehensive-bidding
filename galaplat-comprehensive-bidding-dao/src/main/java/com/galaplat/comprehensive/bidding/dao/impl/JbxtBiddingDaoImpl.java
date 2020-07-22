@@ -143,4 +143,9 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 		 return mapper.getOneSupplierBidPriceDeatil(biddingParam);
 	 }
 
+	 @Override
+	 public int deleteBidding(JbxtBiddingParam biddingParam) {
+		 return mapper.deleteBidding(biddingParam);
+	 }
+
  }

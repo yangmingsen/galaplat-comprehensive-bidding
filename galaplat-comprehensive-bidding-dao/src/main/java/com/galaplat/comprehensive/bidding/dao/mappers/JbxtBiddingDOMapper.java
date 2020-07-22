@@ -382,4 +382,21 @@ public interface JbxtBiddingDOMapper {
     })
     List<BidDVO> getOneSupplierBidPriceDeatil(@Param("param")JbxtBiddingParam biddingParam);
 
+    @Delete({
+            "<script>",
+            "delete from t_jbxt_bidding",
+            "where 1=1 ",
+            " <if test='param.activityCode != null' > " ,
+            " and activity_code = #{param.activityCode,jdbcType = VARCHAR}",
+            " </if>",
+            "<if test='param.userCodeList !=null '>",
+            "  and user_code in " ,
+            " <foreach item='item' index='index' collection='param.userCodeList' open='(' separator=',' close=')'> ",
+            "  #{item} ",
+            " </foreach>",
+            "</if>",
+            "</script>"
+    })
+    int  deleteBidding(@Param("param")JbxtBiddingParam biddingParam);
+
 }
