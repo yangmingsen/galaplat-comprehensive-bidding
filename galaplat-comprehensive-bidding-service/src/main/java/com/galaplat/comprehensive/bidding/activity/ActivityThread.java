@@ -46,6 +46,17 @@ public class ActivityThread extends Thread {
     private boolean haveMinBid = false;
     private Map<String, BigDecimal> minSubmitMap = new HashMap<>();
 
+
+    @Override
+    public String toString() {
+        return "ActivityThread{" +
+                "currentActivityCode='" + currentActivityCode + '\'' +
+                ", currentGoodsId='" + currentGoodsId + '\'' +
+                ", status=" + status +
+                ", remainingTime=" + remainingTime +
+                "} " + super.toString();
+    }
+
     /***
      * 设置当前活动剩余时长（秒）
      * @param remainingTime
@@ -173,6 +184,7 @@ public class ActivityThread extends Thread {
      * @param status 1 进行 2暂停  3重置  4结束(不可手动设置)
      */
     public void setStatus(int status) {
+        LOGGER.info("currentStatus="+status+" newStatus="+status);
         if (this.status == status) return; //处理相同status设置
 
         this.status = status;

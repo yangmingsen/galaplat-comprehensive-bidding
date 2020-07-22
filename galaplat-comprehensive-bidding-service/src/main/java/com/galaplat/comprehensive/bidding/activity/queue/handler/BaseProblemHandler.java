@@ -87,6 +87,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param userCode
      */
     protected void notifyOptionSupplier(Message message, String activityCode, String userCode) {
+        LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" userCode="+userCode+" message="+message);
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
