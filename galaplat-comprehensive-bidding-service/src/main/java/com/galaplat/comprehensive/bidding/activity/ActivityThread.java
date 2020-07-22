@@ -46,6 +46,17 @@ public class ActivityThread extends Thread {
     private boolean haveMinBid = false;
     private Map<String, BigDecimal> minSubmitMap = new HashMap<>();
 
+
+    @Override
+    public String toString() {
+        return "ActivityThread{" +
+                "currentActivityCode='" + currentActivityCode + '\'' +
+                ", currentGoodsId='" + currentGoodsId + '\'' +
+                ", status=" + status +
+                ", remainingTime=" + remainingTime +
+                "} " + super.toString();
+    }
+
     /***
      * 设置当前活动剩余时长（秒）
      * @param remainingTime

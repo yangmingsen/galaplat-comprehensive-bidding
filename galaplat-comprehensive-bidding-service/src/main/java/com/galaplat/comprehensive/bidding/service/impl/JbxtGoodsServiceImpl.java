@@ -60,7 +60,9 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 			sgv.setFirstPrice(goods.getFirstPrice());
 			sgv.setTimeNum(goods.getTimeNum());
 
+
 			if (currentActivity != null) {
+				LOGGER.info("findAll(msg): currentThreadStatus="+currentActivity.getStatus());
 				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId().toString())) {
 					int status = currentActivity.getStatus();
 					if (status == 2) {
@@ -75,6 +77,8 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 				}
 			} else {
 				sgv.setIsActive(goods.getStatus());
+				LOGGER.info("findAll(msg): currentThread="+currentActivity);
+
 			}
 			
             sgvs.add(sgv);
