@@ -15,92 +15,132 @@ public class JbxtActivityDOSqlProvider {
     public String insertSelective(JbxtActivityDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_activity");
-        
+
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getName() != null) {
             VALUES("name", "#{name,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getStartTime() != null) {
             VALUES("start_time", "#{startTime,jdbcType=TIMESTAMP}");
         }
-        
+
         if (record.getEndTime() != null) {
             VALUES("end_time", "#{endTime,jdbcType=TIMESTAMP}");
         }
-        
+
         if (record.getCreatedTime() != null) {
             VALUES("created_time", "#{createdTime,jdbcType=TIMESTAMP}");
         }
-        
+
         if (record.getUpdatedTime() != null) {
             VALUES("updated_time", "#{updatedTime,jdbcType=TIMESTAMP}");
         }
-        
+
+        if (record.getDeleteTime() != null) {
+            VALUES("delete_time", "#{deleteTime,jdbcType=TIMESTAMP}");
+        }
+
         if (record.getUpdator() != null) {
             VALUES("updator", "#{updator,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getCreator() != null) {
             VALUES("creator", "#{creator,jdbcType=VARCHAR}");
         }
-        
+
+        if (record.getDeleter() != null) {
+            VALUES("deleter", "#{deleter,jdbcType=VARCHAR}");
+        }
+
         if (record.getCompanyCode() != null) {
             VALUES("company_code", "#{companyCode,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getSysCode() != null) {
             VALUES("sys_code", "#{sysCode,jdbcType=VARCHAR}");
         }
-        
+
+        if (record.getSupplierNum() != null) {
+            VALUES("supplier_num", "#{supplierNum,jdbcType=INTEGER}");
+        }
+
+        if (record.getStatus() != null) {
+            VALUES("status", "#{status,jdbcType=INTEGER}");
+        }
+
+        if (record.getRecordStatus() != null) {
+            VALUES("record_status", "#{recordStatus,jdbcType=INTEGER}");
+        }
+
         return SQL();
     }
 
     public String updateByPrimaryKeySelective(JbxtActivityDO record) {
         BEGIN();
         UPDATE("t_jbxt_activity");
-        
+
         if (record.getName() != null) {
             SET("name = #{name,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getStartTime() != null) {
             SET("start_time = #{startTime,jdbcType=TIMESTAMP}");
         }
-        
+
         if (record.getEndTime() != null) {
             SET("end_time = #{endTime,jdbcType=TIMESTAMP}");
         }
-        
+
         if (record.getCreatedTime() != null) {
             SET("created_time = #{createdTime,jdbcType=TIMESTAMP}");
         }
-        
+
         if (record.getUpdatedTime() != null) {
             SET("updated_time = #{updatedTime,jdbcType=TIMESTAMP}");
         }
-        
+
+        if (record.getDeleteTime() != null) {
+            SET("delete_time = #{deleteTime,jdbcType=TIMESTAMP}");
+        }
+
         if (record.getUpdator() != null) {
             SET("updator = #{updator,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getCreator() != null) {
             SET("creator = #{creator,jdbcType=VARCHAR}");
         }
-        
+
+        if (record.getDeleter() != null) {
+            SET("deleter = #{deleter,jdbcType=VARCHAR}");
+        }
+
         if (record.getCompanyCode() != null) {
             SET("company_code = #{companyCode,jdbcType=VARCHAR}");
         }
-        
+
         if (record.getSysCode() != null) {
             SET("sys_code = #{sysCode,jdbcType=VARCHAR}");
         }
-        
+
+        if (record.getSupplierNum() != null) {
+            SET("supplier_num = #{supplierNum,jdbcType=INTEGER}");
+        }
+
+        if (record.getStatus() != null) {
+            SET("status = #{status,jdbcType=INTEGER}");
+        }
+
+        if (record.getRecordStatus() != null) {
+            SET("record_status = #{recordStatus,jdbcType=INTEGER}");
+        }
+
         WHERE("code = #{code,jdbcType=VARCHAR}");
-        
+
         return SQL();
     }
 }

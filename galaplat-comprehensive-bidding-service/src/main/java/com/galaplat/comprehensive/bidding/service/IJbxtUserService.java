@@ -17,8 +17,13 @@ import com.github.pagehelper.PageInfo;
  */
 public interface IJbxtUserService{
 
+	 JbxtUserDO getJbxtUserByUsername(String  username);
 
-	boolean handlerLogin(String username, String password);
+	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+
+	 public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+
+	 JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
     /**
 	 * 添加用户表

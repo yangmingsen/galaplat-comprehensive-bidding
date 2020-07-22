@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,9 +40,74 @@ import javax.servlet.http.HttpServletRequest;
  @Service
 public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
+ 	//--------------------------CRUD------------
+ 	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public int insertMinBidTableSelective(JbxtBiddingVO record) {
+		record.setCode(idWorker.nextId());
+
+		record.setCreatedTime(new Date());
+		record.setUpdatedTime(new Date());
+
+		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
+
+		return jbxtbiddingDao.insertMinBidTableSelective(jbxtbiddingDO);
+	}
+
+	@Override
+	public JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.selectMinBidTableBy(userCode,goodsId,activityCode);
+	}
+
+	@Override
+	public List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.selectMinBidTableBy(goodsId,activityCode);
+
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record) {
+		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
+		return jbxtbiddingDao.updateMinBidTableByPrimaryKeySelective(jbxtbiddingDO);
+	}
+
+	@Override
+	public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.deleteMinbidTableByGoodsIdAndActivityCode(goodsId,activityCode);
+	}
+
+	//--------------------
+
+
+	public List<JbxtBiddingDVO> getTheTopBids(Integer goodsId, String activityCode) {
+		List<JbxtBiddingDVO> allUserMinBid = jbxtbiddingDao.selectMinBidTableBy(goodsId, activityCode);
+		if (allUserMinBid.size() > 0) {
+			BigDecimal bid = allUserMinBid.get(0).getBid();
+			int lastIdx = -1;
+			for (int i = 1; i < allUserMinBid.size(); i++) {
+				JbxtBiddingDVO tMinBid = allUserMinBid.get(i);
+				if (tMinBid.getBid().compareTo(bid) == 1) {
+					lastIdx = i;break;
+				}
+			}
+			if (lastIdx != -1) {
+				return allUserMinBid.subList(0,lastIdx);
+			} else {
+				return allUserMinBid.subList(0,1);
+			}
+		}
+		return allUserMinBid;
+	}
+
 
 	@Autowired
 	IJbxtBiddingDao jbxtbiddingDao;
+
+	@Override
+	public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
+		return jbxtbiddingDao.deleteByGoodsIdAndActivityCode(goodsId,activityCode);
+	}
 
 	@Autowired
 	private HttpServletRequest httpServletRequest;
@@ -73,6 +139,7 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 	      JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class,jbxtbiddingVO);
 		  jbxtbiddingDO.setUpdatedTime(new Date());
@@ -82,6 +149,15 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
 	public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode) {
     	return jbxtbiddingDao.gerCurrentGoodsMinSubmitPrice(userCode, goodsId,activityCode);
+	}
+
+	@Override
+	public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode) {
+		return jbxtbiddingDao.findAllByUserCodeAndActivityCode(userCode,activityCode);
+	}
+
+	public List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode) {
+    	return jbxtbiddingDao.findAllByUserCodeAndGooodsIdAndActivityCode(userCode, goodsId, activityCode);
 	}
 
 

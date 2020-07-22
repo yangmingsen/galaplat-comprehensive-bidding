@@ -12,8 +12,26 @@ import java.util.Date;
  */
 public class JbxtBiddingDO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
-    /*唯一编码*/
+
+     @Override
+     public String toString() {
+         return "JbxtBiddingDO{" +
+                 "code='" + code + '\'' +
+                 ", goodsId=" + goodsId +
+                 ", userCode='" + userCode + '\'' +
+                 ", activityCode='" + activityCode + '\'' +
+                 ", bid=" + bid +
+                 ", createdTime=" + createdTime +
+                 ", updatedTime=" + updatedTime +
+                 ", updator='" + updator + '\'' +
+                 ", creator='" + creator + '\'' +
+                 ", companyCode='" + companyCode + '\'' +
+                 ", sysCode='" + sysCode + '\'' +
+                 ", bidTime='" + bidTime + '\'' +
+                 '}';
+     }
+
+     /*唯一编码*/
     private String code;
     /*竞品id*/
     private Integer goodsId;
@@ -35,6 +53,16 @@ public class JbxtBiddingDO implements Serializable {
     private String companyCode;
     /*系统唯一编码*/
     private String sysCode;
+
+     private String bidTime;
+
+     public String getBidTime() {
+         return bidTime;
+     }
+
+     public void setBidTime(String bidTime) {
+         this.bidTime = bidTime;
+     }
 
     public String getCode() {
         return code;

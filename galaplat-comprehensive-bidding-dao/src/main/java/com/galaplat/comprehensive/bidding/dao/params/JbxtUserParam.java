@@ -1,5 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao.params;
 import com.galaplat.base.core.common.params.Param;
+import lombok.*;
+
 import java.util.Date;
 
 
@@ -9,6 +11,11 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
+ @Getter
+ @Setter
+ @Builder
+ @AllArgsConstructor
+ @NoArgsConstructor
 public class JbxtUserParam extends Param {
     private static final long serialVersionUID = 1L;
     
@@ -32,6 +39,14 @@ public class JbxtUserParam extends Param {
     private String companyCode;
     /*系统唯一编码*/
     private String sysCode;
+     /*竞标活动编码*/
+    private String activityCode;
+
+     /*供应商名称*/
+    private String supplierName;
+
+     /*代号*/
+     private String codeName;
 
     public String getCode() {
         return code;
@@ -102,6 +117,27 @@ public class JbxtUserParam extends Param {
     public void setSysCode(String sysCode) {
         this.sysCode = sysCode;
     }
+     public String getSupplierName() {
+         return supplierName;
+     }
 
+     public void setSupplierName(String supplierName) {
+         this.supplierName = supplierName == null ? null : supplierName.trim();
+     }
 
+     public String getCodeName() {
+         return codeName;
+     }
+
+     public void setCodeName(String codeName) {
+         this.codeName = codeName == null ? null : codeName.trim();
+     }
+
+     public String getActivityCode() {
+         return activityCode;
+     }
+
+     public void setActivityCode(String activityCode) {
+         this.activityCode = activityCode == null ? null : activityCode.trim();
+     }
 }

@@ -55,6 +55,19 @@ public class JbxtUserDOSqlProvider {
         if (record.getSysCode() != null) {
             VALUES("sys_code", "#{sysCode,jdbcType=VARCHAR}");
         }
+
+        if (record.getActivityCode() != null) {
+            VALUES("activity_code", "#{activityCode,jdbcType=VARCHAR}");
+        }
+
+        if (record.getSupplierName() != null) {
+            VALUES("supplier_name", "#{supplierName,jdbcType=VARCHAR}");
+        }
+
+        if (record.getCodeName() != null) {
+            VALUES("code_name", "#{codeName,jdbcType=VARCHAR}");
+        }
+
         
         return SQL();
     }
@@ -62,7 +75,20 @@ public class JbxtUserDOSqlProvider {
     public String updateByPrimaryKeySelective(JbxtUserDO record) {
         BEGIN();
         UPDATE("t_jbxt_user");
-        
+
+        if (record.getActivityCode() != null) {
+            SET("activity_code = #{activityCode,jdbcType=VARCHAR}");
+        }
+
+        if (record.getSupplierName() != null) {
+            SET("supplier_name = #{supplierName,jdbcType=VARCHAR}");
+        }
+
+        if (record.getCodeName() != null) {
+            SET("code_name = #{codeName,jdbcType=VARCHAR}");
+        }
+
+
         if (record.getUsername() != null) {
             SET("username = #{username,jdbcType=VARCHAR}");
         }

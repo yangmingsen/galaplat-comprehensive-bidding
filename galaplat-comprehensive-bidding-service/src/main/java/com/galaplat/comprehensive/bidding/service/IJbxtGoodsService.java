@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.galaplat.base.core.common.exception.BaseException;
+import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.querys.JbxtGoodsQuery;
@@ -21,12 +22,6 @@ import com.github.pagehelper.PageInfo;
 public interface IJbxtGoodsService{
 
 
-	 /***
-	  * 给客户端
-	  * @param activityCode
-	  * @return  List CustomGoodsVO
-	  */
-	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode);
 
 	 /**
 	  * 给管理端使用
@@ -37,6 +32,7 @@ public interface IJbxtGoodsService{
 
 
 
+
 	 /***
 	  * 获取所有的GoodsDVO
 	  * @param activityCode
@@ -44,14 +40,6 @@ public interface IJbxtGoodsService{
 	  */
 	 public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
-
-	 /***
-	  * 通用获取当前用户排名情况方法
-	  * @param userCode
-	  * @param goodsId
-	  * @return
-	  */
-	 public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode);
 
 
 	 /**
@@ -67,5 +55,16 @@ public interface IJbxtGoodsService{
 
 	 public JbxtGoodsDO selectActiveGoods(String activityCode);
 
+	 public JbxtGoodsDO selectByGoodsId(Integer goodsId);
 
-}
+
+	 /***
+	  * v2.0 获取当前用户对当前竞品的排名
+	  * @param goodsId
+	  * @param userCode
+	  * @param activityCode
+	  * @return
+	  */
+	 public CustomBidVO getUserBidRankInfoByUserCodeAndActivity(Integer goodsId, String userCode, String activityCode);
+
+ }

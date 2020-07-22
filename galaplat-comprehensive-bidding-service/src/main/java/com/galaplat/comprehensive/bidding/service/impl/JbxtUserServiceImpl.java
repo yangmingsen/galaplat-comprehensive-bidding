@@ -36,31 +36,31 @@ import javax.servlet.http.HttpServletResponse;
  @Service
 public  class JbxtUserServiceImpl implements IJbxtUserService  {
 
- 	Logger LOGGER = LoggerFactory.getLogger(JbxtUserServiceImpl.class);
+ 	private final Logger LOGGER = LoggerFactory.getLogger(JbxtUserServiceImpl.class);
 
 	@Autowired
-	private HttpServletRequest httpServletRequest;
+	private IJbxtUserDao jbxtuserDao;
 
-	@Autowired
-	IJbxtUserDao jbxtuserDao;
+	public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
+	 	return jbxtuserDao.selectByuserCodeAndActivityCode(userCode,activityCode);
+	}
 
-	 @Override
-	 public boolean handlerLogin(String username, String password) {
+	public JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode) {
+	 	return jbxtuserDao.selectByUsernameAndActivityCode(username,activityCode);
+	}
 
-		 JbxtUserDO jud = jbxtuserDao.getJbxtUserByUsername(username);
-		 if (jud != null) {
-		 	if (jud.getPassword().equals(password)) {
-		 		LOGGER.info("LoginInfo: "+username+" login");
-				//存入session中
-				httpServletRequest.getSession().setAttribute(SessionConstant.SESSION_USER,jud);
 
-		 		return true;
-			}
-		 }
-		 return false;
-	 }
+	@Override
+	public JbxtUserDO getJbxtUserByUsername(String username) {
+		return jbxtuserDao.getJbxtUserByUsername(username);
+	}
 
-	 @Override
+	public List<JbxtUserDVO> findAllByActivityCode(String activityCode) {
+	 	return jbxtuserDao.findAllByActivityCode(activityCode);
+	}
+
+
+	@Override
 	public int insertJbxtUser(JbxtUserVO jbxtuserVO){
 	       JbxtUserDO jbxtuserDO = BeanCopyUtils.copyProperties(JbxtUserDO.class, jbxtuserVO);
 	       return jbxtuserDao.insertJbxtUser(jbxtuserDO );

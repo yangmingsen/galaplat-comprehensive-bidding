@@ -1,7 +1,11 @@
 package com.galaplat.comprehensive.bidding;
 
+import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
+import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
+import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import org.galaplat.baseplatform.file.plugin.FilePlugin;
+import org.galaplat.baseplatform.file.upload.UploadPlugin;
 import org.slf4j.MDC;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +33,7 @@ import com.galaplat.baseplatform.serialnumber.plugin2.SerialnumberPlugin2;
 @EnableAsync
 @EnableFeignClients
 @org.springframework.context.annotation.Import({com.galaplat.base.core.springboot.CommonConfig.class, PermissionPlugin.class,
-	SerialnumberPlugin2.class, FilePlugin.class})
+	SerialnumberPlugin2.class, FilePlugin.class, UploadPlugin.class})
 @EnableMBeanExport(registration = org.springframework.jmx.support.RegistrationPolicy.IGNORE_EXISTING)
 public class GalaplatComprehensiveBiddingApp implements CommandLineRunner {
 
@@ -46,6 +50,17 @@ public class GalaplatComprehensiveBiddingApp implements CommandLineRunner {
     @Bean
     public IdWorker idWorker() {
         return new IdWorker(0, 0);
+    }
+
+    @Bean
+    public UserChannelMap userChannelMap() {return new UserChannelMap();}
+
+    @Bean
+    public AdminChannelMap adminChannel() {return new AdminChannelMap();}
+
+    @Bean
+    public ActivityThreadManager activityManager() {
+       return new ActivityThreadManager();
     }
 
 }

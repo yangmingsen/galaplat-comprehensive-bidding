@@ -36,7 +36,35 @@ public class JbxtBiddingDVO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
-    public String getCode() {
+     private String bidTime;
+
+     @Override
+     public String toString() {
+         return "JbxtBiddingDVO{" +
+                 "code='" + code + '\'' +
+                 ", goodsId=" + goodsId +
+                 ", userCode='" + userCode + '\'' +
+                 ", activityCode='" + activityCode + '\'' +
+                 ", bid=" + bid +
+                 ", createdTime=" + createdTime +
+                 ", updatedTime=" + updatedTime +
+                 ", updator='" + updator + '\'' +
+                 ", creator='" + creator + '\'' +
+                 ", companyCode='" + companyCode + '\'' +
+                 ", sysCode='" + sysCode + '\'' +
+                 ", bidTime='" + bidTime + '\'' +
+                 '}';
+     }
+
+     public String getBidTime() {
+         return bidTime;
+     }
+
+     public void setBidTime(String bidTime) {
+         this.bidTime = bidTime;
+     }
+
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {

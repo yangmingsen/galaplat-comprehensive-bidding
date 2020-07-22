@@ -1,15 +1,24 @@
 package com.galaplat.comprehensive.bidding.dao.params;
 import com.galaplat.base.core.common.params.Param;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 
-
- /**
+/**
  * 竞价表Param
  * @author esr
  * @date: 2020年06月17日
  */
+ @Data
+ @Builder
+ @AllArgsConstructor
+ @NoArgsConstructor
 public class JbxtBiddingParam extends Param {
     private static final long serialVersionUID = 1L;
     
@@ -35,6 +44,18 @@ public class JbxtBiddingParam extends Param {
     private String companyCode;
     /*系统唯一编码*/
     private String sysCode;
+
+     private String bidTime;
+
+    private List<String> userCodeList;
+
+     public String getBidTime() {
+         return bidTime;
+     }
+
+     public void setBidTime(String bidTime) {
+         this.bidTime = bidTime;
+     }
 
     public String getCode() {
         return code;
