@@ -6,6 +6,7 @@ import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.netty.EventInHandler;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
@@ -13,9 +14,12 @@ import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseProblemHandler implements ProblemHandler {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(BaseProblemHandler.class);
     protected final UserChannelMap userChannelMap;
     protected final AdminChannelMap adminChannel;
     protected final MessageQueue messageQueue;
@@ -58,6 +62,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param adminCode
      */
     protected void notifyOptionAdmin(Message message, String activityCode, String adminCode) {
+        LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" adminCode="+adminCode+" message="+message);
         AdminInfo adminInfo = adminChannel.get(adminCode);
         if (adminInfo.getFocusActivity().equals(activityCode)) {
             //推数据到管理端
