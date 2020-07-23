@@ -196,11 +196,11 @@ public class AdminController extends BaseController {
     private Object switchActivityGoods(String activityCode) {
         final List<JbxtGoodsDVO> goodsList = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
         for (int i = 0; i < goodsList.size(); i++) {
-            final JbxtGoodsDVO jbxtGoodsDVO1 = goodsList.get(i);
-            if ("0".equals(jbxtGoodsDVO1.getStatus())) {
+            final JbxtGoodsDVO currentGoods = goodsList.get(i);
+            if ("0".equals(currentGoods.getStatus())) {
                 //更新当前竞品状态为 1
                 final JbxtGoodsVO newGoodsStatus = new JbxtGoodsVO();
-                newGoodsStatus.setGoodsId(jbxtGoodsDVO1.getGoodsId());
+                newGoodsStatus.setGoodsId(currentGoods.getGoodsId());
                 newGoodsStatus.setStatus("1");
                 boolean switchOk = false;
                 try {
@@ -220,8 +220,8 @@ public class AdminController extends BaseController {
                 }
 
                 if (switchOk) {
-                    startActivityThread(activityCode, jbxtGoodsDVO1.getGoodsId().toString(), jbxtGoodsDVO1.getTimeNum());
-                    notify214Event(activityCode, jbxtGoodsDVO1.getGoodsId());
+                    startActivityThread(activityCode, currentGoods.getGoodsId().toString(), currentGoods.getTimeNum());
+                    notify214Event(activityCode, currentGoods.getGoodsId());
 
                     return new MyResult(true, "切换成功");
                 } else {
