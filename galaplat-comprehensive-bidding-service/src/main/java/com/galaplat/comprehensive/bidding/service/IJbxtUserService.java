@@ -17,9 +17,6 @@ import com.github.pagehelper.PageInfo;
  */
 public interface IJbxtUserService{
 
-
-	boolean handlerLogin(String username, String password);
-
 	 JbxtUserDO getJbxtUserByUsername(String  username);
 
 	 List<JbxtUserDVO> findAllByActivityCode(String activityCode);

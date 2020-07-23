@@ -155,4 +155,10 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode) {
 		return jbxtbiddingDao.findAllByUserCodeAndActivityCode(userCode,activityCode);
 	}
+
+	public List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode) {
+    	return jbxtbiddingDao.findAllByUserCodeAndGooodsIdAndActivityCode(userCode, goodsId, activityCode);
+	}
+
+
 }

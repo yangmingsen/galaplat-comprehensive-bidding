@@ -7,12 +7,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class PushQueue {
-    private BlockingQueue<QueueMessage> blockingQueue = null;
-
-    public PushQueue() {
-        blockingQueue = new ArrayBlockingQueue<>(100);
-    }
+public class MessageQueue {
+    private final BlockingQueue<QueueMessage> blockingQueue = new ArrayBlockingQueue<>(1000);;
 
     /***
      * 如果试图的操作无法立即执行，返回一个特定的值(常常是 true / false)。

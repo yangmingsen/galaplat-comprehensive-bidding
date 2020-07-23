@@ -22,14 +22,6 @@ import com.github.pagehelper.PageInfo;
 public interface IJbxtGoodsService{
 
 
-	 /***
-	  * 给客户端
-	  * @param activityCode
-	  * @return  List CustomGoodsVO
-	  */
-	 public List<CustomGoodsVO> findAllByActivityCode(String activityCode);
-
-
 
 	 /**
 	  * 给管理端使用
@@ -48,14 +40,6 @@ public interface IJbxtGoodsService{
 	  */
 	 public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
-
-	 /***
-	  * 通用获取当前用户排名情况方法
-	  * @param userCode
-	  * @param goodsId
-	  * @return
-	  */
-	 public CustomBidVO handlerFindCustomBidVO(String userCode, Integer goodsId, String activityCode);
 
 
 	 /**

@@ -36,29 +36,10 @@ import javax.servlet.http.HttpServletResponse;
  @Service
 public  class JbxtUserServiceImpl implements IJbxtUserService  {
 
- 	Logger LOGGER = LoggerFactory.getLogger(JbxtUserServiceImpl.class);
+ 	private final Logger LOGGER = LoggerFactory.getLogger(JbxtUserServiceImpl.class);
 
 	@Autowired
-	private HttpServletRequest httpServletRequest;
-
-	@Autowired
-	IJbxtUserDao jbxtuserDao;
-
-	 @Override
-	 public boolean handlerLogin(String username, String password) {
-
-		 JbxtUserDO jud = jbxtuserDao.getJbxtUserByUsername(username);
-		 if (jud != null) {
-		 	if (jud.getPassword().equals(password)) {
-		 		LOGGER.info("LoginInfo: "+username+" login");
-				//存入session中
-				httpServletRequest.getSession().setAttribute(SessionConstant.SESSION_USER,jud);
-
-		 		return true;
-			}
-		 }
-		 return false;
-	 }
+	private IJbxtUserDao jbxtuserDao;
 
 	public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
 	 	return jbxtuserDao.selectByuserCodeAndActivityCode(userCode,activityCode);

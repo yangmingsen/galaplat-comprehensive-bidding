@@ -26,4 +26,12 @@ public class QueueMessage {
     public void setData(Map<String, String> data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "QueueMessage{" +
+                "type=" + type +
+                ", data=" + data +
+                '}';
+    }
 }

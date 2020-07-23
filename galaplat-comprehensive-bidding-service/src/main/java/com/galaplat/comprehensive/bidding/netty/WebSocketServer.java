@@ -5,6 +5,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,10 +16,11 @@ public class WebSocketServer {
     private EventLoopGroup workerGroup;     // 工作线程池
     private ServerBootstrap server;         // 服务器
     private ChannelFuture future;           // 回调
+    Logger LOGGER = LoggerFactory.getLogger(WebSocketServer.class);
 
     public void start() {
         future = server.bind(9001);
-        System.out.println("Netty server - 启动成功");
+        LOGGER.info("Netty server - 启动成功 bind port in 9001");
     }
 
     public WebSocketServer() {

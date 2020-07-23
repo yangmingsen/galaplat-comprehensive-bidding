@@ -24,8 +24,9 @@ import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.vos.JbxtActivityVO;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import org.springframework.transaction.annotation.Transactional;
 
- /**
+/**
  * 活动表ServiceImpl
  * @author esr
  * @date: 2020年06月17日
@@ -48,6 +49,15 @@ public  class JbxtActivityServiceImpl implements IJbxtActivityService  {
 	      JbxtActivityDO jbxtactivityDO = BeanCopyUtils.copyProperties(JbxtActivityDO.class,jbxtactivityVO);
 		  jbxtactivityDO.setUpdatedTime(new Date());
 		  return jbxtactivityDao.updateJbxtActivity(jbxtactivityDO);
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public int updateByPrimaryKeySelective(JbxtActivityDO entity) {
+    	return jbxtactivityDao.updateByPrimaryKeySelective(entity);
+	}
+
+	public JbxtActivityDO findOneByCode(String code) {
+    	return jbxtactivityDao.findOneByCode(code);
 	}
 
 	@Override

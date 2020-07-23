@@ -1,11 +1,12 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.ActivityMap;
-import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
-import com.galaplat.comprehensive.bidding.activity.AdminInfo;
-import com.galaplat.comprehensive.bidding.activity.queue.PushQueue;
+import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
+import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
+import com.galaplat.comprehensive.bidding.netty.AdminInfo;
+import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.netty.EventInHandler;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
@@ -13,31 +14,33 @@ import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseProblemHandler implements ProblemHandler {
 
-
-    protected UserChannelMap userChannelMap;
-    protected AdminChannelMap adminChannel;
-    protected PushQueue pushQueue;
-    protected IJbxtGoodsService iJbxtGoodsService; //竞品服务
-    protected ActivityMap activityMap;
-    protected IJbxtUserService iJbxtUserService;
-    protected IJbxtBiddingService iJbxtBiddingService;
+    private final Logger LOGGER = LoggerFactory.getLogger(BaseProblemHandler.class);
+    protected final UserChannelMap userChannelMap;
+    protected final AdminChannelMap adminChannel;
+    protected final MessageQueue messageQueue;
+    protected final IJbxtGoodsService iJbxtGoodsService; //竞品服务
+    protected final ActivityThreadManager activityManager;
+    protected final IJbxtUserService iJbxtUserService;
+    protected final IJbxtBiddingService iJbxtBiddingService;
 
     public BaseProblemHandler() {
         this.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
         this.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
-        this.pushQueue = SpringUtil.getBean(PushQueue.class);
+        this.messageQueue = SpringUtil.getBean(MessageQueue.class);
         this.iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
-        this.activityMap = SpringUtil.getBean(ActivityMap.class);
+        this.activityManager = SpringUtil.getBean(ActivityThreadManager.class);
         this.iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
         this.iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
     }
 
     @Override
-    public void problem(int type, QueueMessage queuemsg) {
-        this.handlerProblem(type,queuemsg);
+    public void problem(int type, QueueMessage queueMsg) {
+        this.handlerProblem(type,queueMsg);
     }
 
     public abstract void handlerProblem(int type, QueueMessage queuemsg);
@@ -59,6 +62,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param adminCode
      */
     protected void notifyOptionAdmin(Message message, String activityCode, String adminCode) {
+        LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" adminCode="+adminCode+" message="+message);
         AdminInfo adminInfo = adminChannel.get(adminCode);
         if (adminInfo.getFocusActivity().equals(activityCode)) {
             //推数据到管理端
@@ -83,6 +87,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param userCode
      */
     protected void notifyOptionSupplier(Message message, String activityCode, String userCode) {
+        LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" userCode="+userCode+" message="+message);
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
