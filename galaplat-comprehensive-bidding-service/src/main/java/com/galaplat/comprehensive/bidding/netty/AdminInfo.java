@@ -26,4 +26,12 @@ public class AdminInfo {
     public void setChannel(Channel channel) {
         this.channel = channel;
     }
+
+    @Override
+    public String toString() {
+        return "AdminInfo{" +
+                "focusActivity='" + focusActivity + '\'' +
+                ", channel=" + channel +
+                '}';
+    }
 }

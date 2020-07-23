@@ -184,7 +184,7 @@ public class ActivityThread extends Thread {
      * @param status 1 进行 2暂停  3重置  4结束(不可手动设置)
      */
     public void setStatus(int status) {
-        LOGGER.info("currentStatus="+status+" newStatus="+status);
+        LOGGER.info("currentStatus="+this.status+" newStatus="+status);
         if (this.status == status) return; //处理相同status设置
 
         this.status = status;
