@@ -47,6 +47,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 	private ActivityThreadManager activityManager;
 
     public List<SimpleGoodsVO> findAll(String activityCode) {
+		LOGGER.info("findAll(msg); activityCode="+activityCode);
 
         List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
@@ -63,7 +64,10 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 			if (currentActivity != null) {
 				LOGGER.info("findAll(msg): currentThreadStatus="+currentActivity.getStatus());
+				LOGGER.info("findAll(msg): currentThread1="+currentActivity);
 				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId().toString())) {
+					LOGGER.info("findAll(msg): currentThread2="+currentActivity);
+
 					int status = currentActivity.getStatus();
 					if (status == 2) {
 						sgv.setIsActive("3");

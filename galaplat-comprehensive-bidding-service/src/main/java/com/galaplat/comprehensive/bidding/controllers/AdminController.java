@@ -173,6 +173,7 @@ public class AdminController extends BaseController {
                 LOGGER.info(info);
                 return new MyResult(false, info);
             }
+            LOGGER.info("next(msg): 修改goodsId("+tj.getGoodsId()+")为2");
         }
         return switchActivityGoods(activityCode);
     }
@@ -212,6 +213,7 @@ public class AdminController extends BaseController {
                         iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
                     }
                     iJbxtGoodsService.updateJbxtGoods(newGoodsStatus);
+                    LOGGER.info("switchActivityGoods(msg): 切换下一竞品goodsId("+newGoodsStatus.getGoodsId()+")为1");
                     switchOk = true;
                 } catch (Exception e) {
                     LOGGER.info("next(ERROR): 更新状态为开始失败");

@@ -6,6 +6,7 @@ import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.netty.AdminInfo;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t1;
@@ -48,10 +49,14 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
 
     private void handler300Problem(QueueMessage takeQueuemsg) {
+        LOGGER.info("handler300Problem(reve msg): "+takeQueuemsg.toString());
 
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String adminCode = takeQueuemsg.getData().get("adminCode");
-        final Channel caChannel = adminChannel.get(adminCode).getChannel();
+
+        final AdminInfo adminInfo1 = adminChannel.get(adminCode);
+        LOGGER.info("handler300Problem(msg): adminInfo="+adminInfo1);
+        final Channel caChannel = adminInfo1.getChannel();
 
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         final Integer goodsId ;
@@ -116,7 +121,9 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
         //处理返回数据
         final Message tmsg = new Message(300, res300);
+        LOGGER.info("handler300Problem(msg): 往管理员"+adminCode+" send msg="+tmsg.toString());
         caChannel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(tmsg)));
+
 
         //处理当管理端点击暂停后无故刷新控制台界面 时间同步问题
         //传递当前活动剩余时长

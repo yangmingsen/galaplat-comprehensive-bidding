@@ -1,7 +1,10 @@
 package com.galaplat.comprehensive.bidding.activity.queue;
 
+import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.handler.*;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueueHandlerThread extends Thread {
 
@@ -10,6 +13,8 @@ public class QueueHandlerThread extends Thread {
     private final ProblemHandler supplierInHandler;
     private final ProblemHandler adminOutHandler;
     private final ProblemHandler adminInHandler;
+    private final Logger LOGGER = LoggerFactory.getLogger(QueueHandlerThread.class);
+
 
     private static QueueHandlerThread queueHandler;
 
@@ -37,6 +42,7 @@ public class QueueHandlerThread extends Thread {
     public void run() {
         while (true) {
             QueueMessage takeQueuemsg = messageQueue.take();
+            LOGGER.info("队列线程收到msg: takeQueuemsg="+takeQueuemsg.toString());
 
             //System.out.println("QueueMessage: "+JSON.toJSONString(takeQueuemsg));
 
