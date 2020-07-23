@@ -40,6 +40,7 @@ public class QueueHandlerThread extends Thread {
 
 
     public void run() {
+        LOGGER.info("消息队列线程 QueueHandlerThread 启动成功");
         while (true) {
             QueueMessage takeQueuemsg = messageQueue.take();
             LOGGER.info("队列线程收到msg: takeQueuemsg="+takeQueuemsg.toString());
