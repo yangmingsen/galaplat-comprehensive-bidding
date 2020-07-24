@@ -221,8 +221,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
         List<List<String>> bidPriceRankData = new ArrayList<>();
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
-
+        int index = 1;
         for (JbxtGoodsDO goods : goodsList) {
+            goods.setGoodsId(index);
             // 查询某竞标活动某竞品的所有用户
             List<String> allBidUserCodes = biddingDao.listBidActivityUsers(JbxtBiddingParam.builder().goodsId(goods.getGoodsId())
                     .activityCode(goods.getActivityCode()).build());
@@ -240,6 +241,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 String userCode = allBidUserCodes.get(i);
                 bidPriceDdetailData.add(getBidPriceDetail(userCode, goods, bidActivityCode));
             }
+            index ++;
         }
 
         // 获取表头信息
