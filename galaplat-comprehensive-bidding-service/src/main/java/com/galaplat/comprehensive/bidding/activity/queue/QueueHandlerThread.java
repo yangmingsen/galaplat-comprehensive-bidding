@@ -48,7 +48,7 @@ public class QueueHandlerThread extends Thread {
         //{type: 215, data: {activityCode: "s34534534", goodsId: 234235, status: 3 or 1 }}
         //{type: 216, data: {activityCode: "s34534534"}} or {type: 216, data: {activityCode: "s34534534", userCode: 234235}}
         //{type: 300, data: {adminCode: "235235345", activityCode: "s34534534"}}
-        //{type: 301, data: { activityCode: 23423345, bidTime: 15:32, bid: 2.345, supplierCode: 234903945834, CodeName: '小红', supplierName: '小米科技电子有限公司'}}
+        //{type: 301, data: { activityCode: 23423345, goodsId: 234235, userCode: 234325 }}
         //{type: 302, data: {activityCode: "s34534534", goodsId: 234235, adminCode: 345dfg}}
         switch (takeQueuemsg.getType()) {
             case 111: //处理第一名发生变化时 同步数据给供应商

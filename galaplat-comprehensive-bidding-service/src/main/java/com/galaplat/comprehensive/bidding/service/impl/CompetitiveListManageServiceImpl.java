@@ -221,14 +221,14 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
         List<List<String>> bidPriceRankData = new ArrayList<>();
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
-
+        int index = 1;
         for (JbxtGoodsDO goods : goodsList) {
             // 查询某竞标活动某竞品的所有用户
             List<String> allBidUserCodes = biddingDao.listBidActivityUsers(JbxtBiddingParam.builder().goodsId(goods.getGoodsId())
                     .activityCode(goods.getActivityCode()).build());
 
             // 竞价等级
-            Map<String,Object>  map = getBidPriceFinalRank(goods, allBidUserCodes);
+            Map<String,Object>  map = getBidPriceFinalRank(goods, allBidUserCodes, index);
             int size  = (int) map.get("size");
             if (maxBidNum <  size) {
                 maxBidNum = size;
@@ -240,6 +240,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 String userCode = allBidUserCodes.get(i);
                 bidPriceDdetailData.add(getBidPriceDetail(userCode, goods, bidActivityCode));
             }
+            index ++;
         }
 
         // 获取表头信息
@@ -374,13 +375,14 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      *
      * @param goods
      * @param allBidUserCodes
+     * @param index
      * @return
      */
-    private Map<String,Object> getBidPriceFinalRank(JbxtGoodsDO goods, List<String> allBidUserCodes) {
+    private Map<String,Object> getBidPriceFinalRank(JbxtGoodsDO goods, List<String> allBidUserCodes, int index) {
         Map<String,Object> resultMap = new HashMap<>();
 
         List<String> res = new ArrayList<>();
-        res.add(goods.getGoodsId().toString());
+        res.add(index+"");
         res.add(goods.getCode());
         res.add(goods.getName());
         res.add(goods.getNum().toString());
