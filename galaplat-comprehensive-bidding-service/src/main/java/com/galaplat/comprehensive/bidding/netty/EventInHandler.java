@@ -56,8 +56,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         // {type: 101, data: {userCode: 22343423, activityCode: 23426783345}}
         // {type: 102, data: {adminCode: 22343423}}
         // {type: 213, data: {bidPrice: 32.345, goodsId: 234}}
+        //{type: 217, data: {userCode: 23425345}}
         // {type: 300, data: {activityCode: 2234343423}}
         // {type: 302, data: {activityCode: 2234343423, goodsId: 23425346}}
+        // {type: 303, data: {adminCode: 23534534}}
         switch (message.getType()) {
             // 建立供应商客户端连接的消息
             case 101: {
@@ -114,6 +116,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                 final String userCode = message.getData().get("userCode");
                 LOGGER.info("handler(msg): 来至于供应商端("+userCode+")的心跳");
             }
+            break;
 
             //处理管理端主动请求(建立对目标活动关联)
             case 300: {
@@ -142,6 +145,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                 final String adminCode = message.getData().get("adminCode");
                 LOGGER.info("handler(msg): 来至于管理端("+adminCode+")的心跳");
             }
+            break;
         }
     }
 
