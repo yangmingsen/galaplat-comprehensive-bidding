@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 
 @Component
 public class MessageQueue {
-    private final BlockingQueue<QueueMessage> blockingQueue = new ArrayBlockingQueue<>(1000);;
+    private final BlockingQueue<QueueMessage> blockingQueue = new ArrayBlockingQueue<>(6000);;
     private final Logger LOGGER = LoggerFactory.getLogger(MessageQueue.class);
     /***
      * 如果试图的操作无法立即执行，返回一个特定的值(常常是 true / false)。
