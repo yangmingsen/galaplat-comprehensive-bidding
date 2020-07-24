@@ -6,7 +6,6 @@ import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
-import com.galaplat.comprehensive.bidding.netty.EventInHandler;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.Message;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
