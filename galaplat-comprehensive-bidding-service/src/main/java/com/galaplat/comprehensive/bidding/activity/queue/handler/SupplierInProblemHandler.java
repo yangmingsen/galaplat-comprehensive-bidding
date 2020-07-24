@@ -99,13 +99,9 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         }
 
         final Map<String, String> map301 = new HashMap();
-        map301.put("bidTime",bidTime);
-        map301.put("bid",bid.toString());
         map301.put("activityCode", activityCode);
-        final JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, activityCode);
-        map301.put("supplierCode",jbxtUserDO.getCode());
-        map301.put("CodeName", jbxtUserDO.getCodeName());
-        map301.put("supplierName", jbxtUserDO.getSupplierName());
+        map301.put("userCode", userCode);
+        map301.put("goodsId", goodsId.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
         //

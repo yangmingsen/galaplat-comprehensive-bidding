@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.netty.AdminInfo;
@@ -139,14 +140,28 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
     }
 
-
     private void handler301Problem( QueueMessage takeQueuemsg) {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
+        final String userCode = takeQueuemsg.getData().get("userCode");
+        final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
+        final Integer goodsId = Integer.parseInt(goodsIdStr);
+        final JbxtBiddingDO minbidInfo = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+        final JbxtUserDO userInfo = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, activityCode);
 
+        final Map<String, String> res301 = new HashMap<>();
+        if (minbidInfo != null && userInfo !=null) {
+            res301.put("bidTime", minbidInfo.getBidTime());
+            res301.put("bid", minbidInfo.getBid().toString());
+            res301.put("activityCode", activityCode);
+            res301.put("supplierCode", userInfo.getCode());
+            res301.put("CodeName", userInfo.getCodeName());
+            res301.put("supplierName", userInfo.getSupplierName());
+        } else {
+            return;
+        }
         //推数据给管理端
-        final Message message = new Message(301, takeQueuemsg.getData());
-        notifyAllAdmin(message,activityCode);
+        final Message message = new Message(301, res301);
+        notifyAllAdmin(message, activityCode);
     }
-
 
 }
