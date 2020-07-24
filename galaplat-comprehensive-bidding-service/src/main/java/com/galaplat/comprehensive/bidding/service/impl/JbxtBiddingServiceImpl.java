@@ -42,7 +42,6 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
  	//--------------------------CRUD------------
  	@Override
-	@Transactional(rollbackFor = Exception.class)
 	public int insertMinBidTableSelective(JbxtBiddingVO record) {
 		record.setCode(idWorker.nextId());
 
@@ -66,7 +65,6 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
 	public int updateMinBidTableByPrimaryKeySelective(JbxtBiddingVO record) {
 		JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class, record);
 		return jbxtbiddingDao.updateMinBidTableByPrimaryKeySelective(jbxtbiddingDO);
@@ -139,7 +137,6 @@ public  class JbxtBiddingServiceImpl implements IJbxtBiddingService  {
 
 
 	@Override
-	@Transactional(rollbackFor = Exception.class)
 	public int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO){
 	      JbxtBiddingDO jbxtbiddingDO = BeanCopyUtils.copyProperties(JbxtBiddingDO.class,jbxtbiddingVO);
 		  jbxtbiddingDO.setUpdatedTime(new Date());
