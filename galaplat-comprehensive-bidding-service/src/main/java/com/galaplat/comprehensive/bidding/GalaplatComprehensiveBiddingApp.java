@@ -1,8 +1,7 @@
 package com.galaplat.comprehensive.bidding;
 
-import com.galaplat.comprehensive.bidding.activity.ActivityMap;
-import com.galaplat.comprehensive.bidding.activity.AdminChannelMap;
-import com.galaplat.comprehensive.bidding.activity.GoodsTopMap;
+import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
+import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import org.galaplat.baseplatform.file.plugin.FilePlugin;
@@ -60,13 +59,8 @@ public class GalaplatComprehensiveBiddingApp implements CommandLineRunner {
     public AdminChannelMap adminChannel() {return new AdminChannelMap();}
 
     @Bean
-    public ActivityMap activityMap() {
-       return new ActivityMap();
-    }
-
-    @Bean
-    public GoodsTopMap goodsTopMap() {
-        return new GoodsTopMap();
+    public ActivityThreadManager activityManager() {
+       return new ActivityThreadManager();
     }
 
 }

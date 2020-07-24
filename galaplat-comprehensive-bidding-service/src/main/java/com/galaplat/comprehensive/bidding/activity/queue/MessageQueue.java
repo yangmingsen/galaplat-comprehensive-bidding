@@ -1,5 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity.queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.NoSuchElementException;
@@ -7,17 +9,14 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class PushQueue {
-    private BlockingQueue<QueueMessage> blockingQueue = null;
-
-    public PushQueue() {
-        blockingQueue = new ArrayBlockingQueue<>(100);
-    }
-
+public class MessageQueue {
+    private final BlockingQueue<QueueMessage> blockingQueue = new ArrayBlockingQueue<>(6000);;
+    private final Logger LOGGER = LoggerFactory.getLogger(MessageQueue.class);
     /***
      * 如果试图的操作无法立即执行，返回一个特定的值(常常是 true / false)。
      */
     public boolean offer(QueueMessage queueMessage) {
+        LOGGER.info("offer(ms): 消息队列收到消息"+queueMessage.toString());
         return this.blockingQueue.offer(queueMessage);
     }
 

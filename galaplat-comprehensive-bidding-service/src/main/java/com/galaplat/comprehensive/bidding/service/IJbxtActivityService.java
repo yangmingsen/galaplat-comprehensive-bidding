@@ -28,6 +28,10 @@ public interface IJbxtActivityService{
 	 */
 	int updateJbxtActivity(JbxtActivityVO jbxtactivityVO);
 
+	 int updateByPrimaryKeySelective(JbxtActivityDO entity);
+
+	 JbxtActivityDO findOneByCode(String code);
+
 	/**
 	 * 分页获取活动表列表
 	 *

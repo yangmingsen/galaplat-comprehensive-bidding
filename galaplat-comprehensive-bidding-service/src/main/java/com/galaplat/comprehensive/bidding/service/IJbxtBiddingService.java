@@ -90,4 +90,6 @@ public interface IJbxtBiddingService{
 	  */
 	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
+	 List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
+
 }

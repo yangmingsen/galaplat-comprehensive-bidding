@@ -2,7 +2,7 @@ package com.galaplat.comprehensive.bidding.netty.pojo.res;
 
 public class Res301  {
     private String supplierName;
-    private String CodeName;
+    private String codeName;
     private String supplierCode;
     private Integer bid;
     private String bidTime;
@@ -16,11 +16,11 @@ public class Res301  {
     }
 
     public String getCodeName() {
-        return CodeName;
+        return codeName;
     }
 
     public void setCodeName(String codeName) {
-        CodeName = codeName;
+        this.codeName = codeName;
     }
 
     public String getSupplierCode() {
