@@ -19,7 +19,7 @@ public interface JbxtBiddingDOMapper {
 
     @Delete({
             "delete from t_jbxt_minbid",
-            "where goods_id = #{goodsId,jdbcType=INTEGER} AND activity_code = #{activityCode,jdbcType=VARCHAR}"
+            "where activity_code = #{activityCode,jdbcType=VARCHAR}  AND goods_id = #{goodsId,jdbcType=INTEGER}"
     })
     int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
@@ -33,7 +33,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_minbid",
-            "where user_code=#{userCode,jdbcType=VARCHAR} and goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR}"
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND  goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR}"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
@@ -57,7 +57,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_minbid",
-            "where goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC"
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} ORDER BY bid ASC"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
@@ -92,7 +92,7 @@ public interface JbxtBiddingDOMapper {
 
     @Delete({
             "delete from t_jbxt_bidding",
-            "where goods_id = #{goodsId,jdbcType=INTEGER} AND activity_code = #{activityCode,jdbcType=VARCHAR}"
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER}"
     })
     int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
@@ -193,7 +193,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
-            "where user_code=#{userCode,jdbcType=VARCHAR} and goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
@@ -218,7 +218,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
-            "where user_code=#{userCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} AND activity_code =#{activityCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND  goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
@@ -244,7 +244,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
-            "where goods_id = #{goodsId,jdbcType=INTEGER} and activity_code = #{activityCode}"
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER}"
     })
     @Results({
             @Result(column="code", property="code", jdbcType=JdbcType.VARCHAR, id=true),
@@ -269,7 +269,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
-            "where user_code = #{userCode,jdbcType=VARCHAR} and activity_code = #{activityCode,jdbcType=VARCHAR} ",
+            "where activity_code = #{activityCode,jdbcType=VARCHAR} AND user_code = #{userCode,jdbcType=VARCHAR} ",
             "ORDER BY bid ASC"
     })
     @Results({
@@ -294,7 +294,7 @@ public interface JbxtBiddingDOMapper {
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
             "creator, company_code, sys_code, bid_time",
             "from t_jbxt_bidding",
-            "where user_code = #{userCode,jdbcType=VARCHAR} and goods_id = #{goodsId, jdbcType=INTEGER} and activity_code = #{activityCode,jdbcType=VARCHAR} ",
+            "where activity_code =#{activityCode,jdbcType=VARCHAR} AND  goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR} ",
             "ORDER BY bid ASC"
     })
     @Results({

@@ -2,7 +2,7 @@ package com.galaplat.comprehensive.bidding.netty;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThread;
+import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThreadSingleton;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
@@ -55,8 +55,8 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
                 }
             }
 
-            QueueHandlerThread queueHandler = QueueHandlerThread.getInstance();
-            queueHandler.start();
+            QueueHandlerThreadSingleton queueHandlerThreadSingleton = QueueHandlerThreadSingleton.getInstance();
+            queueHandlerThreadSingleton.start();
 
             this.isInit = true;
         }
