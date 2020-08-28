@@ -11,6 +11,7 @@ import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -28,16 +29,25 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
 
     private boolean isInit = false;
 
-    @Autowired
+    //@Autowired
     private  SpringUtil springUtil;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
 
-        if (!isInit) {
+        System.out.println();
+        System.out.println("event="+event);
+        System.out.println("one="+event.getApplicationContext().getClass());
+        System.out.println("two="+AnnotationConfigServletWebServerApplicationContext.class);
+        System.out.println();
+        boolean isTimeToRun = false;
+        if (event.getApplicationContext().getClass().equals(AnnotationConfigServletWebServerApplicationContext.class)) {
+            System.out.println("acutally");
+            isTimeToRun = true;
+        }
+        if (!isInit && isTimeToRun) {
             websocketServer.start();
             LOGGER.info("onApplicationEvent(msg): WebSocket started");
-
             final IJbxtActivityService iJbxtActivityServiceBeans = springUtil.getBean(IJbxtActivityService.class);
             final ActivityThreadManager activityMap = springUtil.getBean(ActivityThreadManager.class);
             final List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();

@@ -4,6 +4,9 @@ import com.galaplat.comprehensive.bidding.enums.HandlerEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/***
+ * 处理者工厂
+ */
 public class ProblemHandlerFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(ProblemHandlerFactory.class);
     private static HandlerEnum getNameMapper(final String name) {

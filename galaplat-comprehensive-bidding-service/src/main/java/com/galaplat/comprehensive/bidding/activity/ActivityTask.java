@@ -2,13 +2,13 @@ package com.galaplat.comprehensive.bidding.activity;
 
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
-import com.galaplat.comprehensive.bidding.netty.pojo.Message;
+import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ActivityTask implements Runnable{
 
     private  Logger LOGGER ;
-    private  Message remainingTimeMessage;
+    private ResponseMessage remainingTimeMessage;
     private  UserChannelMap userChannelMap ;
     private  AdminChannelMap adminChannel ;
     private  IJbxtGoodsService iJbxtGoodsService ;
@@ -395,7 +395,7 @@ public class ActivityTask implements Runnable{
         public Builder() {
             activityTask.status = 1;
             activityTask.LOGGER = LoggerFactory.getLogger(ActivityThread.class);
-            activityTask.remainingTimeMessage = new Message(100,null);
+            activityTask.remainingTimeMessage = new ResponseMessage(100,null);
             activityTask.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
             activityTask.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
             activityTask.iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);

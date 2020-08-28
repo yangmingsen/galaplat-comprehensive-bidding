@@ -1,14 +1,16 @@
-package com.galaplat.comprehensive.bidding.activity.queue;
+package com.galaplat.comprehensive.bidding.netty.pojo;
 
-import java.util.Map;
 
-public class QueueMessage {
+public class ResponseMessage {
     private Integer type; // 消息类型
-    private Map<String,String> data;  // 消息字段
+    private Object data;  // 扩展消息字段
 
-    public QueueMessage(Integer type, Map<String, String> data) {
+    public ResponseMessage(Integer type, Object data) {
         this.type = type;
         this.data = data;
+    }
+
+    public ResponseMessage() {
     }
 
     public Integer getType() {
@@ -19,17 +21,17 @@ public class QueueMessage {
         this.type = type;
     }
 
-    public Map<String, String> getData() {
+    public Object getData() {
         return data;
     }
 
-    public void setData(Map<String, String> data) {
+    public void setData(Object data) {
         this.data = data;
     }
 
     @Override
     public String toString() {
-        return "QueueMessage{" +
+        return "ResponseMessage{" +
                 "type=" + type +
                 ", data=" + data +
                 '}';

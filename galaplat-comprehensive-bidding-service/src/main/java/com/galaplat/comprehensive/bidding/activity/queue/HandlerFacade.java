@@ -2,8 +2,10 @@ package com.galaplat.comprehensive.bidding.activity.queue;
 
 import static com.galaplat.comprehensive.bidding.activity.queue.handler.ProblemHandlerFactory.*;
 import com.galaplat.comprehensive.bidding.activity.queue.handler.ProblemHandler;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 
 /***
+ * 外观者模式
  * 提供统一处理者接口
  */
 public class HandlerFacade {

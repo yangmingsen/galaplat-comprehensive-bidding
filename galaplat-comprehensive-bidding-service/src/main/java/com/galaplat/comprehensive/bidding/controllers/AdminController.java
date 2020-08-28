@@ -5,7 +5,7 @@ import com.galaplat.baseplatform.permissions.controllers.BaseController;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
@@ -177,7 +177,6 @@ public class AdminController extends BaseController {
         }
         return switchActivityGoods(activityCode);
     }
-
     private MyResult checkNextReq(String activityCode) {
         if (activityCode == null || activityCode.equals("")) {
             return new MyResult(false, "错误: activityCode不能为空哦(*￣︶￣)", null);

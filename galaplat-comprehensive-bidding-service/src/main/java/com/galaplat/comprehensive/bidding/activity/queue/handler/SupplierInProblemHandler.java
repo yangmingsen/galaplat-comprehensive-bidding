@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;

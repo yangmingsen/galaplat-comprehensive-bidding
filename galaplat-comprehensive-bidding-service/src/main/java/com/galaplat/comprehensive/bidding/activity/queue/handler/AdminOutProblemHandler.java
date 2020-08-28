@@ -2,13 +2,13 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.netty.AdminInfo;
-import com.galaplat.comprehensive.bidding.netty.pojo.Message;
+import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t1;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t2;
@@ -121,7 +121,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
 
         //处理返回数据
-        final Message tmsg = new Message(300, res300);
+        final ResponseMessage tmsg = new ResponseMessage(300, res300);
         LOGGER.info("handler300Problem(msg): 往管理员"+adminCode+" send msg="+tmsg.toString());
         caChannel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(tmsg)));
 
@@ -133,7 +133,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 final Map<String, String> t_map = new HashMap<>();
                 t_map.put("remainingTime",currentActivity.getRemainingTimeString());
-                final Message remainingTimeMessage = new Message(100, t_map);
+                final ResponseMessage remainingTimeMessage = new ResponseMessage(100, t_map);
                 notifyOptionAdmin(remainingTimeMessage ,activityCode, adminCode);
             }
         }
@@ -160,7 +160,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             return;
         }
         //推数据给管理端
-        final Message message = new Message(301, res301);
+        final ResponseMessage message = new ResponseMessage(301, res301);
         notifyAllAdmin(message, activityCode);
     }
 

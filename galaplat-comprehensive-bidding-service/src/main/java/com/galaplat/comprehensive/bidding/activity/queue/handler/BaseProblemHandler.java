@@ -5,9 +5,9 @@ import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
-import com.galaplat.comprehensive.bidding.netty.pojo.Message;
+import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
@@ -38,10 +38,15 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     }
 
     @Override
-    public void problem(int type, QueueMessage queueMsg) {
+    public final void problem(int type, QueueMessage queueMsg) {
         this.handlerProblem(type,queueMsg);
     }
 
+    /***
+     * 由子类去实现如何处理
+     * @param type
+     * @param queuemsg
+     */
     public abstract void handlerProblem(int type, QueueMessage queuemsg);
 
 
@@ -50,7 +55,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param message
      * @param activityCode
      */
-    protected void notifyAllAdmin(Message message, String activityCode) {
+    protected void notifyAllAdmin(ResponseMessage message, String activityCode) {
         adminChannel.getAllAdmin().forEach(adminCode -> notifyOptionAdmin(message, activityCode, adminCode));
     }
 
@@ -60,7 +65,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param activityCode
      * @param adminCode
      */
-    protected void notifyOptionAdmin(Message message, String activityCode, String adminCode) {
+    protected void notifyOptionAdmin(ResponseMessage message, String activityCode, String adminCode) {
         LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" adminCode="+adminCode+" message="+message);
         AdminInfo adminInfo = adminChannel.get(adminCode);
         if (adminInfo.getFocusActivity().equals(activityCode)) {
@@ -75,7 +80,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param message
      * @param activityCode
      */
-    protected void notifyAllSupplier(Message message, String activityCode) {
+    protected void notifyAllSupplier(ResponseMessage message, String activityCode) {
         userChannelMap.getAllUser().forEach(supplier -> notifyOptionSupplier(message, activityCode, supplier));
     }
 
@@ -85,7 +90,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param activityCode
      * @param userCode
      */
-    protected void notifyOptionSupplier(Message message, String activityCode, String userCode) {
+    protected void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
         LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" userCode="+userCode+" message="+message);
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
