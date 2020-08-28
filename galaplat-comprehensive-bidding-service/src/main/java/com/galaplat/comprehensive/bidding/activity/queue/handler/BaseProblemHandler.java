@@ -16,6 +16,12 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <h2>抽象问题处理者</h2>
+ * <p>在这个类中,我们定义好问题处理这的大致骨架。</p>
+ * <p>关于处理问题的的细节我们交给它的子类,例如 {@link SupplierOutProblemHandler}</p>
+ * <p>子类需要实现{@link BaseProblemHandler#handlerProblem(int, QueueMessage)}. 这是一个模板方法</p>
+ */
 public abstract class BaseProblemHandler implements ProblemHandler {
 
     private final Logger LOGGER = LoggerFactory.getLogger(BaseProblemHandler.class);
