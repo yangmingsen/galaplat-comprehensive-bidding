@@ -2,6 +2,7 @@ package com.galaplat.comprehensive.bidding.activity;
 
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.ObjectQueueMessage;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +46,14 @@ public class ActivityTask implements Runnable{
     private BigDecimal minBid ;
     private boolean haveMinBid ;
     private Map<String, BigDecimal> minSubmitMap;
+    private List<RankInfo> rankInfos; //所有的供应商排名信息
+    private Map<String, Integer> rankInfoMap; //供应商当前排名位置
+
+
 
     private ActivityTask() {}
 
-
-    /***
+    /**
      * 设置当前活动剩余时长（秒）
      * @param remainingTime
      */
@@ -72,7 +77,7 @@ public class ActivityTask implements Runnable{
         return remainingTime;
     }
 
-    /***
+    /**
      * 获取当前剩余时间（字符串方式，例如 "15:34"）
      * @return
      */
@@ -98,7 +103,7 @@ public class ActivityTask implements Runnable{
         return stringBuilder.toString();
     }
 
-    /***
+    /**
      * 获取当前剩余时间（秒）
      * @return
      */
@@ -106,7 +111,7 @@ public class ActivityTask implements Runnable{
         return initTime;
     }
 
-    /***
+    /**
      * //1 进行 2暂停  3//重置 4 结束
      * @return
      */
@@ -115,7 +120,7 @@ public class ActivityTask implements Runnable{
     }
 
 
-    /***
+    /**
      * 设置榜首信息
      * @param theTopBids 处于第一名的竞价列表
      */
@@ -145,7 +150,7 @@ public class ActivityTask implements Runnable{
         }
     }
 
-    /***
+    /**
      * 设置 当前竞品活动状态
      * @param status 1 进行 2暂停  3重置  4结束(不可手动设置)
      */
@@ -191,7 +196,7 @@ public class ActivityTask implements Runnable{
         }
     }
 
-    /***
+    /**
      * 业务启动入口
      */
     public void run() {
@@ -202,7 +207,7 @@ public class ActivityTask implements Runnable{
         }
     }
 
-    /***
+    /**
      * 启动剩余时长计算
      * @throws InterruptedException
      */
@@ -241,7 +246,7 @@ public class ActivityTask implements Runnable{
 //        }
     }
 
-    /***
+    /**
      * 发送剩余时长到所有通道（supplier,admin）
      */
     private void sendRemainingTimeToAll() {
@@ -264,7 +269,7 @@ public class ActivityTask implements Runnable{
 
     }
 
-    /***
+    /**
      * 自动结束当前活动
      *
      */
@@ -285,7 +290,7 @@ public class ActivityTask implements Runnable{
         }
     }
 
-    /***
+    /**
      * 判断当前竞品是否为当前活动的最后一个竞品
      * @return
      */
@@ -338,7 +343,7 @@ public class ActivityTask implements Runnable{
     }
 
 
-    /***
+    /**
      * 同步数据给所有供应商端
      */
     private void syncInfoToAll() {
@@ -352,14 +357,14 @@ public class ActivityTask implements Runnable{
 
     }
 
-    /***
+    /**
      * 当活动处于暂停时 同步暂停后最后一次时间
      */
     private void whenAcitvityPause() {
         this.sendRemainingTimeToAll();
     }
 
-    /***
+    /**
      *  清除榜首信息
      */
     private void resetTopInfo() {
@@ -389,7 +394,60 @@ public class ActivityTask implements Runnable{
         messageQueue.offer(queueMessage);
     }
 
+    /**
+     * 外部传入的竞价信息
+     * @param queueMessage ObjectQueueMessage
+     */
+    public void recvBidMessage(QueueMessage queueMessage) {
+        ObjectQueueMessage messge = (ObjectQueueMessage)queueMessage;
 
+        //解析成RankInfo
+        //判断是否存在该用户的报价信息
+            //如果存在...
+            //如果不存在...直接添
+        //判断是否需要延时
+    }
+
+
+    private static class RankInfo {
+        private String id;
+        private BigDecimal bidPrice;
+        private Integer rank;
+
+        public RankInfo(String id, BigDecimal bidPrice, Integer rank) {
+            this.id = id;
+            this.bidPrice = bidPrice;
+            this.rank = rank;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public BigDecimal getBidPrice() {
+            return bidPrice;
+        }
+
+        public void setBidPrice(BigDecimal bidPrice) {
+            this.bidPrice = bidPrice;
+        }
+
+        public Integer getRank() {
+            return rank;
+        }
+
+        public void setRank(Integer rank) {
+            this.rank = rank;
+        }
+    }
+
+    /**
+     * 内部构建器
+     */
     public static class Builder {
         private final ActivityTask activityTask = new ActivityTask();
         public Builder() {
@@ -406,6 +464,8 @@ public class ActivityTask implements Runnable{
             activityTask.minBid = new BigDecimal("0.0");
             activityTask.haveMinBid = false;
             activityTask.minSubmitMap = new HashMap<>();
+            activityTask.rankInfos = new ArrayList<>();
+            activityTask.rankInfoMap = new HashMap<>();
         }
         public Builder activityCode(String activityCode) {
             this.activityTask.currentActivityCode = activityCode;
