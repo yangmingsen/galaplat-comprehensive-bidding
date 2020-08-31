@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.param;
-import com.galaplat.comprehensive.bidding.annotations.AlisaField;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
+import com.galaplat.comprehensive.bidding.utils.ImportExcelValidateMapUtil;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -23,25 +23,25 @@ public class JbxtGoodsExcelParam implements Serializable {
 
    /*唯一编码*/
    @NotNull(message =  "必填 竞品编码",  groups = InsertParam.class)
-   @AlisaField("PN")
+   @ImportExcelValidateMapUtil.AlisaField("PN")
    private String code;
    /*商品名称*/
    @NotNull(message =  "必填 竞品名称",  groups = InsertParam.class)
-   @AlisaField("名称")
+   @ImportExcelValidateMapUtil.AlisaField("名称")
    private String name;
     /*起始价*/
     @NotNull(message =  "必填 起拍价",  groups = InsertParam.class)
-    @AlisaField("起拍价")
+    @ImportExcelValidateMapUtil.AlisaField("起拍价")
     private BigDecimal firstPrice;
 
     /*竞品竞标时长(分)*/
     @NotNull(message =  "必填 竞拍时长",  groups = InsertParam.class)
-    @AlisaField("竞标时长")
+    @ImportExcelValidateMapUtil.AlisaField("竞标时长")
     private Integer timeNum;
 
     /*竞标数量*/
     @NotNull(message =  "必填 年采货量",  groups = InsertParam.class)
-    @AlisaField("年采货量")
+    @ImportExcelValidateMapUtil.AlisaField("年采货量")
     private Integer num;
 
     private String errorMsg;
