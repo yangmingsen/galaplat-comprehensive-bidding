@@ -19,15 +19,21 @@ public interface JbxtGoodsDOMapper {
             "insert into t_jbxt_goods (goods_id, code, ",
             "name, num, activity_code, ",
             "created_time, updated_time, ",
-            "updator, creator, ",
+            "first_price, creator, ",
             "company_code, sys_code, ",
-            "status, time_num)",
+            "status, time_num, ",
+            "updator, last_chang_time, ",
+            "per_delay_time, delay_times, ",
+            "add_delay_times)",
             "values (#{goodsId,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, ",
             "#{name,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
             "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
             "#{firstPrice,jdbcType=DECIMAL}, #{creator,jdbcType=VARCHAR}, ",
             "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR}, ",
-            "#{status,jdbcType=VARCHAR}, #{timeNum,jdbcType=INTEGER})"
+            "#{status,jdbcType=VARCHAR}, #{timeNum,jdbcType=INTEGER}, ",
+            "#{updator,jdbcType=VARCHAR}, #{lastChangTime,jdbcType=INTEGER}, ",
+            "#{perDelayTime,jdbcType=INTEGER}, #{delayTimes,jdbcType=INTEGER}, ",
+            "#{addDelayTimes,jdbcType=INTEGER})"
     })
     int insert(JbxtGoodsDO record);
 
@@ -37,7 +43,8 @@ public interface JbxtGoodsDOMapper {
     @Select({
             "select",
             "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-            "creator, updator, company_code, sys_code, status, time_num",
+            "creator, company_code, sys_code, status, time_num, updator, last_chang_time, ",
+            "per_delay_time, delay_times, add_delay_times",
             "from t_jbxt_goods",
             "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
@@ -51,14 +58,17 @@ public interface JbxtGoodsDOMapper {
             @Result(column="updated_time", property="updatedTime", jdbcType=JdbcType.TIMESTAMP),
             @Result(column="first_price", property="firstPrice", jdbcType=JdbcType.DECIMAL),
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
-            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
-            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER),
+            @Result(column="updator", property="updator", jdbcType=JdbcType.VARCHAR),
+            @Result(column="last_chang_time", property="lastChangTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="per_delay_time", property="perDelayTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="delay_times", property="delayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER)
     })
     JbxtGoodsDO selectByPrimaryKey(Integer goodsId);
-
 
     @UpdateProvider(type=JbxtGoodsDOSqlProvider.class, method="updateByPrimaryKeySelective")
     int updateByPrimaryKeySelective(JbxtGoodsDO record);
@@ -73,11 +83,15 @@ public interface JbxtGoodsDOMapper {
             "updated_time = #{updatedTime,jdbcType=TIMESTAMP},",
             "first_price = #{firstPrice,jdbcType=DECIMAL},",
             "creator = #{creator,jdbcType=VARCHAR},",
-            "updator = #{updator,jdbcType=VARCHAR},",
             "company_code = #{companyCode,jdbcType=VARCHAR},",
             "sys_code = #{sysCode,jdbcType=VARCHAR},",
             "status = #{status,jdbcType=VARCHAR},",
-            "time_num = #{timeNum,jdbcType=INTEGER}",
+            "time_num = #{timeNum,jdbcType=INTEGER},",
+            "updator = #{updator,jdbcType=VARCHAR},",
+            "last_chang_time = #{lastChangTime,jdbcType=INTEGER},",
+            "per_delay_time = #{perDelayTime,jdbcType=INTEGER},",
+            "delay_times = #{delayTimes,jdbcType=INTEGER},",
+            "add_delay_times = #{addDelayTimes,jdbcType=INTEGER}",
             "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(JbxtGoodsDO record);
