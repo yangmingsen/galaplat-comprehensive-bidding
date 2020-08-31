@@ -21,10 +21,16 @@ import java.util.Date;
 @NoArgsConstructor
 public class JbxtGoodsExcelParam implements Serializable {
 
+   /*序号*/
+   @NotNull(message =  "必填 序号",  groups = InsertParam.class)
+   @ImportExcelValidateMapUtil.AlisaField("序号")
+   private String serialNumber;
+
    /*唯一编码*/
    @NotNull(message =  "必填 竞品编码",  groups = InsertParam.class)
    @ImportExcelValidateMapUtil.AlisaField("PN")
    private String code;
+
    /*商品名称*/
    @NotNull(message =  "必填 竞品名称",  groups = InsertParam.class)
    @ImportExcelValidateMapUtil.AlisaField("名称")
@@ -43,6 +49,21 @@ public class JbxtGoodsExcelParam implements Serializable {
     @NotNull(message =  "必填 年采货量",  groups = InsertParam.class)
     @ImportExcelValidateMapUtil.AlisaField("年采货量")
     private Integer num;
+
+    /*延时窗口期*/
+    @NotNull(message =  "必填 延时窗口期",  groups = InsertParam.class)
+    @ImportExcelValidateMapUtil.AlisaField("延时窗口期")
+    private Integer lastChangTime;
+
+    /*单次延时时长*/
+    @NotNull(message =  "必填 单次延时",  groups = InsertParam.class)
+    @ImportExcelValidateMapUtil.AlisaField("单次延时")
+    private Integer perDelayTime;
+
+    /*延时次数*/
+    @NotNull(message =  "必填 延时次数",  groups = InsertParam.class)
+    @ImportExcelValidateMapUtil.AlisaField("延时次数")
+    private Integer delayTimes;
 
     private String errorMsg;
    /*竞标活动code*/
