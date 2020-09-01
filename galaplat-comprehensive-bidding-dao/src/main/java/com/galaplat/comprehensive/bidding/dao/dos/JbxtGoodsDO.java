@@ -55,6 +55,9 @@ public class JbxtGoodsDO implements Serializable {
     /*已经延长的次数*/
     private Integer addDelayTimes;
 
+    /*保留价*/
+    private BigDecimal retainPrice;
+
     public Integer getGoodsId() {
         return goodsId;
     }
@@ -197,6 +200,14 @@ public class JbxtGoodsDO implements Serializable {
 
     public void setAddDelayTimes(Integer addDelayTimes) {
         this.addDelayTimes = addDelayTimes;
+    }
+
+    public BigDecimal getRetainPrice() {
+        return retainPrice;
+    }
+
+    public void setRetainPrice(BigDecimal retainPrice) {
+        this.retainPrice = retainPrice;
     }
 
 }

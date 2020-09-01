@@ -62,6 +62,9 @@ public class JbxtGoodsParam extends Param {
      /*已经延长的次数*/
      private Integer addDelayTimes;
 
+     /*保留价*/
+     private BigDecimal retainPrice;
+
     public String getCode() {
         return code;
     }
