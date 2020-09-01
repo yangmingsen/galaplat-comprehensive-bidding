@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class JbxtGoodsVO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*商品名称*/
@@ -35,6 +35,21 @@ public class JbxtGoodsVO implements Serializable {
     private Integer goodsId;
     /*是否过期(0表示未过期，1表示为进行中, 2表示过期)*/
     private String status;
+
+    /*需要延长竞标时长的最后的时间点，比如最后10秒，排名发生变化需要延长*/
+    private Integer lastChangTime;
+
+    /*每次延长的时长*/
+    private Integer perDelayTime;
+
+   /*延长次数*/
+   private Integer delayTimes;
+
+   /*已经延长的次数*/
+   private Integer addDelayTimes;
+
+   /*保留价*/
+   private BigDecimal retainPrice;
 
     public String getCode() {
         return code;
@@ -121,5 +136,44 @@ public class JbxtGoodsVO implements Serializable {
         this.status = status;
     }
 
+     public Integer getLastChangTime() {
+         return lastChangTime;
+     }
+
+     public void setLastChangTime(Integer lastChangTime) {
+         this.lastChangTime = lastChangTime;
+     }
+
+     public Integer getPerDelayTime() {
+         return perDelayTime;
+     }
+
+     public void setPerDelayTime(Integer perDelayTime) {
+         this.perDelayTime = perDelayTime;
+     }
+
+     public Integer getDelayTimes() {
+         return delayTimes;
+     }
+
+     public void setDelayTimes(Integer delayTimes) {
+         this.delayTimes = delayTimes;
+     }
+
+     public Integer getAddDelayTimes() {
+         return addDelayTimes;
+     }
+
+     public void setAddDelayTimes(Integer addDelayTimes) {
+         this.addDelayTimes = addDelayTimes;
+     }
+
+     public BigDecimal getRetainPrice() {
+         return retainPrice;
+     }
+
+     public void setRetainPrice(BigDecimal retainPrice) {
+         this.retainPrice = retainPrice;
+     }
 
 }

@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -29,10 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**@
  * @Description: 竞标活动竞品导入
@@ -59,6 +57,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
     public List<JbxtGoodsExcelParam> insertExcelDate(List<Map<String, Object>> list, ImportVO importVO) {
         if (CollectionUtils.isEmpty(list)) {return Collections.emptyList();}
         List<JbxtGoodsExcelParam>  errorList = Lists.newArrayList();
+        List<JbxtGoodsExcelParam>  rightList = Lists.newArrayList();
         List<JbxtGoodsParam>  saveList = Lists.newArrayList();
 
         String creatorName = getCreatorName(importVO.getCreator());
@@ -66,7 +65,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         String activityCode= null;
 
         if (StringUtils.isNotEmpty(paramJson)) {
-            Map<String, Object> mapVO = JSONObject.parseObject(paramJson, new TypeReference<Map<String, Object>>() {
+            Map<String, Object> mapVO = JSON.parseObject(paramJson, new TypeReference<Map<String, Object>>() {
             });
             activityCode = (String) mapVO.get("bidActivityCode");
         }
@@ -83,8 +82,10 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                 StringBuilder errorMsg = new StringBuilder("");
                 Tuple<String,JbxtGoodsExcelParam> paramTuple =  ImportExcelValidateMapUtil.validateField(goodsExcelParam, goodsMap);
                 errorMsg.append(paramTuple._1);
+                goodsExcelParam = paramTuple._2;
+                errorMsg.append(validateGoodsInfo(goodsExcelParam));
                 if (StringUtils.isNotEmpty(errorMsg.toString())) {
-                    goodsExcelParam = paramTuple._2;
+                    goodsExcelParam.setErrorMsg(errorMsg.toString());
                     errorList.add(goodsExcelParam);
                 } else {
                     try {
@@ -97,13 +98,16 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                         goodsExcelParam.setUpdatedTime(new Date());
                         goodsExcelParam.setCreator(creatorName);
                         goodsExcelParam.setStatus("0");
+                        rightList.add(goodsExcelParam);
                         JbxtGoodsParam goodsParam = new JbxtGoodsParam();
                         CopyUtil.copyPropertiesExceptEmpty(goodsExcelParam, goodsParam);
+                        goodsParam.setAddDelayTimes(0);// 已延长次数默认为0
                         saveList.add(goodsParam);
                 }
             }
             int insertCount = 0;
-            if (CollectionUtils.isNotEmpty(saveList)) {
+
+            if (CollectionUtils.isNotEmpty(saveList) && CollectionUtils.isEmpty(errorList)) {
                 goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
                 insertCount = goodsDao.batchInsert(saveList);
             }
@@ -112,7 +116,9 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                     && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
                 activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
             }
-
+            if (CollectionUtils.isNotEmpty(errorList)) {
+                errorList.addAll(rightList);
+            }
         }// if
 
         return errorList;
@@ -147,6 +153,27 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                     log.error(e.getMessage(),e);
                 }
                 return creatorName;
+    }
+
+    private String validateGoodsInfo(JbxtGoodsExcelParam excelParam) {
+        StringBuilder error= new StringBuilder("");
+        Integer timeNum = excelParam.getTimeNum();
+        Integer lastChangTime = excelParam.getLastChangTime();
+        Integer perDelayTime = excelParam.getPerDelayTime();
+        Integer delayTimes = excelParam.getDelayTimes();
+        if (timeNum > 60) {
+            error.append("竞标时长不能超过60分钟！");
+        }
+        if (lastChangTime > timeNum) {
+            error.append("延时窗口期不能超过竞标时长！");
+        }
+        if (perDelayTime > 600) {
+            error.append("单次延长不能超过600秒！");
+        }
+        if (delayTimes > 100) {
+            error.append("延长次数不能超过100次！");
+        }
+        return error.toString();
     }
 
 }

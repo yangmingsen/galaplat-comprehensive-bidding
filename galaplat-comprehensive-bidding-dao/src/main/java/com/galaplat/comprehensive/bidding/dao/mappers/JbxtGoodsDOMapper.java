@@ -24,7 +24,7 @@ public interface JbxtGoodsDOMapper {
             "status, time_num, ",
             "updator, last_chang_time, ",
             "per_delay_time, delay_times, ",
-            "add_delay_times)",
+            "add_delay_times, retain_price)",
             "values (#{goodsId,jdbcType=INTEGER}, #{code,jdbcType=VARCHAR}, ",
             "#{name,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{activityCode,jdbcType=VARCHAR}, ",
             "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
@@ -33,7 +33,7 @@ public interface JbxtGoodsDOMapper {
             "#{status,jdbcType=VARCHAR}, #{timeNum,jdbcType=INTEGER}, ",
             "#{updator,jdbcType=VARCHAR}, #{lastChangTime,jdbcType=INTEGER}, ",
             "#{perDelayTime,jdbcType=INTEGER}, #{delayTimes,jdbcType=INTEGER}, ",
-            "#{addDelayTimes,jdbcType=INTEGER})"
+            "#{addDelayTimes,jdbcType=INTEGER}, #{retainPrice,jdbcType=DECIMAL})"
     })
     int insert(JbxtGoodsDO record);
 
@@ -44,7 +44,7 @@ public interface JbxtGoodsDOMapper {
             "select",
             "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
             "creator, company_code, sys_code, status, time_num, updator, last_chang_time, ",
-            "per_delay_time, delay_times, add_delay_times",
+            "per_delay_time, delay_times, add_delay_times, retain_price",
             "from t_jbxt_goods",
             "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
@@ -66,7 +66,8 @@ public interface JbxtGoodsDOMapper {
             @Result(column="last_chang_time", property="lastChangTime", jdbcType=JdbcType.INTEGER),
             @Result(column="per_delay_time", property="perDelayTime", jdbcType=JdbcType.INTEGER),
             @Result(column="delay_times", property="delayTimes", jdbcType=JdbcType.INTEGER),
-            @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER)
+            @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
     JbxtGoodsDO selectByPrimaryKey(Integer goodsId);
 
@@ -91,7 +92,8 @@ public interface JbxtGoodsDOMapper {
             "last_chang_time = #{lastChangTime,jdbcType=INTEGER},",
             "per_delay_time = #{perDelayTime,jdbcType=INTEGER},",
             "delay_times = #{delayTimes,jdbcType=INTEGER},",
-            "add_delay_times = #{addDelayTimes,jdbcType=INTEGER}",
+            "add_delay_times = #{addDelayTimes,jdbcType=INTEGER},",
+            "retain_price = #{retainPrice,jdbcType=DECIMAL}",
             "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
     int updateByPrimaryKey(JbxtGoodsDO record);
@@ -156,7 +158,9 @@ public interface JbxtGoodsDOMapper {
             "created_time, updated_time, ",
             "updator, creator, ",
             "company_code, sys_code, ",
-            "status, time_num, first_price)",
+            "status, time_num, first_price," ,
+            "last_chang_time, per_delay_time, " ,
+            "delay_times, add_delay_times,retain_price )",
             " values ",
             " <foreach collection=\"list\" item=\"item\" separator=\",\"> ",
             " (#{item.goodsId,jdbcType=INTEGER}, #{item.code,jdbcType=VARCHAR}, ",
@@ -164,7 +168,9 @@ public interface JbxtGoodsDOMapper {
             "#{item.createdTime,jdbcType=TIMESTAMP}, #{item.updatedTime,jdbcType=TIMESTAMP}, ",
             "#{item.firstPrice,jdbcType=DECIMAL}, #{item.creator,jdbcType=VARCHAR}, ",
             "#{item.companyCode,jdbcType=VARCHAR}, #{item.sysCode,jdbcType=VARCHAR}, ",
-            "#{item.status,jdbcType=VARCHAR}, #{item.timeNum,jdbcType=INTEGER}, #{item.firstPrice,jdbcType=DECIMAL})",
+            "#{item.status,jdbcType=VARCHAR}, #{item.timeNum,jdbcType=INTEGER}, #{item.firstPrice,jdbcType=DECIMAL}, ",
+            "#{item.lastChangTime,jdbcType=INTEGER}, #{item.perDelayTime,jdbcType=INTEGER}, #{item.delayTimes,jdbcType=INTEGER}, ",
+            "#{item.addDelayTimes,jdbcType=INTEGER}, #{item.retainPrice,jdbcType=DECIMAL})",
             " </foreach> ",
             " </script>",
     })
