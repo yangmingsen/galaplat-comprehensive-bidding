@@ -22,33 +22,38 @@ import java.util.Date;
 public class JbxtGoodsExcelParam implements Serializable {
 
    /*序号*/
-   @NotNull(message =  "必填 序号",  groups = InsertParam.class)
    @ImportExcelValidateMapUtil.AlisaField("序号")
    private String serialNumber;
 
    /*唯一编码*/
-   @NotNull(message =  "必填 竞品编码",  groups = InsertParam.class)
+   @NotNull(message =  "必填 PN",  groups = InsertParam.class)
    @ImportExcelValidateMapUtil.AlisaField("PN")
    private String code;
 
    /*商品名称*/
-   @NotNull(message =  "必填 竞品名称",  groups = InsertParam.class)
+   @NotNull(message =  "必填 名称",  groups = InsertParam.class)
    @ImportExcelValidateMapUtil.AlisaField("名称")
    private String name;
+
     /*起始价*/
     @NotNull(message =  "必填 起拍价",  groups = InsertParam.class)
     @ImportExcelValidateMapUtil.AlisaField("起拍价")
     private BigDecimal firstPrice;
 
-    /*竞品竞标时长(分)*/
-    @NotNull(message =  "必填 竞拍时长",  groups = InsertParam.class)
-    @ImportExcelValidateMapUtil.AlisaField("竞标时长")
-    private Integer timeNum;
+    /*保留价*/
+    @NotNull(message =  "必填 保留价",  groups = InsertParam.class)
+    @ImportExcelValidateMapUtil.AlisaField("保留价")
+    private BigDecimal retainPrice;
 
     /*竞标数量*/
     @NotNull(message =  "必填 年采货量",  groups = InsertParam.class)
     @ImportExcelValidateMapUtil.AlisaField("年采货量")
     private Integer num;
+
+    /*竞品竞标时长(分)*/
+    @NotNull(message =  "必填 竞拍时长",  groups = InsertParam.class)
+    @ImportExcelValidateMapUtil.AlisaField("竞标时长")
+    private Integer timeNum;
 
     /*延时窗口期*/
     @NotNull(message =  "必填 延时窗口期",  groups = InsertParam.class)

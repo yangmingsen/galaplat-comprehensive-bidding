@@ -89,6 +89,10 @@ public class JbxtGoodsDOSqlProvider {
             VALUES("add_delay_times", "#{addDelayTimes,jdbcType=INTEGER}");
         }
 
+        if (record.getRetainPrice() != null) {
+            VALUES("retain_price", "#{retainPrice,jdbcType=DECIMAL}");
+        }
+
         return SQL();
     }
 
@@ -162,6 +166,10 @@ public class JbxtGoodsDOSqlProvider {
 
         if (record.getAddDelayTimes() != null) {
             SET("add_delay_times = #{addDelayTimes,jdbcType=INTEGER}");
+        }
+
+        if (record.getRetainPrice() != null) {
+            SET("retain_price = #{retainPrice,jdbcType=DECIMAL}");
         }
 
         WHERE("goods_id = #{goodsId,jdbcType=INTEGER}");
