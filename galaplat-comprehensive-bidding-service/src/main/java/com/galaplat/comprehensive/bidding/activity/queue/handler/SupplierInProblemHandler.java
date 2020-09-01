@@ -7,6 +7,8 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -65,7 +67,8 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
     }
 
-    private void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
+    @Transactional( rollbackFor = Exception.class) //#issue
+    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
 
         final ActivityThread currentActivity = activityManager.get(activityCode);
         final String bidTime = currentActivity.getRemainingTimeString();

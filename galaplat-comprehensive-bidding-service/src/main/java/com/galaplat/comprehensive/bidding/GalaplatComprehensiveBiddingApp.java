@@ -1,8 +1,8 @@
 package com.galaplat.comprehensive.bidding;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
-import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
-import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
+import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
+import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import org.galaplat.baseplatform.file.plugin.FilePlugin;
 import org.galaplat.baseplatform.file.upload.UploadPlugin;

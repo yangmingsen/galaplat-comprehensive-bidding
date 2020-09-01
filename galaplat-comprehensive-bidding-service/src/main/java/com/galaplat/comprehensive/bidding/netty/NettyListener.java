@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.netty;
 
+import com.galaplat.comprehensive.bidding.activity.ActivityMap;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThreadSingleton;
@@ -27,6 +28,9 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
     @Autowired
     private WebSocketServer websocketServer;
 
+    @Autowired
+    private ActivityMap activityInfoMap;
+
     private boolean isInit = false;
 
     //@Autowired
@@ -34,15 +38,8 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-
-        System.out.println();
-        System.out.println("event="+event);
-        System.out.println("one="+event.getApplicationContext().getClass());
-        System.out.println("two="+AnnotationConfigServletWebServerApplicationContext.class);
-        System.out.println();
         boolean isTimeToRun = false;
         if (event.getApplicationContext().getClass().equals(AnnotationConfigServletWebServerApplicationContext.class)) {
-            System.out.println("acutally");
             isTimeToRun = true;
         }
         if (!isInit && isTimeToRun) {
@@ -52,6 +49,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
             final ActivityThreadManager activityMap = springUtil.getBean(ActivityThreadManager.class);
             final List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
             for (JbxtActivityDVO jbxtActivityDVO : lists) {
+                activityInfoMap.put(jbxtActivityDVO.getCode(), jbxtActivityDVO);
                 if (jbxtActivityDVO.getStatus() == 3) {
                     final IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
                     final JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());

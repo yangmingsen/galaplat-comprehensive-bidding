@@ -22,4 +22,12 @@ public class ObjectQueueMessage extends QueueMessage{
     public void setObjData(Map<String, Object> objData) {
         this.objData = objData;
     }
+
+    @Override
+    public String toString() {
+        return "ObjectQueueMessage{" +
+                "objData=" + objData +
+                ", type=" + type +
+                "} " + super.toString();
+    }
 }
