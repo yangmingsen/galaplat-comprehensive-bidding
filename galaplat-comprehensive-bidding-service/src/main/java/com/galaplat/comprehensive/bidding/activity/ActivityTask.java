@@ -46,19 +46,18 @@ public class ActivityTask implements Runnable {
     private int allowDelayedTime; //允许延迟次数
     private int initAllowDelayedTime; //
     private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
-
     private Map<String, String> t_map;
     private BigDecimal minBid;
     private boolean haveMinBid;
     private Map<String, BigDecimal> minSubmitMap;
     //private List<RankInfo> rankInfos; //所有的供应商排名信息
     //private Map<String, Integer> rankInfoMap; //供应商当前排名位置
-
     private DynamicRankTable dynamicRankTable;
     private Integer supplierNum;
 
 
     /**
+     * <h2>动态排名表</h2>
      *<table border="1">
      *     <tr>
      *         <td>标识Id</td>
@@ -94,9 +93,9 @@ public class ActivityTask implements Runnable {
         private Map<String, Integer> rankInfoMap = new HashMap<>(); //供应商当前排名位置
 
         public DynamicRankTable(int num) {
-            rankInfos = new ArrayList<>(num);
+            rankInfos = new ArrayList<>();
             for (int i = 0; i < num; i++) {
-                rankInfos.set(i,null);
+                rankInfos.add(i,null);
             }
         }
 
@@ -111,6 +110,7 @@ public class ActivityTask implements Runnable {
         public Integer getRankById(String id) {
             return this.rankInfoMap.get(id);
         }
+
         public Map<String, Integer> getRankInfoMap() {
             return rankInfoMap;
         }
@@ -122,19 +122,39 @@ public class ActivityTask implements Runnable {
             this.rankInfos.add(index, newMap);
         }
 
-
         public void remove(int index, String removeId) {
             Map<String, RankInfo> rankInfoMap = this.rankInfos.get(index);
             rankInfoMap.remove(removeId);
-            if (rankInfoMap.size() == 0) {
-                this.rankInfos.set(index, null);
+
+            if (rankInfoMap.size() == 1) {
+                if (rankInfoMap.get(index+"") != null) {
+                    this.rankInfos.set(index, null);
+                }
             }
+
         }
 
     }
 
+    public int getDelayedCondition() {
+        return delayedCondition;
+    }
 
+    public int getAllowDelayedLength() {
+        return allowDelayedLength;
+    }
 
+    public int getAllowDelayedTime() {
+        return allowDelayedTime;
+    }
+
+    public int getInitAllowDelayedTime() {
+        return initAllowDelayedTime;
+    }
+
+    public Integer getSupplierNum() {
+        return supplierNum;
+    }
 
     private ActivityTask() {
     }
@@ -379,7 +399,7 @@ public class ActivityTask implements Runnable {
     }
 
 
-    /***
+    /**
      *  推数据流到所有管理端
      * @param message
      * @param activityCode
@@ -388,7 +408,7 @@ public class ActivityTask implements Runnable {
         adminChannel.getAllAdmin().forEach(adminCode -> notifyOptionAdmin(message, activityCode, adminCode));
     }
 
-    /***
+    /**
      * 推送数据到指定管理端
      * @param message
      * @param activityCode
@@ -486,7 +506,6 @@ public class ActivityTask implements Runnable {
         map216.put("activityCode", activityCode);
         messageQueue.offer(new QueueMessage(216, map216));
     }
-
 
     /**
      * 同步数据给所有供应商端
@@ -677,15 +696,65 @@ public class ActivityTask implements Runnable {
 
         if (needDeedDelayed) {
             //do other after needDeedDelayed
-
+            final Integer delayedLength = this.allowDelayedLength;
+            ResponseMessage responseMessage = new ResponseMessage(120,new HashMap<String, Object>(){{
+                put("delayedLength",delayedLength);
+            }});
+            notifyAllSupplier(responseMessage, this.currentActivityCode);
+            notifyAllAdmin(responseMessage, this.currentActivityCode);
         }
 
         if (needNotifyTopUpdate) {
             // do needNotifyTopUpdate
+            final String activityCode = this.currentActivityCode;
+            final String goodsId = this.currentGoodsId.toString();
+            ResponseMessage responseMessage = new ResponseMessage(120,new HashMap<String, Object>(){{
+                put("activityCode",activityCode);
+                put("goodsId",goodsId);
+            }});
+            notifyAllSupplier(responseMessage, activityCode);
+        }
+
+        //推送最新排名到所有的供应商
+        //do sendSupplierRank
+        doSendSupplierRank(dynamicRankTable);
+    }
+
+    /**
+     * 将最新排名信息推送至各个客户端
+     * @param dynamicRankTable
+     */
+    private void doSendSupplierRank(DynamicRankTable dynamicRankTable) {
+        List<Map<String, RankInfo>> rankInfoList = dynamicRankTable.getRankInfos();
+        Integer listSize = rankInfoList.size();
+        for(int i=0; i< listSize; i++) {
+            Map<String, RankInfo> curRankInfoMap = rankInfoList.get(i);
+            if (curRankInfoMap == null ) continue;
+
+            Set<Map.Entry<String, RankInfo>> entries = curRankInfoMap.entrySet();
+            for(Map.Entry<String, RankInfo> entry : entries) {
+                String supplierCode = entry.getKey();
+                RankInfo rankInfo = entry.getValue();
+                final BigDecimal goodsPrice = rankInfo.getBidPrice();
+                final String goodsId = this.currentGoodsId.toString();
+                final Integer userRank = rankInfo.getRank();
+                ResponseMessage responseMessage = new ResponseMessage(200, new HashMap<String, Object>(){{
+                    put("goodsPrice", goodsPrice);
+                    put("goodsId", goodsId);
+                    put("userRank", userRank);
+                }});
+                final String activityCode = this.currentActivityCode;
+                notifyOptionSupplier(responseMessage, activityCode, supplierCode);
+            }
+
         }
 
     }
 
+    /**
+     * 决策是否延迟
+     * @return 是否延迟结果
+     */
     private boolean decideDelayed() {
         final int remainingTime = this.remainingTime;
         final int delayedCondition = this.delayedCondition;
@@ -701,7 +770,9 @@ public class ActivityTask implements Runnable {
         return false;
     }
 
-
+    /**
+     * 排名信息类
+     */
     private static class RankInfo {
         private String id; //供应商id
         private BigDecimal bidPrice; //供应商竞价
@@ -745,7 +816,7 @@ public class ActivityTask implements Runnable {
 
         public Builder() {
             activityTask.status = 1;
-            activityTask.LOGGER = LoggerFactory.getLogger(ActivityThread.class);
+            activityTask.LOGGER = LoggerFactory.getLogger(ActivityTask.class);
             activityTask.remainingTimeMessage = new ResponseMessage(100, null);
             activityTask.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
             activityTask.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
@@ -760,6 +831,11 @@ public class ActivityTask implements Runnable {
             activityTask.disappearTime = 0;
         }
 
+        /**
+         * 设置当前活动供应商数
+         * @param num
+         * @return
+         */
         public Builder supplierNum(int num) {
             this.activityTask.dynamicRankTable = new DynamicRankTable(num);
             return this;
@@ -770,27 +846,52 @@ public class ActivityTask implements Runnable {
             return this;
         }
 
+        /**
+         * 设置当前goodsId
+         * @param goodsId
+         * @return
+         */
         public Builder goodsId(Integer goodsId) {
             this.activityTask.currentGoodsId = goodsId;
             return this;
         }
 
+        /**
+         * 设置活动初始化时间
+         * @param initTime
+         * @return
+         */
         public Builder initTime(Integer initTime) {
             this.activityTask.initTime = initTime;
             this.activityTask.remainingTime = initTime;
             return this;
         }
 
+        /**
+         * 设置延迟条件
+         * @param delayedCondition
+         * @return
+         */
         public Builder delayedCondition(Integer delayedCondition) {
             this.activityTask.delayedCondition = delayedCondition;
             return this;
         }
 
+        /**
+         * 设置延迟时长
+         * @param allowDelayedLength
+         * @return
+         */
         public Builder allowDelayedLength(Integer allowDelayedLength) {
             this.activityTask.allowDelayedLength = allowDelayedLength;
             return this;
         }
 
+        /**
+         * 设置延迟次数
+         * @param allowDelayedTime
+         * @return
+         */
         public Builder allowDelayedTime(Integer allowDelayedTime) {
             this.activityTask.allowDelayedTime = allowDelayedTime;
             this.activityTask.initAllowDelayedTime = allowDelayedTime;

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class ActivityMap {
+public class ActivityInfoMap {
     private Map<String, JbxtActivityDVO> activityDVOMap = new HashMap<>();
 
     public JbxtActivityDVO get(String activityCode) {

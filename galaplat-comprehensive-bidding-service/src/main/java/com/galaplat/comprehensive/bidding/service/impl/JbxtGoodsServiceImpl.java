@@ -3,8 +3,8 @@ package com.galaplat.comprehensive.bidding.service.impl;
 import java.math.BigDecimal;
 import java.util.*;
 
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
@@ -51,7 +51,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
         List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
-		ActivityThread currentActivity = activityManager.get(activityCode);
+		ActivityTask currentActivity = activityManager.get(activityCode);
 		jgdList.stream().forEach(goods -> {
             SimpleGoodsVO sgv = new SimpleGoodsVO();
             sgv.setGoodsId(goods.getGoodsId());

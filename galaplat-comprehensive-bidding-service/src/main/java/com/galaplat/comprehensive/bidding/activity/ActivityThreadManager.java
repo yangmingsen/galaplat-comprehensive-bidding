@@ -1,13 +1,16 @@
 package com.galaplat.comprehensive.bidding.activity;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+
 public class ActivityThreadManager {
     private final Executor executor = Executors.newCachedThreadPool();
-    private final Map<String, ActivityThread> map = new HashMap<>(); //activityCode => ActivityThread
+    private final Map<String, ActivityTask> activityTaskMap =new HashMap<>();
 
     /**
      * 这是 使用例子
@@ -26,17 +29,17 @@ public class ActivityThreadManager {
      * @param key
      * @param value
      */
-    public void put(String key, ActivityThread value) {
-        map.put(key, value);
+    public void put(String key, ActivityTask value) {
+        activityTaskMap.put(key, value);
     }
 
     /***
-     * 根据 activityCode 获取关联的 Activity
+     * 根据 activityCode 获取关联的 ActivityTask
      * @param key
      * @return
      */
-    public ActivityThread get(String key) {
-        return map.get(key);
+    public ActivityTask get(String key) {
+        return activityTaskMap.get(key);
     }
 
 }

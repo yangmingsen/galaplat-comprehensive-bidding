@@ -2,8 +2,9 @@ package com.galaplat.comprehensive.bidding.controllers;
 
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
+import com.galaplat.comprehensive.bidding.activity.ActivityInfoMap;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
@@ -48,6 +49,9 @@ public class AdminController extends BaseController {
     @Autowired
     private MessageQueue messageQueue;
 
+    @Autowired
+    private ActivityInfoMap activityInfoMap;
+
 
     /***
      * 删除竞品历史竞价数据
@@ -76,7 +80,7 @@ public class AdminController extends BaseController {
      * @param activityThread 当前活动线程
      * @return
      */
-    private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityThread activityThread) {
+    private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityThread) {
         if (status == 3) { //处理重置问题
             final int remainingTime = activityThread.getRemainingTime();
             //删除历史竞价数据
@@ -85,7 +89,12 @@ public class AdminController extends BaseController {
                 if (remainingTime < 0) {
                     final String gid = goodsId.toString();
                     final int initTime = activityThread.getInitTime() / 60;
-                    final boolean startOk = this.startActivityThread(activityCode, gid, initTime);
+                    final int delayedCondition = activityThread.getDelayedCondition();
+                    final int allowDelayedLength = activityThread.getAllowDelayedLength();
+                    final int allowDelayedTime = activityThread.getAllowDelayedTime();
+                    final int supplierNum = activityThread.getSupplierNum();
+                    final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
+                            allowDelayedLength,allowDelayedTime, supplierNum);
 
                     if (!startOk) {
                         String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
@@ -118,7 +127,14 @@ public class AdminController extends BaseController {
         if (activity != null && goods != null) {
             final Integer curActivityStatus = activity.getStatus();
             if (curActivityStatus == 3) { //如果为进行状态
-                this.startActivityThread(activityCode, goodsId.toString(), goods.getTimeNum());
+                final int delayedCondition = goods.getLastChangTime();
+                final int allowDelayedLength = goods.getPerDelayTime();
+                final int allowDelayedTime = goods.getDelayTimes();
+                final int supplier = activity.getSupplierNum();
+
+                this.startActivityTask(activityCode, goodsId.toString(), goods.getTimeNum(),
+                        delayedCondition,
+                        allowDelayedLength,allowDelayedTime, supplier);
             }
             return new MyResult(true, "更新成功");
         } else {
@@ -133,7 +149,7 @@ public class AdminController extends BaseController {
         if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
         if (status == null) return new MyResult(false, "status不能为null");
 
-        final ActivityThread currentActivity = activityThreadManager.get(activityCode);
+        final ActivityTask currentActivity = activityThreadManager.get(activityCode);
         MyResult myResult = null;
         if (currentActivity != null) {
             myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
@@ -219,7 +235,14 @@ public class AdminController extends BaseController {
                 }
 
                 if (switchOk) {
-                    startActivityThread(activityCode, currentGoods.getGoodsId().toString(), currentGoods.getTimeNum());
+                    final int delayedCondition = currentGoods.getLastChangTime();
+                    final int allowDelayedLength = currentGoods.getPerDelayTime();
+                    final int allowDelayedTime = currentGoods.getDelayTimes();
+                    final int supplierNum = activityInfoMap.get(activityCode).getSupplierNum();
+                    startActivityTask(activityCode, currentGoods.getGoodsId().toString(),
+                            currentGoods.getTimeNum(), delayedCondition,
+                            allowDelayedLength,allowDelayedTime, supplierNum);
+
                     notify214Event(activityCode, currentGoods.getGoodsId());
 
                     return new MyResult(true, "切换成功");
@@ -278,7 +301,7 @@ public class AdminController extends BaseController {
     }
 
     private void closeLastActivityThread(String activityCode) {
-        final ActivityThread lastActivityThread = activityThreadManager.get(activityCode);
+        final ActivityTask lastActivityThread = activityThreadManager.get(activityCode);
         if (lastActivityThread != null) { //停止上一个goods的活动
             lastActivityThread.setStatus(1);
             lastActivityThread.setRemainingTime(0);
@@ -293,15 +316,19 @@ public class AdminController extends BaseController {
      * @param initTime
      * @return
      */
-    private boolean startActivityThread(String activityCode, String goodsId, int initTime) {
+    private boolean startActivityThread1(String activityCode, String goodsId, int initTime) {
         boolean startOK = true;
         try {
             closeLastActivityThread(activityCode);
-            final ActivityThread newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
-            activityThreadManager.put(activityCode, newActivityThread);
-            newActivityThread.start();
+            //final ActivityTask newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
+            final ActivityTask.Builder newActivityTaskBuiler = new ActivityTask.Builder();
+            newActivityTaskBuiler.activityCode(activityCode).goodsId(Integer.parseInt(goodsId)).initTime(initTime*60);
+            ActivityTask newActivityTask = newActivityTaskBuiler.build();
+            activityThreadManager.put(activityCode, newActivityTask);
+            activityThreadManager.doTask(newActivityTask);
+          //  newActivityThread.start();
 
-            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityThread.getCurrentGoodsId() + ")活动成功");
+            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityTask.getCurrentGoodsId() + ")活动成功");
         } catch (Exception e) {
             LOGGER.info("startActivity(ERROR): 启动" + activityCode + " 活动失败" + e.getMessage());
             startOK = false;
@@ -309,4 +336,36 @@ public class AdminController extends BaseController {
 
         return startOK;
     }
+
+
+    private boolean startActivityTask(String activityCode, String goodsId, int initTime, int delayedCondition,
+                                      int allowDelayedLength,  int allowDelayedTime, int supplierNum) {
+        boolean startOK = true;
+        try {
+            closeLastActivityThread(activityCode);
+            //final ActivityTask newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
+            final ActivityTask.Builder newActivityTaskBuiler = new ActivityTask.Builder();
+            newActivityTaskBuiler.activityCode(activityCode).
+                    goodsId(Integer.parseInt(goodsId)).
+                    initTime(initTime*60).
+                    delayedCondition(delayedCondition).
+                    allowDelayedLength(allowDelayedLength).
+                    allowDelayedTime(allowDelayedTime);
+
+            ActivityTask newActivityTask = newActivityTaskBuiler.build();
+            activityThreadManager.put(activityCode, newActivityTask);
+            activityThreadManager.doTask(newActivityTask);
+            //  newActivityThread.start();
+
+            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityTask.getCurrentGoodsId() + ")活动成功");
+        } catch (Exception e) {
+            LOGGER.info("startActivity(ERROR): 启动" + activityCode + " 活动失败" + e.getMessage());
+            startOK = false;
+        }
+
+        return startOK;
+    }
+
 }
+
+

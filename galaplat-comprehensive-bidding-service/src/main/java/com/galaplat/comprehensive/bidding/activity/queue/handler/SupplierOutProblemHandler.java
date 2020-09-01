@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
@@ -114,7 +114,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         notifyOptionSupplier(message ,activityCode, userCode);
 
         //传递当前活动剩余时长
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 Map<String, String> t_map = new HashMap<>();
@@ -128,7 +128,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     private void handler211Problem(final QueueMessage takeQueuemsg) {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String userCode = takeQueuemsg.getData().get("userCode");
-        final String goodsId = activityManager.get(activityCode).getCurrentGoodsId();
+        final String goodsId = activityManager.get(activityCode).getCurrentGoodsId().toString();
         takeQueuemsg.getData().put("goodsId", goodsId);
         final int status = activityManager.get(activityCode).getStatus();
         if (status == 2) {

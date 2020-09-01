@@ -1,8 +1,8 @@
 package com.galaplat.comprehensive.bidding.netty;
 
 import com.alibaba.fastjson.JSON;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
@@ -87,7 +87,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                         return; //返回不同步数据
                     }
 
-                    final ActivityThread currentActivity = activityManager.get(focusActivity);
+                    final ActivityTask currentActivity = activityManager.get(focusActivity);
                     if (currentActivity != null) { //如果当前供应商聚焦的竞品活动存在 则同步数据
                         //同步数据
                         final QueueMessage queueMessage = new QueueMessage(211, message.getData());
@@ -229,7 +229,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         map.put("adminCode", adminCode);
 
 
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
             //同步数据
             QueueMessage queueMessage = new QueueMessage(300, map);

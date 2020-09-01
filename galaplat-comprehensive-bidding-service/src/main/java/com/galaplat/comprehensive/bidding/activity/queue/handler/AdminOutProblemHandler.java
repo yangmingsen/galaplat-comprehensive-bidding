@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
@@ -62,8 +62,8 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         final Integer goodsId ;
         if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
-            ActivityThread currentActivity = activityManager.get(activityCode);
-            goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId());
+            ActivityTask currentActivity = activityManager.get(activityCode);
+            goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId().toString());
         } else { //不为null 意味着302问题
             try {
                 goodsId = Integer.parseInt(goodsIdStr);
@@ -128,7 +128,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
         //处理当管理端点击暂停后无故刷新控制台界面 时间同步问题
         //传递当前活动剩余时长
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 final Map<String, String> t_map = new HashMap<>();

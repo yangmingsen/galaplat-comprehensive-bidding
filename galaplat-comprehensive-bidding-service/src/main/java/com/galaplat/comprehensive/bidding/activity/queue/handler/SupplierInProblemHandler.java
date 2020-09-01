@@ -1,6 +1,7 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.ObjectQueueMessage;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
@@ -36,11 +37,12 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         //处理提交是否过时问题(V2.0添加)
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
+
         if (currentActivity == null) {
             LOGGER.info("handler213Problem: 当前活动不存在");return;
         } else {
-            String currentGoodsId = currentActivity.getCurrentGoodsId();
+            String currentGoodsId = currentActivity.getCurrentGoodsId().toString();
             if (!currentGoodsId.equals(goodsIdStr)) {
                 LOGGER.info("handler213Problem: 当前竞品竞价已经结束或者未开始");return;
             }
@@ -70,7 +72,8 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
     @Transactional( rollbackFor = Exception.class) //#issue
     void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
 
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
+
         final String bidTime = currentActivity.getRemainingTimeString();
 
         final JbxtBiddingVO jbv = new JbxtBiddingVO();
@@ -106,6 +109,16 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("goodsId", goodsId.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
+        final Map<String, Object> map200 = new HashMap();
+        map200.put("activityCode", activityCode);
+        map200.put("userCode", userCode);
+        map200.put("goodsId", goodsId.toString());
+        map200.put("bidPrice", bid);
+        ObjectQueueMessage msg = new ObjectQueueMessage(200, map200);
+        currentActivity.recvBidMessage(msg);
+
+
+/*
         //
         final Map<String, String> map200 = new HashMap();
         map200.put("activityCode", activityCode);
@@ -114,7 +127,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         //检查是否更新top提示
         final List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
-        activityManager.get(activityCode).updateTopMinBid(theTopBids);
+        activityManager.get(activityCode).updateTopMinBid(theTopBids);*/
     }
 
 }
