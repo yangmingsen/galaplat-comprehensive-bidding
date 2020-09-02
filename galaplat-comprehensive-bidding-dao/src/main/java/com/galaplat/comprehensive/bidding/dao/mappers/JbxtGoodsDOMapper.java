@@ -103,7 +103,7 @@ public interface JbxtGoodsDOMapper {
     @Select({
             "select",
             "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-            "creator, company_code, sys_code, status, time_num",
+            "creator, company_code, sys_code, status, time_num, last_chang_time, per_delay_time, delay_times, add_delay_times, retain_price",
             "from t_jbxt_goods",
             "where activity_code = #{activityCode,jdbcType=VARCHAR} ORDER BY goods_id ASC LIMIT 0,1000"
     })
@@ -120,7 +120,12 @@ public interface JbxtGoodsDOMapper {
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
-            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER),
+            @Result(column="last_chang_time", property="lastChangTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="per_delay_time", property="perDelayTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="delay_times", property="delayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
     List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
@@ -129,7 +134,7 @@ public interface JbxtGoodsDOMapper {
     @Select({
             "select",
             "goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-            "creator, company_code, sys_code, status, time_num",
+            "creator, company_code, sys_code, status, time_num,last_chang_time, per_delay_time, delay_times, add_delay_times, retain_price ",
             "from t_jbxt_goods",
             "where status = 1 AND activity_code=#{activityCode,jdbcType=VARCHAR} "
     })
@@ -146,7 +151,12 @@ public interface JbxtGoodsDOMapper {
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
-            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER),
+            @Result(column="last_chang_time", property="lastChangTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="per_delay_time", property="perDelayTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="delay_times", property="delayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
     public JbxtGoodsDO selectActiveGoods(String activityCode);
 
@@ -180,7 +190,7 @@ public interface JbxtGoodsDOMapper {
             " <script>",
             " select",
             " goods_id, code, name, num, activity_code, created_time, updated_time, first_price, ",
-            " creator, company_code, sys_code, status, time_num",
+            " creator, company_code, sys_code, status, time_num, last_chang_time, per_delay_time, delay_times, add_delay_times, retain_price ",
             " from t_jbxt_goods",
             " where 1=1 " ,
             " <if test='param.activityCode != null' > " ,
@@ -207,7 +217,12 @@ public interface JbxtGoodsDOMapper {
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="status", property="status", jdbcType=JdbcType.VARCHAR),
-            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER)
+            @Result(column="time_num", property="timeNum", jdbcType=JdbcType.INTEGER),
+            @Result(column="last_chang_time", property="lastChangTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="per_delay_time", property="perDelayTime", jdbcType=JdbcType.INTEGER),
+            @Result(column="delay_times", property="delayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
+            @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
     List<JbxtGoodsDO> listGoods(@Param("param") JbxtGoodsParam goodsParam);
 
