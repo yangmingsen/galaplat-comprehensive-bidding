@@ -9,7 +9,7 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
-import com.galaplat.comprehensive.bidding.dao.mappers.JbxtActivityDOMapper;
+import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtActivityCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -25,8 +25,8 @@ import java.util.List;
 public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 
 	@Autowired
-	private JbxtActivityDOMapper mapper;
-	
+	private JbxtActivityCustMapper mapper;
+
     @Override
 	public int insertJbxtActivity(JbxtActivityDO entity){
 	       return mapper.insert(entity);
@@ -50,14 +50,14 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException{
 	       PageHelper.startPage(jbxtactivityParam.getPn(), jbxtactivityParam.getPs());
 		   return new PageInfo<JbxtActivityDVO>(mapper.getJbxtActivityList(jbxtactivityParam));
-	
+
 	}
 
 	@Override
 	public List<JbxtActivityDVO> findAll(){
 		return mapper.selectAll();
 	}
-	
+
     @Override
     public JbxtActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam){
 		return mapper.selectByPrimaryKey(jbxtactivityParam.getCode());

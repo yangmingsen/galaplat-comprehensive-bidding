@@ -19,7 +19,7 @@ import java.util.List;
  @NoArgsConstructor
 public class JbxtActivityDO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*活动名称*/
     /*唯一编码*/
     private String code;
@@ -52,127 +52,26 @@ public class JbxtActivityDO implements Serializable {
      /*删除人*/
      private String deleter;
 
+    /*出价方式(1-数值，2-降幅)*/
+    private Integer bidingType;
+
+    /*预计竞标日*/
+    private Date predictBidDatetime;
+
+    /*竞标描述*/
+    private String bidActivityInfo;
+
+    /*承诺函标题*/
+    private String promiseTitle;
+
+    /*附件路径*/
+    private String filePath;
+
+    /*承诺函内容*/
+    private String promiseText;
+
      public static long getSerialVersionUID() {
          return serialVersionUID;
      }
 
-     public String getCode() {
-         return code;
-     }
-
-     public void setCode(String code) {
-         this.code = code == null ? null : code.trim();
-     }
-
-     public String getName() {
-         return name;
-     }
-
-     public void setName(String name) {
-         this.name = name == null ? null : name.trim();
-     }
-
-     public Date getStartTime() {
-         return startTime;
-     }
-
-     public void setStartTime(Date startTime) {
-         this.startTime = startTime;
-     }
-
-     public Date getEndTime() {
-         return endTime;
-     }
-
-     public void setEndTime(Date endTime) {
-         this.endTime = endTime;
-     }
-
-     public Date getCreatedTime() {
-         return createdTime;
-     }
-
-     public void setCreatedTime(Date createdTime) {
-         this.createdTime = createdTime;
-     }
-
-     public Date getUpdatedTime() {
-         return updatedTime;
-     }
-
-     public void setUpdatedTime(Date updatedTime) {
-         this.updatedTime = updatedTime;
-     }
-
-     public Date getDeleteTime() {
-         return deleteTime;
-     }
-
-     public void setDeleteTime(Date deleteTime) {
-         this.deleteTime = deleteTime;
-     }
-
-     public String getUpdator() {
-         return updator;
-     }
-
-     public void setUpdator(String updator) {
-         this.updator = updator == null ? null : updator.trim();
-     }
-
-     public String getCreator() {
-         return creator;
-     }
-
-     public void setCreator(String creator) {
-         this.creator = creator == null ? null : creator.trim();
-     }
-
-     public String getDeleter() {
-         return deleter;
-     }
-
-     public void setDeleter(String deleter) {
-         this.deleter = deleter == null ? null : deleter.trim();
-     }
-
-     public String getCompanyCode() {
-         return companyCode;
-     }
-
-     public void setCompanyCode(String companyCode) {
-         this.companyCode = companyCode == null ? null : companyCode.trim();
-     }
-
-     public String getSysCode() {
-         return sysCode;
-     }
-
-     public void setSysCode(String sysCode) {
-         this.sysCode = sysCode == null ? null : sysCode.trim();
-     }
-
-     public Integer getSupplierNum() {
-         return supplierNum;
-     }
-
-     public void setSupplierNum(Integer supplierNum) {
-         this.supplierNum = supplierNum;
-     }
-
-     public Integer getStatus() {
-         return status;
-     }
-
-     public void setStatus(Integer status) {
-         this.status = status;
-     }
-
-     public Integer getRecordStatus() {
-         return recordStatus;
-     }
-
-     public void setRecordStatus(Integer recordStatus) {
-         this.recordStatus = recordStatus;
-     }
 }
