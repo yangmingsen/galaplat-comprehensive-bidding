@@ -10,7 +10,7 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.dao.mappers.JbxtBiddingDOMapper;
+import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtBiddingCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -50,7 +50,7 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	 //--------------------------
 
 	@Autowired
-	private JbxtBiddingDOMapper mapper;
+	private JbxtBiddingCustMapper mapper;
 
 	 public int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode) {
 		 return mapper.deleteByGoodsIdAndActivityCode(goodsId,activityCode);
@@ -70,9 +70,9 @@ public   class JbxtBiddingDaoImpl implements IJbxtBiddingDao  {
 	public PageInfo<JbxtBiddingDVO> getJbxtBiddingPage(JbxtBiddingParam jbxtbiddingParam) throws BaseException{
 	       PageHelper.startPage(jbxtbiddingParam.getPn(), jbxtbiddingParam.getPs());
 		   return new PageInfo<JbxtBiddingDVO>(mapper.getJbxtBiddingList(jbxtbiddingParam));
-	
+
 	}
-	
+
     @Override
     public JbxtBiddingDO getJbxtBidding(JbxtBiddingParam jbxtbiddingParam){
 		return mapper.selectByPrimaryKey(jbxtbiddingParam.getCode());

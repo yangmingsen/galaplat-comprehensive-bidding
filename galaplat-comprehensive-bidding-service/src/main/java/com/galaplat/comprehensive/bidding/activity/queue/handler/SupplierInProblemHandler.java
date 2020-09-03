@@ -115,7 +115,10 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map200.put("goodsId", goodsId.toString());
         map200.put("bidPrice", bid);
         ObjectQueueMessage msg = new ObjectQueueMessage(200, map200);
-        currentActivity.recvBidMessage(msg);
+
+        currentActivity.handleRank();
+
+       // currentActivity.recvBidMessage(msg);
 
 
 /*

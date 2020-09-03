@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class JbxtUserDO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*用户名*/
@@ -37,6 +37,18 @@ public class JbxtUserDO implements Serializable {
     private String supplierName;
     private String codeName;
 
+     /*联系人*/
+     private String contactPerson;
+     /*手机号*/
+     private String phone;
+     /*邮箱地址*/
+     private String emailAddress;
+     /*是否登录系统*/
+     private Integer loginStatus;
+     /*短信发送状态*/
+     private Integer sendSms;
+     /*邮箱发送状态*/
+     private Integer sendMail;
 
      @Override
      public String toString() {
@@ -151,5 +163,52 @@ public class JbxtUserDO implements Serializable {
         this.sysCode = sysCode;
     }
 
+     public String getContactPerson() {
+         return contactPerson;
+     }
+
+     public void setContactPerson(String contactPerson) {
+         this.contactPerson = contactPerson == null ? null : contactPerson.trim();
+     }
+
+     public String getPhone() {
+         return phone;
+     }
+
+     public void setPhone(String phone) {
+         this.phone = phone == null ? null : phone.trim();
+     }
+
+     public String getEmailAddress() {
+         return emailAddress;
+     }
+
+     public void setEmailAddress(String emailAddress) {
+         this.emailAddress = emailAddress == null ? null : emailAddress.trim();
+     }
+
+     public Integer getLoginStatus() {
+         return loginStatus;
+     }
+
+     public void setLoginStatus(Integer loginStatus) {
+         this.loginStatus = loginStatus;
+     }
+
+     public Integer getSendSms() {
+         return sendSms;
+     }
+
+     public void setSendSms(Integer sendSms) {
+         this.sendSms = sendSms;
+     }
+
+     public Integer getSendMail() {
+         return sendMail;
+     }
+
+     public void setSendMail(Integer sendMail) {
+         this.sendMail = sendMail;
+     }
 
 }

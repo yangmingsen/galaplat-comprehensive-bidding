@@ -30,8 +30,11 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
     @Override
     public void handlerProblem(int type, QueueMessage queuemsg) {
         switch (type) {
-            case 300: //当某个管理端中途加入（或掉线从新加入） 同步数据
+            case 300: //当某个管理端中途加入（或掉线从新加入） 同步数据  //同步
                 handler300Problem(queuemsg);
+                //同步延迟时间
+                //doDeta...
+                handlerDelayed(queuemsg);
                 break;
 
             case 301: //推数据给管理端（同步一些数据给管理端）
@@ -42,6 +45,26 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                 handler302Problem(queuemsg);
                 break;
         }
+    }
+
+    private void handlerDelayed(QueueMessage queuemsg) {
+        final String activityCode = queuemsg.getData().get("activityCode");
+        final ActivityTask activityTask = this.activityManager.get(activityCode);
+        if (activityTask == null) return; //如果当前活动不存在返回
+
+        final int initAllowDelayedTime = activityTask.getInitAllowDelayedTime();
+        final int allowDelayedTime = activityTask.getAllowDelayedTime();
+        if (allowDelayedTime < initAllowDelayedTime) {
+            final int delayedLength = activityTask.getAllowDelayedLength();
+            final int expendTime = initAllowDelayedTime - allowDelayedTime; //发生延迟的次数
+            ResponseMessage responseMessage = new ResponseMessage(305, new HashMap<String, Object>() {{
+                put("delayedLength", delayedLength);
+                put("delayedTime", expendTime);
+            }});
+            final String adminCode = queuemsg.getData().get("adminCode");
+            notifyOptionAdmin(responseMessage, activityCode, adminCode);
+        }
+
     }
 
     private void handler302Problem(QueueMessage queuemsg) {
@@ -56,7 +79,6 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String adminCode = takeQueuemsg.getData().get("adminCode");
 
         final AdminInfo adminInfo1 = adminChannel.get(adminCode);
-        LOGGER.info("handler300Problem(msg): adminInfo="+adminInfo1);
         final Channel caChannel = adminInfo1.getChannel();
 
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
@@ -156,6 +178,14 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             res301.put("supplierCode", userInfo.getCode());
             res301.put("CodeName", userInfo.getCodeName());
             res301.put("supplierName", userInfo.getSupplierName());
+
+            final ActivityTask activityTask = this.activityManager.get(activityCode);
+            if (activityTask != null) {
+                res301.put("remainingTimeType",activityTask.getRemainingTimeType().toString());
+            } else {
+                res301.put("remainingTimeType", "false");
+            }
+
         } else {
             return;
         }
