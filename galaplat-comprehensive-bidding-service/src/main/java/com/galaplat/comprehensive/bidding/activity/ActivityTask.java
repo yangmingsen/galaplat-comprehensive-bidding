@@ -36,9 +36,9 @@ public class ActivityTask implements Runnable {
     private AdminChannelMap adminChannel;
     private IJbxtGoodsService iJbxtGoodsService;
     private ReentrantLock lock = new ReentrantLock();
-    ;
+
     private Condition continueRun = this.lock.newCondition();
-    ;
+
     private MessageQueue messageQueue;
     private String currentActivityCode;
     private Integer currentGoodsId;
