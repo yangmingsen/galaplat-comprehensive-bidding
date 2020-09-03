@@ -74,7 +74,8 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
 
-        final String bidTime = currentActivity.getRemainingTimeString();
+        //获取剩余时间类型
+        final String bidTime = currentActivity.getRemainingTimeType() == false ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
 
         final JbxtBiddingVO jbv = new JbxtBiddingVO();
         jbv.setBid(bid);
