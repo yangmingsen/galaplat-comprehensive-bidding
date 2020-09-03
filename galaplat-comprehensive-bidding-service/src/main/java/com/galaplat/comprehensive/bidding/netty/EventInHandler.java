@@ -32,8 +32,8 @@ import java.util.*;
 public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     // 用来保存所有的客户端连接
-    private static ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
+    private static final ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
     private final Logger LOGGER = LoggerFactory.getLogger(EventInHandler.class);
 
@@ -109,6 +109,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                 LOGGER.info("handler: " + "建立（admin）用户:" + adminCode + "与通道" + ctx.channel().id() + "的关联");
             }
             break;
+
             //处理供应商端提交竞价
             case 213: {
                 handler213Problem(message, ctx);
@@ -126,6 +127,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                 handler300Problem(message, ctx);
             }
             break;
+
             //处理管理端主动请求获取某个竞品数据时
             case 302: {
                 final String adminCode = adminChannelMap.getAdminIdByChannelId(ctx.channel().id());

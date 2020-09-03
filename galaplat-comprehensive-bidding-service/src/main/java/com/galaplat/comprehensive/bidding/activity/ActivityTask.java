@@ -29,49 +29,63 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ActivityTask implements Runnable {
 
+    //---------v2.0
     private Logger LOGGER;
     private ResponseMessage remainingTimeMessage;
     private UserChannelMap userChannelMap;
     private AdminChannelMap adminChannel;
     private IJbxtGoodsService iJbxtGoodsService;
-    private ReentrantLock lock;
-    private Condition continueRun;
+    private ReentrantLock lock = new ReentrantLock();
+    ;
+    private Condition continueRun = this.lock.newCondition();
+    ;
     private MessageQueue messageQueue;
     private String currentActivityCode;
     private Integer currentGoodsId;
     private int initTime; //初始化时间 秒
     private int status;//1 进行 2暂停  3//重置 4 结束
     private int remainingTime;  //剩余时间 秒
-    private int disappearTime; //过去了多长时间 秒
-    private int delayedCondition; //延时条件 秒
-    private int allowDelayedLength; //单次延时长度 秒
-    private int allowDelayedTime; //允许延迟次数
-    private int initAllowDelayedTime; //
-    private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
     private Map<String, String> t_map;
     private BigDecimal minBid;
     private boolean haveMinBid;
     private Map<String, BigDecimal> minSubmitMap;
-    //private List<RankInfo> rankInfos; //所有的供应商排名信息
-    //private Map<String, Integer> rankInfoMap; //供应商当前排名位置
+
+    //-----------v2.1.1
     private Integer supplierNum;
-    //supplierCode -> rank
     private Map<String, Integer> lastRankInfoMap = new HashMap<>();
     private IJbxtBiddingService biddingService;
+    private int disappearTime; //过去了多长时间 秒
+    private int delayedCondition; //延时条件 秒
+    private int allowDelayedLength; //单次延时长度 秒
+    private int allowDelayedTime; //允许延迟次数
+    private int initAllowDelayedTime; //初始化允许的延迟次数
+    private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
 
 
     public int getDelayedCondition() {
         return delayedCondition;
     }
 
+    /**
+     * 单次延时长度 秒
+     * @return
+     */
     public int getAllowDelayedLength() {
         return allowDelayedLength;
     }
 
+    /**
+     * 允许延迟次数
+     * @return
+     */
     public int getAllowDelayedTime() {
         return allowDelayedTime;
     }
 
+    /**
+     * 初始化允许的延迟次数
+     * @return
+     */
     public int getInitAllowDelayedTime() {
         return initAllowDelayedTime;
     }
@@ -232,9 +246,12 @@ public class ActivityTask implements Runnable {
         final QueueMessage queueMessage = new QueueMessage(212, map);
         messageQueue.offer(queueMessage);
 
-        this.status = 1;
-        this.remainingTime = this.initTime;
-        this.lastRankInfoMap = new HashMap<>();
+        this.status = 1; //重置状态
+        this.remainingTime = this.initTime; //重置剩余时间
+        this.disappearTime = 0; //重置总消耗时长为0
+        this.remainingTimeType = false;//重置剩余时间为false
+        this.allowDelayedTime = this.initAllowDelayedTime; //重置允许的延迟次数
+        this.lastRankInfoMap = new HashMap<>();//重置历史排名榜
         //this.resetTopInfo();
     }
 
@@ -281,13 +298,28 @@ public class ActivityTask implements Runnable {
                 }
             }
             this.sendRemainingTimeToAll();
-            Thread.sleep(1 * 200 * 1000);
-            remainingTime--;
+            Thread.sleep(1000);
+            remainingTime--; //剩余时间减少一秒
+            this.disappearTime++; //过去了多长时间
+
+            //判断现在是否为延迟时间
+            this.remainingTimeType = this.disappearTime > this.initTime;
         }
 //        if (isfinallyGoods()) {
 //            endTheCurrentGoodsActivity();
 //            autoCloseCurrentActivity();
 //        }
+    }
+
+    /**
+     * 获取剩余时间类型：
+     * true: 延迟时间
+     * false: 正常时间
+     *
+     * @return
+     */
+    public Boolean getRemainingTimeType() {
+        return remainingTimeType;
     }
 
     /**
@@ -551,8 +583,6 @@ public class ActivityTask implements Runnable {
             activityTask.iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
             activityTask.messageQueue = SpringUtil.getBean(MessageQueue.class);
             activityTask.biddingService = SpringUtil.getBean(JbxtBiddingServiceImpl.class);
-            activityTask.continueRun = activityTask.lock.newCondition();
-            activityTask.lock = new ReentrantLock();
             activityTask.t_map = new HashMap<>();
             activityTask.minBid = new BigDecimal("0.0");
             activityTask.haveMinBid = false;
@@ -732,17 +762,23 @@ public class ActivityTask implements Runnable {
         //推送各个供应商排名信息
         for (Map.Entry<BigDecimal, Map<String, RankInfo>> priceGroup : rankInfoMap.entrySet()) {
             Map<String, RankInfo> supplierRankMap = priceGroup.getValue();
+            boolean isParataxis = supplierRankMap.size() > 1;
             for (Map.Entry<String, RankInfo> supplierRank : supplierRankMap.entrySet()) {
                 RankInfo rankInfo = supplierRank.getValue();
                 final String supplierCode = supplierRank.getKey();
                 final BigDecimal goodsPrice = rankInfo.getBidPrice();
                 final String goodsId = this.currentGoodsId.toString();
                 final String activityCode = this.currentActivityCode;
-                final Integer userRank = rankInfo.getRank();
+                String userRank = rankInfo.getRank().toString();
+                if (isParataxis) {
+                    userRank = userRank + "（并列）";
+                }
+                final String finalUserRank = userRank;
+
                 ResponseMessage responseMessage = new ResponseMessage(200, new HashMap<String, Object>() {{
                     put("goodsPrice", goodsPrice);
                     put("goodsId", goodsId);
-                    put("userRank", userRank);
+                    put("userRank", finalUserRank);
                 }});
                 notifyOptionSupplier(responseMessage, activityCode, supplierCode);
             }
