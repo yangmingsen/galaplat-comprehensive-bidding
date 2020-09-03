@@ -7,7 +7,7 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
-import com.galaplat.comprehensive.bidding.dao.mappers.JbxtGoodsDOMapper;
+import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtGoodsCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -21,7 +21,7 @@ import com.github.pagehelper.PageInfo;
 public   class JbxtGoodsDaoImpl implements IJbxtGoodsDao  {
 
 	@Autowired
-	private JbxtGoodsDOMapper mapper;
+	private JbxtGoodsCustMapper mapper;
 
 	@Override
 	public int insertJbxtGoods(JbxtGoodsDO entity){

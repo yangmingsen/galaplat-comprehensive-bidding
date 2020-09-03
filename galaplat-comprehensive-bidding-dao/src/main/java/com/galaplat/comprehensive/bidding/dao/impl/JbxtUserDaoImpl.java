@@ -9,7 +9,7 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
-import com.galaplat.comprehensive.bidding.dao.mappers.JbxtUserDOMapper;
+import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtUserCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -23,7 +23,7 @@ import com.github.pagehelper.PageInfo;
 public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 
 	@Autowired
-	private JbxtUserDOMapper mapper;
+	private JbxtUserCustMapper mapper;
 
 	@Override
 	public List<JbxtUserDVO> findAllByActivityCode(String activityCode) {
