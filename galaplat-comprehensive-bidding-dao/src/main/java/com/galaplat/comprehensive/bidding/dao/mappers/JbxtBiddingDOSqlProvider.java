@@ -20,6 +20,10 @@ public class JbxtBiddingDOSqlProvider {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
 
+        if (record.getIsdelay() != null) {
+            VALUES("isdelay", "#{isdelay,jdbcType=INTEGER}");
+        }
+
         if (record.getGoodsId() != null) {
             VALUES("goods_id", "#{goodsId,jdbcType=INTEGER}");
         }
@@ -69,6 +73,10 @@ public class JbxtBiddingDOSqlProvider {
     public String updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record) {
         BEGIN();
         UPDATE("t_jbxt_minbid");
+
+        if (record.getIsdelay() != null) {
+            SET("isdelay = #{isdelay, jdbcType=INTEGER}");
+        }
 
         if (record.getGoodsId() != null) {
             SET("goods_id = #{goodsId,jdbcType=INTEGER}");
@@ -120,7 +128,6 @@ public class JbxtBiddingDOSqlProvider {
     }
 
 
-
     public String insertSelective(JbxtBiddingDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_bidding");
@@ -128,6 +135,11 @@ public class JbxtBiddingDOSqlProvider {
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
+
+        if (record.getIsdelay() != null) {
+            VALUES("isdelay", "#{isdelay,jdbcType=INTEGER}");
+        }
+
 
         if (record.getBidTime() != null) {
             VALUES("bid_time", "#{bidTime,jdbcType=VARCHAR}");
@@ -179,7 +191,11 @@ public class JbxtBiddingDOSqlProvider {
     public String updateByPrimaryKeySelective(JbxtBiddingDO record) {
         BEGIN();
         UPDATE("t_jbxt_bidding");
-        
+
+        if (record.getIsdelay() != null) {
+            SET("isdelay = #{isdelay, jdbcType=INTEGER}");
+        }
+
         if (record.getGoodsId() != null) {
             SET("goods_id = #{goodsId,jdbcType=INTEGER}");
         }

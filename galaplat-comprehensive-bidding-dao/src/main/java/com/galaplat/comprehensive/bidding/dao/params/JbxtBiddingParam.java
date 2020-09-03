@@ -47,6 +47,16 @@ public class JbxtBiddingParam extends Param {
 
      private String bidTime;
 
+    private Integer isdelay;
+
+    public Integer getIsdelay() {
+        return isdelay;
+    }
+
+    public void setIsdelay(Integer isdelay) {
+        this.isdelay = isdelay;
+    }
+
     private List<String> userCodeList;
 
      public String getBidTime() {
