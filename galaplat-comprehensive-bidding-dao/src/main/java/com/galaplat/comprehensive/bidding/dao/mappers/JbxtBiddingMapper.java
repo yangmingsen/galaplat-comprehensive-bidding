@@ -23,13 +23,13 @@ public interface JbxtBiddingMapper {
             "bid, created_time, ",
             "updated_time, updator, ",
             "creator, company_code, ",
-            "sys_code, bid_time)",
+            "sys_code, bid_time,isdelay)",
             "values (#{code,jdbcType=VARCHAR}, #{goodsId,jdbcType=INTEGER}, ",
             "#{userCode,jdbcType=VARCHAR}, #{activityCode,jdbcType=VARCHAR}, ",
             "#{bid,jdbcType=DECIMAL}, #{createdTime,jdbcType=TIMESTAMP}, ",
             "#{updatedTime,jdbcType=TIMESTAMP}, #{updator,jdbcType=VARCHAR}, ",
             "#{creator,jdbcType=VARCHAR}, #{companyCode,jdbcType=VARCHAR}, ",
-            "#{sysCode,jdbcType=VARCHAR},#{bidTime,jdbcType=VARCHAR})"
+            "#{sysCode,jdbcType=VARCHAR},#{bidTime,jdbcType=VARCHAR},#{isdelay,jdbcType=INTEGER})"
     })
     int insert(JbxtBiddingDO record);
 
@@ -39,7 +39,7 @@ public interface JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time,isdelay",
             "from t_jbxt_bidding",
             "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -55,7 +55,8 @@ public interface JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
     })
     JbxtBiddingDO selectByPrimaryKey(String code);
 
@@ -74,7 +75,8 @@ public interface JbxtBiddingMapper {
             "creator = #{creator,jdbcType=VARCHAR},",
             "company_code = #{companyCode,jdbcType=VARCHAR},",
             "sys_code = #{sysCode,jdbcType=VARCHAR},",
-            "bid_time = #{bidTime,jdbcType=VARCHAR}",
+            "bid_time = #{bidTime,jdbcType=VARCHAR},",
+            "isdelay = #{isdelay,jdbcType=INTEGER}",
             "where code = #{code,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKey(JbxtBiddingDO record);

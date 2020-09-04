@@ -33,7 +33,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_minbid",
             "where activity_code =#{activityCode,jdbcType=VARCHAR} AND  goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR}"
     })
@@ -49,7 +49,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     JbxtBiddingDO selectMinBidTableByOne(String userCode, Integer goodsId, String activityCode);
 
@@ -57,7 +58,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_minbid",
             "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} ORDER BY bid ASC"
     })
@@ -73,7 +74,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtBiddingDVO> selectMinBidTableByList(Integer goodsId, String activityCode);
 
@@ -95,7 +97,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_bidding",
             "where goods_id = #{goodsId,jdbcType=INTEGER} ORDER BY bid ASC LIMIT 0,1000"
     })
@@ -111,7 +113,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId);
 
@@ -122,7 +125,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_bidding",
             "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
@@ -138,7 +141,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 
@@ -147,7 +151,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_bidding",
             "where activity_code =#{activityCode,jdbcType=VARCHAR} AND  goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR} ORDER BY bid ASC LIMIT 0,1"
     })
@@ -163,7 +167,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
@@ -173,7 +178,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_bidding",
             "where activity_code =#{activityCode,jdbcType=VARCHAR} AND goods_id=#{goodsId,jdbcType=INTEGER}"
     })
@@ -189,7 +194,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtBiddingDVO> getAllBidUserInfo( Integer goodsId, String activityCode);
 
@@ -198,7 +204,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_bidding",
             "where activity_code = #{activityCode,jdbcType=VARCHAR} AND user_code = #{userCode,jdbcType=VARCHAR} ",
             "ORDER BY bid ASC"
@@ -215,7 +221,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
@@ -223,7 +230,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     @Select({
             "select",
             "code, goods_id, user_code, activity_code, bid, created_time, updated_time, updator, ",
-            "creator, company_code, sys_code, bid_time",
+            "creator, company_code, sys_code, bid_time, isdelay",
             "from t_jbxt_bidding",
             "where activity_code =#{activityCode,jdbcType=VARCHAR} AND  goods_id=#{goodsId,jdbcType=INTEGER} AND user_code=#{userCode,jdbcType=VARCHAR} ",
             "ORDER BY bid ASC"
@@ -240,7 +247,8 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="creator", property="creator", jdbcType=JdbcType.VARCHAR),
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR),
-            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR)
+            @Result(column="bid_time", property="bidTime", jdbcType=JdbcType.VARCHAR),
+            @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER)
     })
     List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
 

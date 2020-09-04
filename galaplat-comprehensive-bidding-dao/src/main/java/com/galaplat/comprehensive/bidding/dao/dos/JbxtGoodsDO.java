@@ -194,6 +194,10 @@ public class JbxtGoodsDO implements Serializable {
         this.delayTimes = delayTimes;
     }
 
+    /**
+     * 获取已经延迟的次数
+     * @return
+     */
     public Integer getAddDelayTimes() {
         return addDelayTimes;
     }
