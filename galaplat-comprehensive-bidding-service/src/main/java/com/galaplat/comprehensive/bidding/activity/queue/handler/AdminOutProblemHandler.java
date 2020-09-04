@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
@@ -34,7 +35,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                 handler300Problem(queuemsg);
                 //同步延迟时间
                 //doDeta...
-                handlerDelayed(queuemsg);
+                //handlerDelayed(queuemsg);
                 break;
 
             case 301: //推数据给管理端（同步一些数据给管理端）
@@ -130,6 +131,17 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final Res300 res300 = new Res300();
         res300.setGoodsId(goodsId);
 
+        JbxtGoodsDO currentGoods = iJbxtGoodsService.selectByGoodsId(goodsId); //获取当前竞品信息
+        final int delayedNum = currentGoods.getAddDelayTimes();
+        if (delayedNum != 0) {
+            res300.setDelay(true); //设置是否出现延时判断字段
+            res300.setDelayedTime(currentGoods.getAddDelayTimes()); //设置出现过的延迟次数
+            res300.setDelayedLength(currentGoods.getPerDelayTime()); //设置每次延时时长
+        } else {
+            res300.setDelay(false);
+        }
+
+
         BigDecimal minPrice = new BigDecimal("0.000");
         for (int i = 0; i < t1sCollect.size(); i++) {
             Res300t1 tres = t1sCollect.get(i);
@@ -181,7 +193,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
             final ActivityTask activityTask = this.activityManager.get(activityCode);
             if (activityTask != null) {
-                res301.put("remainingTimeType",activityTask.getRemainingTimeType().toString());
+                res301.put("remainingTimeType",activityTask.isRealAccessDealyedTime().toString());
             } else {
                 res301.put("remainingTimeType", "false");
             }
