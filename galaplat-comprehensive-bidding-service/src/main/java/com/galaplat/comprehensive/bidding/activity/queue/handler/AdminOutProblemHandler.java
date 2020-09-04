@@ -193,7 +193,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
             final ActivityTask activityTask = this.activityManager.get(activityCode);
             if (activityTask != null) {
-                res301.put("remainingTimeType",activityTask.getRemainingTimeType().toString());
+                res301.put("remainingTimeType",activityTask.isRealAccessDealyedTime().toString());
             } else {
                 res301.put("remainingTimeType", "false");
             }

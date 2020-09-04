@@ -1,20 +1,16 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
-import com.galaplat.comprehensive.bidding.activity.queue.msg.ObjectQueueMessage;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SupplierInProblemHandler extends BaseProblemHandler {
@@ -74,8 +70,10 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
 
+        final boolean timeType = currentActivity.isTriggerDelayed();
+
         //获取剩余时间类型
-        final String bidTime = currentActivity.getRemainingTimeType() == false ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
+        final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
 
         final JbxtBiddingVO jbv = new JbxtBiddingVO();
         jbv.setBid(bid);
@@ -83,6 +81,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         jbv.setGoodsId(goodsId);
         jbv.setActivityCode(activityCode); //设置当前活动id
         jbv.setBidTime(bidTime);
+        if (!timeType) {
+            jbv.setIsdelay(1);
+        } else {
+            jbv.setIsdelay(2);
+        }
 
         try {
             //add to db
@@ -97,6 +100,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 var1.setBid(bid);
                 var1.setUpdatedTime(new Date());
                 var1.setBidTime(bidTime);
+                if (!timeType) {
+                    var1.setIsdelay(1);
+                } else {
+                    var1.setIsdelay(2);
+                }
                 iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(var1);
             }
         }catch (Exception e) {
@@ -110,12 +118,12 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("goodsId", goodsId.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
-        final Map<String, Object> map200 = new HashMap();
-        map200.put("activityCode", activityCode);
-        map200.put("userCode", userCode);
-        map200.put("goodsId", goodsId.toString());
-        map200.put("bidPrice", bid);
-        ObjectQueueMessage msg = new ObjectQueueMessage(200, map200);
+//        final Map<String, Object> map200 = new HashMap();
+//        map200.put("activityCode", activityCode);
+//        map200.put("userCode", userCode);
+//        map200.put("goodsId", goodsId.toString());
+//        map200.put("bidPrice", bid);
+//        ObjectQueueMessage msg = new ObjectQueueMessage(200, map200);
 
         currentActivity.handleRank();
 

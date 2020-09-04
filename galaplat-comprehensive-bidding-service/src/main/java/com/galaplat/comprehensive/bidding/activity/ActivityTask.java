@@ -125,7 +125,9 @@ public class ActivityTask implements Runnable {
      * @return
      */
     public String getDelayRemainingTimeString() {
-        final int delayTime = this.computeCurrentDelayTime();
+        final boolean haveRemainingTime = this.disappearTime >= this.initTime; //如果消失的时间大于等于初始化时间，那么意味着可以使用延迟时间了
+        final int delayTime = haveRemainingTime ? this.computeCurrentDelayTime() : this.initTime - this.disappearTime;
+
         return this.doTransferTimeStr(delayTime);
     }
 
@@ -243,7 +245,25 @@ public class ActivityTask implements Runnable {
      *
      * @return
      */
-    public Boolean getRemainingTimeType() {
+//    public Boolean getRemainingTimeType() {
+//
+//        return remainingTimeType;
+//    }
+
+    public Boolean isTriggerDelayed() {
+        if (this.initAllowDelayedTime != this.allowDelayedTime) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 获取剩余时间类型：
+     *   true: 延迟时间
+     *  false: 正常时间
+     * @return
+     */
+    public Boolean isRealAccessDealyedTime() {
         return remainingTimeType;
     }
 
@@ -589,7 +609,8 @@ public class ActivityTask implements Runnable {
 
         final String activityCode = this.currentActivityCode;
         notifyAllSupplier(remainingTimeMessage, activityCode);
-        if (this.remainingTimeType) { //当处于延迟时间时
+
+        if (this.isTriggerDelayed()) { //当处于延迟时间时
             String delayTimeString = this.getDelayRemainingTimeString();
             t_map.put("remainingTime", delayTimeString);
             remainingTimeMessage.setData(t_map);
@@ -615,7 +636,6 @@ public class ActivityTask implements Runnable {
      * @param adminCode
      */
     private void notifyOptionAdmin(ResponseMessage message, String activityCode, String adminCode) {
-        LOGGER.info("notifyOptionAdmin(msg): activityCode=" + activityCode + " adminCode=" + adminCode + " message=" + message);
         AdminInfo adminInfo = adminChannel.get(adminCode);
         if (adminInfo.getFocusActivity().equals(activityCode)) {
             //推数据到管理端
@@ -825,7 +845,5 @@ public class ActivityTask implements Runnable {
             this.rank = rank;
         }
     }
-
-
 
 }
