@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class JbxtActivityDVO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*活动名称*/
@@ -33,9 +33,10 @@ public class JbxtActivityDVO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
-     private Integer supplierNum;
-
-     private Integer status;
+     /*供应商个数*/
+    private Integer supplierNum;
+     /*竞标单状态*/
+    private Integer status;
 
      @Override
      public String toString() {

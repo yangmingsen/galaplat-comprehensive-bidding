@@ -18,7 +18,7 @@ import java.util.Date;
  @NoArgsConstructor
 public class JbxtUserParam extends Param {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*用户名*/
@@ -48,6 +48,19 @@ public class JbxtUserParam extends Param {
      /*代号*/
      private String codeName;
 
+
+     /*联系人*/
+     private String contactPerson;
+     /*手机号*/
+     private String phone;
+     /*邮箱地址*/
+     private String emailAddress;
+     /*是否登录系统*/
+     private Integer loginStatus;
+     /*短信发送状态*/
+     private Integer sendSms;
+     /*邮箱发送状态*/
+     private Integer sendMail;
     public String getCode() {
         return code;
     }

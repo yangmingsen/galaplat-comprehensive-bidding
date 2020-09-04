@@ -49,7 +49,7 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	@Override
 	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException{
 	       PageHelper.startPage(jbxtactivityParam.getPn(), jbxtactivityParam.getPs());
-		   return new PageInfo<JbxtActivityDVO>(mapper.getJbxtActivityList(jbxtactivityParam));
+		   return new PageInfo<>(mapper.getJbxtActivityList(jbxtactivityParam));
 
 	}
 
@@ -87,4 +87,8 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	}
 
 
+	@Override
+	public JbxtActivityDO getJbxtActivityByParam(JbxtActivityParam param) {
+     return  mapper.getJbxtActivityByParam(param);
+	}
 }

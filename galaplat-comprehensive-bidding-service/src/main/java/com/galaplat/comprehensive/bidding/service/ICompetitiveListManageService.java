@@ -1,9 +1,12 @@
 package com.galaplat.comprehensive.bidding.service;
 
 import com.galaplat.base.core.common.exception.BaseException;
+import com.galaplat.comprehensive.bidding.dao.dvos.ActivityDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.CompetitiveListDVO;
+import com.galaplat.comprehensive.bidding.dao.params.BidActivityInfoParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
+import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.github.pagehelper.PageInfo;
 
@@ -70,4 +73,28 @@ public interface ICompetitiveListManageService {
      * @throws BaseException
      */
     String exportBidRankAndBidPrice(String bidActivityCode,HttpServletResponse response, HttpServletRequest request) throws BaseException;
+
+    /**
+     * 新增竞标活动时获取活动编码
+     * @param userName
+     * @return
+     */
+    BidCodeVO getBidcode(String userName);
+
+    /**
+     * 新增或者编辑竞标活动基本信息
+     * @param infoParam
+     * @param userName
+     * @return
+     */
+    String saveBidActivityBasicInfo(BidActivityInfoParam infoParam, String userName) throws Exception;
+
+    /**
+     * 查询带有竞品和供应商的竞标活动信息
+     * @param bidActivityCode
+     * @return
+     * @throws Exception
+     */
+    ActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception;
+
 }

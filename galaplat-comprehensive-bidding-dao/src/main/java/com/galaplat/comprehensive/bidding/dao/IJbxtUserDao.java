@@ -7,6 +7,7 @@ import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 用户表Dao
@@ -80,4 +81,19 @@ public interface IJbxtUserDao{
 	 * @return
 	 */
 	int batchDeleteUser(List<String> userCodes,String activityCode);
+
+	/**
+	 * 查询供应商
+	 * @param param
+	 * @return
+	 */
+	List<JbxtUserDO> listJbxtUser(@Param("param") JbxtUserParam param);
+
+	/**
+	 * 修改
+	 * @param updateParam
+	 * @param conditionParam
+	 * @return
+	 */
+	int updateBySomeParam(JbxtUserParam updateParam,  JbxtUserParam conditionParam);
 }

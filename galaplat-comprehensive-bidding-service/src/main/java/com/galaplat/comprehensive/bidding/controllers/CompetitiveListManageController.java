@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
+import com.galaplat.comprehensive.bidding.dao.params.BidActivityInfoParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.SupplierAccountParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
@@ -72,5 +73,25 @@ public class CompetitiveListManageController extends BaseController {
     public Object exportBidRankAndBidPrice(String bidActivityCode) throws BaseException {
         return manageService.exportBidRankAndBidPrice(bidActivityCode, response, request);
     }
+
+
+    @GetMapping("/getbidcode")
+    @RestfulResult
+    public Object getBidcode() throws Exception {
+      return   manageService.getBidcode(getUser().getName());
+    }
+
+    @PostMapping("/saveBasicInfo")
+    @RestfulResult
+    public Object saveBidActivityBasicInfo(BidActivityInfoParam infoParam) throws Exception {
+        return manageService.saveBidActivityBasicInfo(infoParam, getUser().getName());
+    }
+
+    @PostMapping("/getBidActivity")
+    @RestfulResult
+    public Object saveBidActivityBasicInfo(String bidActivityCode) throws Exception {
+        return manageService.getBidActivityWithGoodsAndSupplier(bidActivityCode);
+    }
+
 
 }

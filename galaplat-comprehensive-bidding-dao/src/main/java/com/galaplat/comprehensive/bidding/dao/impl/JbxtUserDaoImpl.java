@@ -43,7 +43,7 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 	@Override
 	public PageInfo<JbxtUserDVO> getJbxtUserPage(JbxtUserParam jbxtuserParam) throws BaseException{
 		PageHelper.startPage(jbxtuserParam.getPn(), jbxtuserParam.getPs());
-		return new PageInfo<JbxtUserDVO>(mapper.getJbxtUserList(jbxtuserParam));
+		return new PageInfo<>(mapper.getJbxtUserList(jbxtuserParam));
 
 	}
 
@@ -91,6 +91,17 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 	public int batchDeleteUser(List<String> userCodes, String activityCode) {
 		return mapper.batchDeleteUser(userCodes, activityCode);
 	}
+
+	@Override
+	public  List<JbxtUserDO> listJbxtUser(JbxtUserParam param) {
+       return  mapper.listJbxtUser(param);
+	}
+
+	@Override
+	public int updateBySomeParam(JbxtUserParam updateParam,  JbxtUserParam conditionParam) {
+		return  mapper.updateBySomeParam(updateParam,conditionParam);
+	}
+
 
 
 }

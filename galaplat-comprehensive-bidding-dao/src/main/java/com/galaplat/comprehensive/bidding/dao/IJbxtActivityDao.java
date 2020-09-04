@@ -9,7 +9,7 @@ import com.galaplat.comprehensive.bidding.dao.params.CompetitiveListParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.github.pagehelper.PageInfo;
 
- /**
+/**
  * 活动表Dao
  * @author esr
  * @date: 2020年06月17日
@@ -38,8 +38,8 @@ public interface IJbxtActivityDao{
 	 *
 	 */
 	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException;
-	
-    
+
+
     JbxtActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam);
 
 	 /**
@@ -68,4 +68,9 @@ public interface IJbxtActivityDao{
 	  */
 	int updateBidActivity(JbxtActivityDO entity);
 
+	 /**
+	  *
+	  * @return
+	  */
+	JbxtActivityDO getJbxtActivityByParam(JbxtActivityParam param);
 }

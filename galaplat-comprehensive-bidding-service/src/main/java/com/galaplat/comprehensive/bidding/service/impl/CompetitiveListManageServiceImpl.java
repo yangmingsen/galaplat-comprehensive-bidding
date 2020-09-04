@@ -5,7 +5,7 @@ import com.galaplat.comprehensive.bidding.dao.*;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.*;
 import com.galaplat.comprehensive.bidding.dao.params.*;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
@@ -14,6 +14,7 @@ import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
+import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
 import com.galaplat.comprehensive.bidding.vos.RankInfoVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
@@ -22,6 +23,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -525,6 +528,121 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         return deleteCount;
     }
 
+    @Override
+    public BidCodeVO getBidcode(String userName) {
+        return  BidCodeVO.builder().bidActivityCode(worker.nextId()).creator(userName).createdDate(DateFormatUtils.format(new Date(), "yyyy-MM-dd")).build();
+    }
+
+    @Override
+    public  String saveBidActivityBasicInfo(BidActivityInfoParam infoParam, String userName) throws Exception {
+        int count = 0;
+
+        String bidActivityCode = infoParam.getBidActivityCode();
+        JbxtActivityDO activityDO = new JbxtActivityDO();
+        activityDO.setCode(bidActivityCode);
+        activityDO.setBidingType(infoParam.getBidingType());
+        activityDO.setBidActivityInfo(infoParam.getBidActivityInfo());
+        Date predictBidDate = DateUtils.parseDate(infoParam.getPredictBidDateTime(),"yyyyMMddHHmmss");
+        activityDO.setPredictBidDatetime(predictBidDate);
+
+        if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(), "add")) {
+            activityDO.setCreator(userName);
+            activityDO.setCreatedTime(new Date());
+            activityDO.setUpdatedTime(new Date());
+            activityDO.setUpdator(userName);
+            activityDO.setRecordStatus(1);
+            activityDO.setStatus(ActivityStatusEnum.UNEXPORT.getCode());
+            count = activityDao.insertBidActivity(activityDO);
+            if (count == 0) {
+                throw  new BaseException("新增竞标活动失败！","新增竞标活动失败！");
+            }
+        } else if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(), "update")) {
+            JbxtActivityDO sourceActivity = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+            if (null == sourceActivity ) {
+               throw new BaseException("竞标单编码错误，竞标活动不存在！","竞标单编码错误，竞标活动不存在！");
+            }
+
+            if (ActivityStatusEnum.BIDING.getCode().equals(sourceActivity.getStatus())
+                    || ActivityStatusEnum.FINISH.getCode().equals(sourceActivity.getStatus()) ) {
+                throw new BaseException("竞标活动进行中或已结束，不可在编辑竞标基本信息！","竞标活动进行中或已结束，不可在编辑竞标基本信息！");
+            }
+            activityDO.setUpdator(userName);
+            activityDO.setUpdatedTime(new Date());
+            count = activityDao.updateBidActivity(activityDO);
+            if (count == 0) {
+                throw new BaseException("新增竞标活动失败！", "新增竞标活动失败！");
+            }
+
+            if (checkActivityInfoComplete(bidActivityCode)) {
+                activityDO.setStatus(ActivityStatusEnum.EXPORT_NO_SATRT.getCode());
+            }
+
+            // 如果竞标描述和竞标预计时间改变则将所有邮件和短信状态置为未发送
+            if (!StringUtils.equals(sourceActivity.getBidActivityInfo(), activityDO.getBidActivityInfo())
+            || (sourceActivity.getPredictBidDatetime().compareTo(activityDO.getPredictBidDatetime()) != 0)) {
+            userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(0).sendSms(0).build(),
+                  JbxtUserParam.builder().activityCode(bidActivityCode).build());
+            }
+        } else {
+            throw  new BaseException("操作类型错误！","操作类型错误！");
+        }
+    return bidActivityCode;
+    }
+
+    @Override
+    public  ActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception {
+        JbxtActivityDO activityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        List<JbxtGoodsDVO> goodsDVOList = goodsDdao.getListJbxtGoodsByActivityCode(bidActivityCode);
+        List<JbxtUserDO> userDOList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+
+        List<GoodsDVO> goodsDVOSList = Lists.newArrayList();
+        goodsDVOList.stream().forEach(e->{
+            GoodsDVO dvo = GoodsDVO.builder()
+                    .code(e.getCode())
+                    .goodsName(e.getName())
+                    .firstPrice(e.getFirstPrice())
+                    .retainPrice(e.getFirstPrice())
+                    .yearPurchaseNum(e.getNum())
+                    .bidTimeNum(e.getTimeNum())
+                    .lastChangTime(e.getLastChangTime())
+                    .perDelayTime(e.getPerDelayTime())
+                    .delayTimes(e.getDelayTimes())
+                    .build();
+            goodsDVOSList.add(dvo);
+        });
+
+        List<SupplierDVO> supplierDVOList = Lists.newArrayList();
+        userDOList.stream().forEach(e->{
+            SupplierDVO dvo = SupplierDVO.builder()
+                    .codeName(e.getCodeName())
+                    .supplierName(e.getSupplierName())
+                    .contactPerson(e.getContactPerson())
+                    .phone(e.getPhone())
+                    .emailAdrress(e.getEmailAddress())
+                    .loginStatus(e.getLoginStatus())
+                    .sendMail(e.getSendMail())
+                    .sendSms(e.getSendSms())
+                    .build();
+            supplierDVOList.add(dvo);
+        });
+
+       return ActivityDVO.builder()
+                .bidActivityCode(activityDO.getCode())
+                .bidActivityInfo(activityDO.getBidActivityInfo())
+                .creator(activityDO.getCreator())
+                .createdDate(null != activityDO.getCreatedTime() ? DateFormatUtils.format(activityDO.getCreatedTime(),"yyyy-MM-dd") : "")
+                .bidingType(activityDO.getBidingType())
+                .predictBidDatetime(null != activityDO.getPredictBidDatetime() ? DateFormatUtils.format(activityDO.getPredictBidDatetime(),"yyyy-MM-dd") : "")
+                .promiseTitle(activityDO.getPromiseTitle())
+                .promiseText(activityDO.getPromiseText())
+                .filePath(activityDO.getFilePath())
+                .goodsList(goodsDVOSList)
+                .supplierList(supplierDVOList)
+                .build();
+    }
+
+
+
     /**
      * 获取账号
      * 账号格式：供应商名称拼音首字母大写取前两个字母 + 四位自增数字
@@ -572,6 +690,40 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private String getShortCode(int index) {
         String code = worker.nextId();
         return code.substring(code.length() - index, code.length());
+    }
+
+    /**
+     * 检查竞标活动的竞品是否导入，供应商是否导入，承诺函是否导入
+     * @param bidActivityCode
+     * @return
+     */
+    private boolean checkActivityInfoComplete(String  bidActivityCode) {
+        boolean promiseExists = false;
+        boolean goodsExists = false;
+        boolean supplierExists = false;
+
+        JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if ( null != jbxtActivityDO && StringUtils.isNotBlank(jbxtActivityDO.getPromiseText())) {
+            promiseExists = true;
+        }
+
+        List<JbxtGoodsDO>   goodsDOs  = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        if ( CollectionUtils.isNotEmpty(goodsDOs)) {
+            goodsExists = true;
+        }
+
+        List<JbxtUserDVO> users = userDao.findAllByActivityCode(bidActivityCode);
+        if ( CollectionUtils.isNotEmpty(users)) {
+            supplierExists = true;
+        }
+
+        if (supplierExists && goodsExists && promiseExists) {
+            return true;
+        } else {
+            return false;
+        }
+
+
     }
 
 }
