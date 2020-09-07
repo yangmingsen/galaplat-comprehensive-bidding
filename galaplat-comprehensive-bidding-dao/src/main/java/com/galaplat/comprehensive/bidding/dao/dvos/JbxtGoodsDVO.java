@@ -52,6 +52,17 @@ public class JbxtGoodsDVO implements Serializable {
      /*已经延长的次数*/
      private Integer addDelayTimes;
 
+     /*保留价*/
+     private BigDecimal retainPrice;
+
+     public BigDecimal getRetainPrice() {
+         return retainPrice;
+     }
+
+     public void setRetainPrice(BigDecimal retainPrice) {
+         this.retainPrice = retainPrice;
+     }
+
      public Integer getTimeNum() {
          return timeNum;
      }

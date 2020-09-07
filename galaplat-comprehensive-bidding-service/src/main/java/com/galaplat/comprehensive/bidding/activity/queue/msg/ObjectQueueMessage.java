@@ -28,6 +28,6 @@ public class ObjectQueueMessage extends QueueMessage{
         return "ObjectQueueMessage{" +
                 "objData=" + objData +
                 ", type=" + type +
-                "} " + super.toString();
+                "} ";
     }
 }

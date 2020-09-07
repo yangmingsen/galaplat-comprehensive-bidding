@@ -25,7 +25,10 @@ import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-
+/**
+ * 废弃
+ */
+@Deprecated
 public class ActivityThread extends Thread {
 
     private final Logger LOGGER = LoggerFactory.getLogger(ActivityThread.class);
