@@ -65,7 +65,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 			if (currentActivity != null) {
 				LOGGER.info("findAll(msg): currentThreadStatus="+currentActivity.getStatus());
 				LOGGER.info("findAll(msg): currentThread1="+currentActivity);
-				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId().toString())) {
+				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId())) {
 					LOGGER.info("findAll(msg): currentThread2="+currentActivity);
 
 					int status = currentActivity.getStatus();

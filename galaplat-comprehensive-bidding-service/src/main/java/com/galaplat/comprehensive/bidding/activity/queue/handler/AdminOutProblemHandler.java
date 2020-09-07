@@ -86,7 +86,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final Integer goodsId ;
         if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
             ActivityTask currentActivity = activityManager.get(activityCode);
-            goodsId = Integer.parseInt(currentActivity.getCurrentGoodsId().toString());
+            goodsId = currentActivity.getCurrentGoodsId();
         } else { //不为null 意味着302问题
             try {
                 goodsId = Integer.parseInt(goodsIdStr);
