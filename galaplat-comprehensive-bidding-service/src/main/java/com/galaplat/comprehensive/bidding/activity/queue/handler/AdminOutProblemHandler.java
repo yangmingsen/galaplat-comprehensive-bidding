@@ -119,6 +119,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                     final Res300t2 res300t2 = new Res300t2();
                     res300t2.setBid(ubid1.getBid());
                     res300t2.setBidTime(ubid1.getBidTime());
+                    res300t2.setIsDelay(ubid1.getIsdelay());
 
                     t2s.add(res300t2);
                 }
@@ -143,9 +144,8 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
 
         BigDecimal minPrice = new BigDecimal("0.000");
-        for (int i = 0; i < t1sCollect.size(); i++) {
-            Res300t1 tres = t1sCollect.get(i);
-            if (tres.getMinBid().compareTo(minPrice) == 1) { //如果当前 > minPrice
+        for (Res300t1 tres : t1sCollect) {
+            if (tres.getMinBid().compareTo(minPrice) > 0) { //如果当前 > minPrice
                 minPrice = tres.getMinBid();
                 break;
             }

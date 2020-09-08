@@ -52,7 +52,6 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
             final ActivityThreadManager activityMap = springUtil.getBean(ActivityThreadManager.class);
             final List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
             for (JbxtActivityDVO jbxtActivityDVO : lists) {
-                activityInfoMap.put(jbxtActivityDVO.getCode(), jbxtActivityDVO);
                 if (jbxtActivityDVO.getStatus() == 3) {
                     final IJbxtGoodsService iJbxtGoodsService = springUtil.getBean(IJbxtGoodsService.class);
                     final JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());

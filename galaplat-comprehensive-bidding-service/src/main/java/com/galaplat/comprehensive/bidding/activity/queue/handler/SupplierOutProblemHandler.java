@@ -74,10 +74,13 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     private void handlerSendOneSupplier(final String activityCode, final Integer goodsId, final String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             final CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode); //issue sort
+            final Boolean parataxis = activityManager.get(activityCode).isParataxis(userCode) ? Boolean.TRUE : Boolean.FALSE;
             final Map<String, String> map = new HashMap<>();
             map.put("userRank", info.getUserRank().toString());
             map.put("goodsPrice", info.getGoodsPrice().toString());
             map.put("goodsId", info.getGoodsId().toString());
+            map.put("parataxis", parataxis.toString());
+
 
             //推流到供应商客户端
             final ResponseMessage message = new ResponseMessage(200, map);

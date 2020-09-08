@@ -17,6 +17,7 @@ import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.impl.JbxtBiddingServiceImpl;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
+import com.galaplat.comprehensive.bidding.vos.RankInfoVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
@@ -52,7 +53,10 @@ public class ActivityTask implements Runnable {
 
     //-----------v2.1.1
     private Integer supplierNum;
+    //排名Map
     private Map<String, Integer> lastRankInfoMap = new HashMap<>();
+    //竞价并列表Map
+    private Map<BigDecimal, Map<String, RankInfo>> bidParaxtisInfoMap = new HashMap<>();
     private IJbxtBiddingService biddingService;
     private int disappearTime; //过去了多长时间 秒
     private int delayedCondition; //延时条件 秒
@@ -60,6 +64,7 @@ public class ActivityTask implements Runnable {
     private int allowDelayedTime; //允许延迟次数
     private int initAllowDelayedTime; //初始化允许的延迟次数
     private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
+    private int lastRemainingTime = 0;
 
     public int getDelayedCondition() {
         return delayedCondition;
@@ -251,10 +256,7 @@ public class ActivityTask implements Runnable {
 //    }
 
     public Boolean isTriggerDelayed() {
-        if (this.initAllowDelayedTime != this.allowDelayedTime) {
-            return true;
-        }
-        return false;
+        return this.initAllowDelayedTime != this.allowDelayedTime;
     }
 
     /**
@@ -372,8 +374,8 @@ public class ActivityTask implements Runnable {
      * 处理排名
      */
     public void handleRank() {
-        Boolean needDeedDelayed = false;
-        Boolean needNotifyTopUpdate = false;
+        boolean needDeedDelayed = false;
+        boolean needNotifyTopUpdate = false;
         Map<BigDecimal, Integer> tmpRankMap = new HashMap<>();
         List<JbxtBiddingDVO> minBidList = biddingService.selectMinBidTableBy(currentGoodsId, currentActivityCode);
         int len = minBidList.size();
@@ -391,8 +393,7 @@ public class ActivityTask implements Runnable {
         //{bidPrice -> { supplierCode -> rankInfo}}
         Map<BigDecimal, Map<String, RankInfo>> rankInfoMap = new HashMap<>();
         ////判断是否需要延时 //更新top棒
-        for (int i = 0; i < len; i++) {
-            JbxtBiddingDVO oneBid = minBidList.get(i);
+        for (JbxtBiddingDVO oneBid : minBidList) {
             String supplierCode = oneBid.getUserCode();
             BigDecimal bidPrice = oneBid.getBid();
 
@@ -435,13 +436,19 @@ public class ActivityTask implements Runnable {
             }
 
         }
+        //更新
+        //this.bidParaxtisInfoMap = rankInfoMap;
 
         //是否通知延时
         if (needDeedDelayed) {
             //do other after needDeedDelayed
             final Integer delayedLength = this.allowDelayedLength;
+            final String remainingTime = this.doTransferTimeStr(this.lastRemainingTime);
+            final Integer allowDelayedTime = this.initAllowDelayedTime;
             ResponseMessage responseMessage = new ResponseMessage(120, new HashMap<String, Object>() {{
                 put("delayedLength", delayedLength);
+                put("remainingTime", remainingTime);
+                put("allowDelayedTime", allowDelayedTime);
             }});
             notifyAllSupplier(responseMessage, this.currentActivityCode);
             notifyAllAdmin(responseMessage, this.currentActivityCode);
@@ -470,16 +477,13 @@ public class ActivityTask implements Runnable {
                 final BigDecimal goodsPrice = rankInfo.getBidPrice();
                 final String goodsId = this.currentGoodsId.toString();
                 final String activityCode = this.currentActivityCode;
-                String userRank = rankInfo.getRank().toString();
-                if (isParataxis) {
-                    userRank = userRank + "（并列）";
-                }
-                final String finalUserRank = userRank;
-
+                final Integer userRank = rankInfo.getRank();
+                final Boolean parataxis = isParataxis ? Boolean.TRUE : Boolean.FALSE;
                 ResponseMessage responseMessage = new ResponseMessage(200, new HashMap<String, Object>() {{
                     put("goodsPrice", goodsPrice);
                     put("goodsId", goodsId);
-                    put("userRank", finalUserRank);
+                    put("userRank", userRank);
+                    put("parataxis", parataxis.toString());
                 }});
                 notifyOptionSupplier(responseMessage, activityCode, supplierCode);
             }
@@ -612,7 +616,9 @@ public class ActivityTask implements Runnable {
 
         if (this.isTriggerDelayed()) { //当处于延迟时间时
             String delayTimeString = this.getDelayRemainingTimeString();
-            t_map.put("remainingTime", delayTimeString);
+            int delay = this.disappearTime > this.initTime ? 2 : 1;
+            t_map.put("delay", Integer.toString(delay));
+           // t_map.put("remainingTime", delayTimeString);
             remainingTimeMessage.setData(t_map);
         }
         notifyAllAdmin(remainingTimeMessage, activityCode);
@@ -791,6 +797,7 @@ public class ActivityTask implements Runnable {
         final int allowDelayedTime = this.allowDelayedTime;
         if (remainingTime < delayedCondition && allowDelayedTime > 0) {
             final int allowDelayedLength = this.allowDelayedLength;
+            this.lastRemainingTime = this.remainingTime;
             this.remainingTime += allowDelayedLength;
             this.allowDelayedTime--;
 
@@ -806,6 +813,7 @@ public class ActivityTask implements Runnable {
 
         return false;
     }
+
 
     /**
      * 排名信息类
@@ -845,5 +853,26 @@ public class ActivityTask implements Runnable {
             this.rank = rank;
         }
     }
+
+
+    public Boolean isParataxis(String supplierCode) {
+        final Map<String, Integer> map = this.lastRankInfoMap;
+        Integer curSupplierrank = map.get(supplierCode);
+        if (curSupplierrank == null) return false;
+
+        for( Map.Entry<String, Integer> entry : map.entrySet()) {
+            //如果当前排名相同但是账号不同就表明有并列
+            if (entry.getValue().equals(curSupplierrank) && !(entry.getKey().equals(supplierCode))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+
+
+
 
 }
