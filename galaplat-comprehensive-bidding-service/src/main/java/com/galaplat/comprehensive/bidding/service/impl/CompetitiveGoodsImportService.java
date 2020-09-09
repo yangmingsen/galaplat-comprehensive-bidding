@@ -164,7 +164,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         if (timeNum > 60) {
             error.append("竞标时长不能超过60分钟！");
         }
-        if (lastChangTime > timeNum) {
+        if (lastChangTime > timeNum * 60) {
             error.append("延时窗口期不能超过竞标时长！");
         }
         if (perDelayTime > 600) {
