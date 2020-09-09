@@ -420,8 +420,8 @@ public class ActivityTask implements Runnable {
                     needNotifyTopUpdate = true;
                 }
 
-                if (lastRankPosition > 1 && lastRankPosition <= 3) { //上一次位置在(1,3]
-                    if (newRankPostion < lastRankPosition) {
+                if (lastRankPosition >= 1 && lastRankPosition <= 3) { //上一次位置在(1,3]; 加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
+                    if (newRankPostion <= lastRankPosition) { //加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
                         needDeedDelayed = decideDelayed(needDeedDelayed);
                     }
                 } else if (lastRankPosition > 3) {// 上一次位置在 (3: +..)
