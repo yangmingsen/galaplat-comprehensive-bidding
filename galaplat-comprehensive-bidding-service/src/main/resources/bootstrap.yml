@@ -1,4 +1,4 @@
-spring: 
+spring:
     rabbitmq:
       host: ser03.dev.esr.local
       port: 5672
@@ -7,41 +7,42 @@ spring:
     zipkin:
       base-url: http://192.168.51.101:8005
     cloud:
-      config:
-        profile: dev
-        name:  bootstrap,${spring.application.name}
-        uri: http://ms01.dev.esr.local:8001
-      
+#      config:
+#        profile: dev
+#        name:  bootstrap,${spring.application.name}
+#        uri: http://ms01.dev.esr.local:8001
+
 feign:
   hystrix:
    enabled: true
- 
+
 hystrix:
    command:
       default:
          execution:
              timeout:
                  enabled: false
-      
+
 ribbon:
       ConnectionTimeout: 50000
       ReadTimeout: 50000 #负载均衡策略
       eureka:
          enabled: true
 
-eureka: 
+eureka:
     client:
       #healthcheck:
-      #enabled: true 
+      #enabled: true
        service-url:
-            defaultZone: http://ms01.dev.esr.local:8002/eureka #绑定注册中心地址
-            #defaultZone: http://192.168.50.114:8762/eureka,http://192.168.50.111:8761/eureka,http://192.168.50.115:8763/eureka  
+#            defaultZone: http://ms01.dev.esr.local:8002/eureka #绑定注册中心地址
+            defaultZone: http://localhost:8002/eureka #绑定注册中心地址
+            #defaultZone: http://192.168.50.114:8762/eureka,http://192.168.50.111:8761/eureka,http://192.168.50.115:8763/eureka
     instance:
-        prefer-ip-address: true 
-        instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port} 
+        prefer-ip-address: true
+        instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
         lease-expiration-duration-in-seconds: 30 #server收到心跳到下一次收到心跳的超时时间
-        lease-renewal-interval-in-seconds: 10  #client发送心跳的频率       
-       
-       
+        lease-renewal-interval-in-seconds: 10  #client发送心跳的频率
 
-      
+
+
+
