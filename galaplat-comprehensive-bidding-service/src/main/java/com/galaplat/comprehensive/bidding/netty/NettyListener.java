@@ -19,7 +19,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+/**
+ * 不再使用该类进行Netty启动, 从2.1.1后使用{@link MyApplicationRunner}启动
+ *
+ * @since 2.1.1
+ */
+//@Component
+@Deprecated
 public class NettyListener implements ApplicationListener<ContextRefreshedEvent> {
 
 
@@ -41,6 +47,7 @@ public class NettyListener implements ApplicationListener<ContextRefreshedEvent>
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        System.out.println(event);
         boolean isTimeToRun = false;
         if (event.getApplicationContext().getClass().equals(AnnotationConfigServletWebServerApplicationContext.class)) {
             isTimeToRun = true;
