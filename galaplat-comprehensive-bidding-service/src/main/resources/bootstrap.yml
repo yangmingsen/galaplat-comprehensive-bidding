@@ -7,10 +7,10 @@ spring:
     zipkin:
       base-url: http://192.168.51.101:8005
     cloud:
-#      config:
-#        profile: dev
-#        name:  bootstrap,${spring.application.name}
-#        uri: http://ms01.dev.esr.local:8001
+      config:
+        profile: dev
+        name:  bootstrap,${spring.application.name}
+        uri: http://ms01.dev.esr.local:8001
 
 feign:
   hystrix:
@@ -34,8 +34,7 @@ eureka:
       #healthcheck:
       #enabled: true
        service-url:
-#            defaultZone: http://ms01.dev.esr.local:8002/eureka #绑定注册中心地址
-            defaultZone: http://localhost:8002/eureka #绑定注册中心地址
+            defaultZone: http://ms01.dev.esr.local:8002/eureka #绑定注册中心地址
             #defaultZone: http://192.168.50.114:8762/eureka,http://192.168.50.111:8761/eureka,http://192.168.50.115:8763/eureka
     instance:
         prefer-ip-address: true

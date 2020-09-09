@@ -1,6 +1,6 @@
 server:
   id: 0409
-  port: 8050
+  port: 8049
   tomcat:
     accept-count: 500 # Maximum queue length for incoming connection requests when all possible request processing threads are in use.
     max-connections: 500 # Maximum number of connections that the server will accept and process at any given time.
