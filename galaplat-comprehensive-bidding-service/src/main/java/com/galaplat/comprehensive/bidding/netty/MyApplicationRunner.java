@@ -2,6 +2,7 @@ package com.galaplat.comprehensive.bidding.netty;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
+import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThreadSingleton;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
@@ -55,6 +56,10 @@ public class MyApplicationRunner implements ApplicationRunner {
                 }
             }
         }
+
+
+        QueueHandlerThreadSingleton queueHandlerThreadSingleton = QueueHandlerThreadSingleton.getInstance();
+        queueHandlerThreadSingleton.start();
     }
 
     @Override
