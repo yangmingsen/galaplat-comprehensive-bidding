@@ -57,7 +57,8 @@ public class ActivityTask implements Runnable {
     //-----------v2.1.1
     private Integer supplierNum;
     //排名Map
-    private Map<String, Integer> lastRankInfoMap = new HashMap<>();
+    private Map<String, Integer> lastRankInfoMap = new HashMap<>(); // supplier -> rank
+    private Map<String, BigDecimal> lastBidPrceMap = new HashMap<>(); // supplierCode -> BidPrice
     //竞价并列表Map
     private Map<BigDecimal, Map<String, RankInfo>> bidParaxtisInfoMap = new HashMap<>();
     private IJbxtBiddingService biddingService;
@@ -421,9 +422,15 @@ public class ActivityTask implements Runnable {
                 }
 
                 if (lastRankPosition >= 1 && lastRankPosition <= 3) { //上一次位置在(1,3]; 加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
-                    if (newRankPostion <= lastRankPosition) { //加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
+                    if (newRankPostion < lastRankPosition) { //加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
                         needDeedDelayed = decideDelayed(needDeedDelayed);
                     }
+                    if (newRankPostion == lastRankPosition) {
+                        if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
+                            needDeedDelayed = this.decideDelayed(needDeedDelayed);
+                        }
+                    }
+
                 } else if (lastRankPosition > 3) {// 上一次位置在 (3: +..)
                     if (newRankPostion <= 3) {
                         needDeedDelayed = decideDelayed(needDeedDelayed);
@@ -431,6 +438,7 @@ public class ActivityTask implements Runnable {
                 }
             }
             lastRankInfoMap.put(supplierCode, newRankPostion);
+            lastBidPrceMap.put(supplierCode, bidPrice);
 
             //封装各个供应商排名信息
             if (rankInfoMap.get(bidPrice) != null) {
