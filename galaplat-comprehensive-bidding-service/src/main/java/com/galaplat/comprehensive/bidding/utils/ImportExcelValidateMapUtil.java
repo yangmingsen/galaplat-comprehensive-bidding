@@ -30,6 +30,85 @@ public class ImportExcelValidateMapUtil {
 
     /**
      * 校验导入数据,返回有异常的行
+     * @param referenceParamClazz
+     * @param excelParam
+     * @param excelDataMap
+     * @return
+     */
+    public static  <K> Tuple<String,K> validateField_1(Class referenceParamClazz,K excelParam, Map<String, Object> excelDataMap) {
+        Field[] fileds = referenceParamClazz.getDeclaredFields();
+        StringBuffer errorMsg = new StringBuffer("");
+
+        for (Field field : fileds) {
+            AlisaField alisaAnnotation = field.getAnnotation(AlisaField.class);
+            NotNull notNullAnnotation = field.getAnnotation(NotNull.class);
+            DateFieldFormate  dateFieldFormateAnnotation = field.getAnnotation(DateFieldFormate.class);
+
+            String  fieldName  = field.getName();
+            String  excelTitle;
+            StringBuffer  temErrorMsg = new StringBuffer("") ;
+
+            if (alisaAnnotation != null) {
+                excelTitle = alisaAnnotation.value();
+                Class fieldClass = field.getType();
+                Class superclass = field.getType().getSuperclass();
+                Class clazz = field.getType();
+                String  fieldValue  = (String) excelDataMap.get(fieldName);
+
+                if (notNullAnnotation != null && StringUtils.isEmpty(fieldValue)) {
+                    temErrorMsg.append(notNullAnnotation.message());
+                    errorMsg.append(temErrorMsg);
+                    continue;
+                }
+
+                if (superclass  == Number.class && (clazz == int.class
+                        || clazz == short.class || clazz == long.class
+                        || clazz == Integer.class || clazz == Short.class
+                        || clazz == Long.class)) {
+
+                    String firstNum = fieldValue.substring(0,1);
+                    fieldValue = StringUtils.equals(firstNum,"-") ? fieldValue.substring(0,fieldValue.length()) : fieldValue;
+                    String tempFieldValue = StringUtils.replaceFirst(fieldValue,"\\.","");
+                    if (!StringUtils.isNumeric(tempFieldValue)) {
+                        temErrorMsg.append(excelTitle).append("必须为数字！");
+                    } else {
+                        if (fieldValue.contains(".")) { temErrorMsg.append(excelTitle).append("必须为整数！");}
+                    }
+                }
+
+                if (superclass  == Number.class && (clazz == double.class || clazz == float.class
+                        ||  clazz == Double.class || clazz == Float.class || clazz == BigDecimal.class)) {
+                    fieldValue = StringUtils.replaceFirst(fieldValue,"\\.","");
+                    if (!StringUtils.isNumeric(fieldValue)) {
+                        temErrorMsg.append(excelTitle).append("必须为数字！");
+                    }
+                }
+
+                try {
+                    String methodName = "set"+ upperFirstWordString(fieldName);
+                    Method method = excelParam.getClass().getDeclaredMethod(methodName,String.class);
+                    Object fieldVal = excelDataMap.get(fieldName);
+                    method.invoke(excelParam, fieldVal);
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    log.error("导入校验异常{}{}",e.getMessage(),e );
+                }
+                errorMsg.append(temErrorMsg);
+            }// if
+        }
+
+        if (StringUtils.isNotEmpty(errorMsg.toString())) {
+            try {
+                Method method = excelParam.getClass().getDeclaredMethod("setErrorMsg",String.class);
+                method.invoke(excelParam,errorMsg.toString());
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                log.error("There is a validatting Exception,【{}】,【{}】", e.getMessage(),e);
+            }
+        }
+        return new Tuple<>(errorMsg.toString(), excelParam);
+    }
+
+    /**
+     * 校验导入数据,返回有异常的行
      * @param param
      * @param excelDataMap
      * @return
