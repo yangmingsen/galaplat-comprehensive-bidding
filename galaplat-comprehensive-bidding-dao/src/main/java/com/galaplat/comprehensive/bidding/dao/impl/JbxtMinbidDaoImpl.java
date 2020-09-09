@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao.impl;
 
 import com.galaplat.comprehensive.bidding.dao.IJbxtMinbidDao;
-import com.galaplat.comprehensive.bidding.dao.mappers.JbxtMinbidDOMapper;
+import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtMinbidCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtMinbidParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public class JbxtMinbidDaoImpl implements IJbxtMinbidDao {
 
     @Autowired
-    private JbxtMinbidDOMapper mapper;
+    private JbxtMinbidCustMapper mapper;
 
     @Override
     public int deleteBidding(JbxtMinbidParam minbidParam) {

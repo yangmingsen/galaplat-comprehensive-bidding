@@ -1,9 +1,9 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
-import com.galaplat.comprehensive.bidding.netty.pojo.Message;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
+import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -40,7 +40,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     }
 
     private void handler216Problem(final QueueMessage queuemsg) {
-        final Message message = new Message(216, queuemsg.getData());
+        final ResponseMessage message = new ResponseMessage(216, queuemsg.getData());
         final String activityCode = queuemsg.getData().get("activityCode");
         final String userCode = queuemsg.getData().get("userCode");
 
@@ -53,13 +53,13 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
 
 
     private void handler215Problem(final QueueMessage queuemsg) {
-        final Message message = new Message(215, queuemsg.getData());
+        final ResponseMessage message = new ResponseMessage(215, queuemsg.getData());
         final String activityCode = queuemsg.getData().get("activityCode");
         notifyAllSupplier(message, activityCode);
     }
 
     private void handler214Problem(final QueueMessage queuemsg) {
-        final Message message = new Message(214, queuemsg.getData());
+        final ResponseMessage message = new ResponseMessage(214, queuemsg.getData());
         final String activityCode = queuemsg.getData().get("activityCode");
         notifyAllSupplier(message, activityCode);
     }
@@ -73,14 +73,17 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
      */
     private void handlerSendOneSupplier(final String activityCode, final Integer goodsId, final String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            final CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode);
+            final CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode); //issue sort
+            final Boolean parataxis = activityManager.get(activityCode).isParataxis(userCode) ? Boolean.TRUE : Boolean.FALSE;
             final Map<String, String> map = new HashMap<>();
             map.put("userRank", info.getUserRank().toString());
             map.put("goodsPrice", info.getGoodsPrice().toString());
             map.put("goodsId", info.getGoodsId().toString());
+            map.put("parataxis", parataxis.toString());
+
 
             //推流到供应商客户端
-            final Message message = new Message(200, map);
+            final ResponseMessage message = new ResponseMessage(200, map);
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
     }
@@ -89,7 +92,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     private void handler111Problem(final QueueMessage takeQueuemsg) {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
 
-        final Message message = new Message(111, takeQueuemsg.getData());
+        final ResponseMessage message = new ResponseMessage(111, takeQueuemsg.getData());
         notifyAllSupplier(message, activityCode);
     }
 
@@ -110,16 +113,16 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         final String userCode = takeQueuemsg.getData().get("userCode");
         takeQueuemsg.getData().put("userCode", null);
 
-        final Message message = new Message(215, takeQueuemsg.getData());
+        final ResponseMessage message = new ResponseMessage(215, takeQueuemsg.getData());
         notifyOptionSupplier(message ,activityCode, userCode);
 
         //传递当前活动剩余时长
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 Map<String, String> t_map = new HashMap<>();
                 t_map.put("remainingTime",currentActivity.getRemainingTimeString());
-                Message remainingTimeMessage = new Message(100, t_map);
+                ResponseMessage remainingTimeMessage = new ResponseMessage(100, t_map);
                 notifyOptionSupplier(remainingTimeMessage ,activityCode, userCode);
             }
         }
@@ -128,7 +131,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     private void handler211Problem(final QueueMessage takeQueuemsg) {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String userCode = takeQueuemsg.getData().get("userCode");
-        final String goodsId = activityManager.get(activityCode).getCurrentGoodsId();
+        final String goodsId = activityManager.get(activityCode).getCurrentGoodsId().toString();
         takeQueuemsg.getData().put("goodsId", goodsId);
         final int status = activityManager.get(activityCode).getStatus();
         if (status == 2) {
@@ -145,7 +148,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
 
     private void handler212Problem(final QueueMessage takeQueuemsg) {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
-        final Message message = new Message(212, takeQueuemsg.getData());
+        final ResponseMessage message = new ResponseMessage(212, takeQueuemsg.getData());
         notifyAllSupplier(message,activityCode);
     }
 

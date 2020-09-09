@@ -12,6 +12,7 @@ import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 
 public class JbxtGoodsDOSqlProvider {
 
+
     public String insertSelective(JbxtGoodsDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_goods");
@@ -52,10 +53,6 @@ public class JbxtGoodsDOSqlProvider {
             VALUES("creator", "#{creator,jdbcType=VARCHAR}");
         }
 
-        if (record.getUpdator() != null) {
-            VALUES("updator", "#{updator,jdbcType=VARCHAR}");
-        }
-
         if (record.getCompanyCode() != null) {
             VALUES("company_code", "#{companyCode,jdbcType=VARCHAR}");
         }
@@ -70,6 +67,30 @@ public class JbxtGoodsDOSqlProvider {
 
         if (record.getTimeNum() != null) {
             VALUES("time_num", "#{timeNum,jdbcType=INTEGER}");
+        }
+
+        if (record.getUpdator() != null) {
+            VALUES("updator", "#{updator,jdbcType=VARCHAR}");
+        }
+
+        if (record.getLastChangTime() != null) {
+            VALUES("last_chang_time", "#{lastChangTime,jdbcType=INTEGER}");
+        }
+
+        if (record.getPerDelayTime() != null) {
+            VALUES("per_delay_time", "#{perDelayTime,jdbcType=INTEGER}");
+        }
+
+        if (record.getDelayTimes() != null) {
+            VALUES("delay_times", "#{delayTimes,jdbcType=INTEGER}");
+        }
+
+        if (record.getAddDelayTimes() != null) {
+            VALUES("add_delay_times", "#{addDelayTimes,jdbcType=INTEGER}");
+        }
+
+        if (record.getRetainPrice() != null) {
+            VALUES("retain_price", "#{retainPrice,jdbcType=DECIMAL}");
         }
 
         return SQL();
@@ -111,10 +132,6 @@ public class JbxtGoodsDOSqlProvider {
             SET("creator = #{creator,jdbcType=VARCHAR}");
         }
 
-        if (record.getUpdator() != null) {
-            SET("updator = #{updator,jdbcType=VARCHAR}");
-        }
-
         if (record.getCompanyCode() != null) {
             SET("company_code = #{companyCode,jdbcType=VARCHAR}");
         }
@@ -129,6 +146,30 @@ public class JbxtGoodsDOSqlProvider {
 
         if (record.getTimeNum() != null) {
             SET("time_num = #{timeNum,jdbcType=INTEGER}");
+        }
+
+        if (record.getUpdator() != null) {
+            SET("updator = #{updator,jdbcType=VARCHAR}");
+        }
+
+        if (record.getLastChangTime() != null) {
+            SET("last_chang_time = #{lastChangTime,jdbcType=INTEGER}");
+        }
+
+        if (record.getPerDelayTime() != null) {
+            SET("per_delay_time = #{perDelayTime,jdbcType=INTEGER}");
+        }
+
+        if (record.getDelayTimes() != null) {
+            SET("delay_times = #{delayTimes,jdbcType=INTEGER}");
+        }
+
+        if (record.getAddDelayTimes() != null) {
+            SET("add_delay_times = #{addDelayTimes,jdbcType=INTEGER}");
+        }
+
+        if (record.getRetainPrice() != null) {
+            SET("retain_price = #{retainPrice,jdbcType=DECIMAL}");
         }
 
         WHERE("goods_id = #{goodsId,jdbcType=INTEGER}");

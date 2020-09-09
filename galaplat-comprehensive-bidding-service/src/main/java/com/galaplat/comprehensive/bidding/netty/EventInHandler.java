@@ -1,13 +1,16 @@
 package com.galaplat.comprehensive.bidding.netty;
 
 import com.alibaba.fastjson.JSON;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
+import com.galaplat.comprehensive.bidding.netty.channel.AdminInfo;
+import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
@@ -29,8 +32,8 @@ import java.util.*;
 public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     // 用来保存所有的客户端连接
-    private static ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
+    private static final ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
     private final Logger LOGGER = LoggerFactory.getLogger(EventInHandler.class);
 
@@ -84,7 +87,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                         return; //返回不同步数据
                     }
 
-                    final ActivityThread currentActivity = activityManager.get(focusActivity);
+                    final ActivityTask currentActivity = activityManager.get(focusActivity);
                     if (currentActivity != null) { //如果当前供应商聚焦的竞品活动存在 则同步数据
                         //同步数据
                         final QueueMessage queueMessage = new QueueMessage(211, message.getData());
@@ -106,6 +109,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                 LOGGER.info("handler: " + "建立（admin）用户:" + adminCode + "与通道" + ctx.channel().id() + "的关联");
             }
             break;
+
             //处理供应商端提交竞价
             case 213: {
                 handler213Problem(message, ctx);
@@ -123,6 +127,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
                 handler300Problem(message, ctx);
             }
             break;
+
             //处理管理端主动请求获取某个竞品数据时
             case 302: {
                 final String adminCode = adminChannelMap.getAdminIdByChannelId(ctx.channel().id());
@@ -203,7 +208,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         final JbxtBiddingDO lastUserMinBid = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
         if (lastUserMinBid != null) {
             int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
-            if (compareRes == 0 || compareRes == 1) {
+            if (compareRes >= 0) {
                 LOGGER.info("channelRead0-case213: 当前竞价(" + bidPrice + ")大于或等于历史竞价(" + lastUserMinBid.getBid() + ")");
                 return;
             }
@@ -226,7 +231,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         map.put("adminCode", adminCode);
 
 
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
             //同步数据
             QueueMessage queueMessage = new QueueMessage(300, map);

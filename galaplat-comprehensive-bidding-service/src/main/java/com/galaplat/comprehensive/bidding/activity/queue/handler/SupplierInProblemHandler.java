@@ -1,17 +1,16 @@
 package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
-import com.galaplat.comprehensive.bidding.activity.ActivityThread;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.ActivityTask;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SupplierInProblemHandler extends BaseProblemHandler {
@@ -34,11 +33,12 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         //处理提交是否过时问题(V2.0添加)
-        final ActivityThread currentActivity = activityManager.get(activityCode);
+        final ActivityTask currentActivity = activityManager.get(activityCode);
+
         if (currentActivity == null) {
             LOGGER.info("handler213Problem: 当前活动不存在");return;
         } else {
-            String currentGoodsId = currentActivity.getCurrentGoodsId();
+            String currentGoodsId = currentActivity.getCurrentGoodsId().toString();
             if (!currentGoodsId.equals(goodsIdStr)) {
                 LOGGER.info("handler213Problem: 当前竞品竞价已经结束或者未开始");return;
             }
@@ -65,10 +65,15 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
     }
 
-    private void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
+    @Transactional( rollbackFor = Exception.class) //#issue
+    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
 
-        final ActivityThread currentActivity = activityManager.get(activityCode);
-        final String bidTime = currentActivity.getRemainingTimeString();
+        final ActivityTask currentActivity = activityManager.get(activityCode);
+
+        final boolean timeType = currentActivity.isTriggerDelayed();
+
+        //获取剩余时间类型
+        final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
 
         final JbxtBiddingVO jbv = new JbxtBiddingVO();
         jbv.setBid(bid);
@@ -76,6 +81,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         jbv.setGoodsId(goodsId);
         jbv.setActivityCode(activityCode); //设置当前活动id
         jbv.setBidTime(bidTime);
+        if (!timeType) {
+            jbv.setIsdelay(1);
+        } else {
+            jbv.setIsdelay(2);
+        }
 
         try {
             //add to db
@@ -90,6 +100,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 var1.setBid(bid);
                 var1.setUpdatedTime(new Date());
                 var1.setBidTime(bidTime);
+                if (!timeType) {
+                    var1.setIsdelay(1);
+                } else {
+                    var1.setIsdelay(2);
+                }
                 iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(var1);
             }
         }catch (Exception e) {
@@ -103,6 +118,19 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("goodsId", goodsId.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
+//        final Map<String, Object> map200 = new HashMap();
+//        map200.put("activityCode", activityCode);
+//        map200.put("userCode", userCode);
+//        map200.put("goodsId", goodsId.toString());
+//        map200.put("bidPrice", bid);
+//        ObjectQueueMessage msg = new ObjectQueueMessage(200, map200);
+
+        currentActivity.handleRank();
+
+       // currentActivity.recvBidMessage(msg);
+
+
+/*
         //
         final Map<String, String> map200 = new HashMap();
         map200.put("activityCode", activityCode);
@@ -111,7 +139,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         //检查是否更新top提示
         final List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
-        activityManager.get(activityCode).updateTopMinBid(theTopBids);
+        activityManager.get(activityCode).updateTopMinBid(theTopBids);*/
     }
 
 }

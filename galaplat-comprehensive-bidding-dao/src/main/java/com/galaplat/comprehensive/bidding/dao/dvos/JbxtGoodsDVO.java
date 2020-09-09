@@ -12,7 +12,7 @@ import java.util.Date;
  */
 public class JbxtGoodsDVO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*商品名称*/
@@ -39,6 +39,29 @@ public class JbxtGoodsDVO implements Serializable {
     private String status;
 
      private Integer timeNum;
+
+     /*需要延长竞标时长的最后的时间点，比如最后10秒，排名发生变化需要延长*/
+     private Integer lastChangTime;
+
+     /*每次延长的时长*/
+     private Integer perDelayTime;
+
+     /*延长次数*/
+     private Integer delayTimes;
+
+     /*已经延长的次数*/
+     private Integer addDelayTimes;
+
+     /*保留价*/
+     private BigDecimal retainPrice;
+
+     public BigDecimal getRetainPrice() {
+         return retainPrice;
+     }
+
+     public void setRetainPrice(BigDecimal retainPrice) {
+         this.retainPrice = retainPrice;
+     }
 
      public Integer getTimeNum() {
          return timeNum;
@@ -133,5 +156,36 @@ public class JbxtGoodsDVO implements Serializable {
         this.status = status;
     }
 
+     public Integer getLastChangTime() {
+         return lastChangTime;
+     }
+
+     public void setLastChangTime(Integer lastChangTime) {
+         this.lastChangTime = lastChangTime;
+     }
+
+     public Integer getPerDelayTime() {
+         return perDelayTime;
+     }
+
+     public void setPerDelayTime(Integer perDelayTime) {
+         this.perDelayTime = perDelayTime;
+     }
+
+     public Integer getDelayTimes() {
+         return delayTimes;
+     }
+
+     public void setDelayTimes(Integer delayTimes) {
+         this.delayTimes = delayTimes;
+     }
+
+     public Integer getAddDelayTimes() {
+         return addDelayTimes;
+     }
+
+     public void setAddDelayTimes(Integer addDelayTimes) {
+         this.addDelayTimes = addDelayTimes;
+     }
 
 }
