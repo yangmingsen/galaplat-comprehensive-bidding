@@ -8,7 +8,9 @@ import java.util.Map;
 
 /**
  * 不使用，因为如果临时添加竞标数据，无法实时更新
+ *
  */
+@Deprecated
 @Component
 public class ActivityInfoMap {
     private Map<String, JbxtActivityDVO> activityDVOMap = new HashMap<>();

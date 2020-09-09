@@ -44,7 +44,10 @@ public class ActivityTask implements Runnable {
     private String currentActivityCode;
     private Integer currentGoodsId;
     private int initTime; //初始化时间 秒
-    private int status;//1 进行 2暂停  3//重置 4 结束
+    /**
+     *1 进行 2暂停  3//重置 4 结束
+     */
+    private int status;
     private int remainingTime;  //剩余时间 秒
     private Map<String, String> t_map;
     private BigDecimal minBid;
@@ -64,7 +67,7 @@ public class ActivityTask implements Runnable {
     private int allowDelayedTime; //允许延迟次数
     private int initAllowDelayedTime; //初始化允许的延迟次数
     private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
-    private int lastRemainingTime = 0;
+    private int lastRemainingTime = 0;// 记录上一次发生延迟的时间
 
     public int getDelayedCondition() {
         return delayedCondition;
@@ -255,6 +258,11 @@ public class ActivityTask implements Runnable {
 //        return remainingTimeType;
 //    }
 
+
+    /**
+     * 根据初始化延迟时间和已经消耗的次数来判断
+     * @return
+     */
     public Boolean isTriggerDelayed() {
         return this.initAllowDelayedTime != this.allowDelayedTime;
     }
@@ -443,7 +451,7 @@ public class ActivityTask implements Runnable {
         if (needDeedDelayed) {
             //do other after needDeedDelayed
             final Integer delayedLength = this.allowDelayedLength;
-            final String remainingTime = this.doTransferTimeStr(this.lastRemainingTime);
+            final Integer remainingTime = this.lastRemainingTime;//this.doTransferTimeStr(this.lastRemainingTime);
             final Integer allowDelayedTime = this.initAllowDelayedTime;
             ResponseMessage responseMessage = new ResponseMessage(120, new HashMap<String, Object>() {{
                 put("delayedLength", delayedLength);
@@ -550,6 +558,7 @@ public class ActivityTask implements Runnable {
         this.remainingTimeType = false;//重置剩余时间为false
         this.allowDelayedTime = this.initAllowDelayedTime; //重置允许的延迟次数
         this.lastRankInfoMap = new HashMap<>();//重置历史排名榜
+        this.lastRemainingTime = 0;
 
         //重置db当前竞品的延迟过了次数
         JbxtGoodsVO newGoodsVO = new JbxtGoodsVO();
@@ -619,7 +628,7 @@ public class ActivityTask implements Runnable {
             int delay = this.disappearTime > this.initTime ? 2 : 1;
             t_map.put("delay", Integer.toString(delay));
            // t_map.put("remainingTime", delayTimeString);
-            remainingTimeMessage.setData(t_map);
+            //remainingTimeMessage.setData(t_map);
         }
         notifyAllAdmin(remainingTimeMessage, activityCode);
     }
@@ -807,6 +816,11 @@ public class ActivityTask implements Runnable {
             newGoodsVO.setGoodsId(this.currentGoodsId);
             newGoodsVO.setAddDelayTimes(delayedNum);
             iJbxtGoodsService.updateJbxtGoods(newGoodsVO);
+
+            //判断如果当前是暂停状态 那么同步最后剩余时间
+            if (this.status == 2) {
+                this.whenAcitvityPause();
+            }
 
             return true;
         }

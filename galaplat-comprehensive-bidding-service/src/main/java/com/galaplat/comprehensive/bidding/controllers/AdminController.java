@@ -2,7 +2,6 @@ package com.galaplat.comprehensive.bidding.controllers;
 
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
-import com.galaplat.comprehensive.bidding.activity.ActivityInfoMap;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
