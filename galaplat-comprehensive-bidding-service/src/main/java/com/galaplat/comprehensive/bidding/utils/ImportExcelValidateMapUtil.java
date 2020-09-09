@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class ImportExcelValidateMapUtil {
 
             String  fieldName  = field.getName();
             String  excelTitle;
-            StringBuffer  temErrorMsg  = new StringBuffer("") ;
+            StringBuffer  temErrorMsg = new StringBuffer("") ;
 
             if (alisaAnnotation != null) {
                 excelTitle = alisaAnnotation.value();
@@ -53,15 +54,32 @@ public class ImportExcelValidateMapUtil {
                 Class clazz = field.getType();
                 String  fieldValue  = (String) excelDataMap.get(fieldName);
 
-                if (superclass  == Number.class || clazz == int.class || clazz == short.class
-                        || clazz == long.class || clazz == double.class || clazz == float.class ) {
-                    fieldValue = StringUtils.replace(fieldValue, ".","");
+                if (notNullAnnotation != null && StringUtils.isEmpty(fieldValue)) {
+                    temErrorMsg.append(notNullAnnotation.message());
+                    continue;
+                }
+
+                if (superclass  == Number.class && (clazz == int.class
+                        || clazz == short.class || clazz == long.class
+                        || clazz == Integer.class || clazz == Short.class
+                        || clazz == Long.class)) {
+
+                    String firstNum = fieldValue.substring(0,1);
+                    fieldValue = StringUtils.equals(firstNum,"-") ? fieldValue.substring(0,fieldValue.length()) : fieldValue;
+                    String tempFieldValue = StringUtils.replaceFirst(fieldValue,"\\.","");
+                    if (!StringUtils.isNumeric(tempFieldValue)) {
+                        temErrorMsg.append(excelTitle).append("必须为数字！");
+                    } else {
+                        if (fieldValue.contains(".")) { temErrorMsg.append(excelTitle).append("必须为整数！");}
+                    }
+                }
+
+                if (superclass  == Number.class && (clazz == double.class || clazz == float.class
+                        ||  clazz == Double.class || clazz == Float.class || clazz == BigDecimal.class)) {
+                    fieldValue = StringUtils.replaceFirst(fieldValue,"\\.","");
                     if (!StringUtils.isNumeric(fieldValue)) {
                         temErrorMsg.append(excelTitle).append("必须为数字！");
                     }
-                }
-                if (notNullAnnotation != null && StringUtils.isEmpty(fieldValue)) {
-                    temErrorMsg.append(notNullAnnotation.message());
                 }
 
                 try {

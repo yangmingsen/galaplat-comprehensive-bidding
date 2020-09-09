@@ -161,16 +161,16 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         Integer lastChangTime = excelParam.getLastChangTime();
         Integer perDelayTime = excelParam.getPerDelayTime();
         Integer delayTimes = excelParam.getDelayTimes();
-        if (timeNum > 60) {
+        if (null != timeNum && timeNum > 60) {
             error.append("竞标时长不能超过60分钟！");
         }
-        if (lastChangTime > timeNum * 60) {
+        if (null != lastChangTime && null != timeNum && lastChangTime > timeNum * 60) {
             error.append("延时窗口期不能超过竞标时长！");
         }
-        if (perDelayTime > 600) {
+        if (null != perDelayTime && perDelayTime > 600) {
             error.append("单次延长不能超过600秒！");
         }
-        if (delayTimes > 100) {
+        if (null != delayTimes && delayTimes > 100) {
             error.append("延长次数不能超过100次！");
         }
         return error.toString();
