@@ -57,6 +57,7 @@ public class ImportExcelValidateMapUtil {
 
                 if (notNullAnnotation != null && StringUtils.isEmpty(fieldValue)) {
                     temErrorMsg.append(notNullAnnotation.message());
+                    errorMsg.append(temErrorMsg);
                     continue;
                 }
 
