@@ -5,7 +5,7 @@
 		<groupId>com.galaplat.comprehensive</groupId>
 		<artifactId>galaplat-comprehensive-bidding</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-	</parent> 
+	</parent>
 	<artifactId>galaplat-comprehensive-bidding-service</artifactId>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,7 +33,7 @@
 			<artifactId>spring-boot-starter-redis</artifactId>
 			<version>1.3.1.RELEASE</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
@@ -129,8 +129,21 @@
 			<artifactId>pinyin4j</artifactId>
 			<version>2.5.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.galaplat.baseplatform</groupId>
+			<artifactId>galaplat-baseplatform-messaging-plugin</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
-	
+
 	<build>
 		<finalName>galaplat-comprehensive-bidding-service</finalName>
 		<plugins>
