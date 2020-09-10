@@ -13,26 +13,26 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CodeNameEnum {
 
-    WYF(1,"吴亦凡"),
-    YY(2,"杨洋"),
-    WLH(3,"王力宏"),
-    LJJ(4,"林俊杰"),
-    ZJ(5,"张杰"),
-    WF(6,"王菲"),
-    DZQ(7,"邓紫棋"),
-    YCY(8,"杨超越"),
-    YM(9,"杨幂"),
-    DLRB(10,"迪丽热巴"),
-    ZYS(11,"张一山"),
-    YZ(12,"杨紫"),
-    ZLY(13,"赵丽颖"),
-    LYF(14,"李易峰"),
-    DL(15,"邓伦"),
-    LZL(16,"林志玲"),
-    FBB(17,"范冰冰"),
-    LBB(18,"李冰冰"),
-    ZZY(19,"章子怡"),
-    MY(20,"马云");
+    LITTEL_RED(1,"小红"),
+    LITTEL_ORANGE(2,"小橙"),
+    LITTEL_YELLOW(3,"小黄"),
+    LITTEL_GREEN(4,"小绿"),
+    LITTEL_CYAN(5,"小青"),
+    LITTEL_BLUE(6,"小蓝"),
+    LITTEL_PURPLE(7,"小紫"),
+    MIDDEL_RED(8,"中红"),
+    MIDDEL_ORANGE(9,"中橙"),
+    MIDDEL_YELLOW(10,"中黄"),
+    MIDDEL_GREEN(11,"中绿"),
+    MIDDEL_CYAN(12,"中青"),
+    MIDDEL_BLUE(13,"中蓝"),
+    MIDDEL_PURPLE(14,"中紫"),
+    BIG_RED(15,"大红"),
+    BIG_ORANGE(16,"大橙"),
+    BIG_YELLOW(17,"大黄"),
+    BIG_GREEN(18,"大绿"),
+    BIG_CYAN(19,"大青"),
+    BIG_BLUE(20,"大蓝");
 
     /*序号*/
     private  int code;

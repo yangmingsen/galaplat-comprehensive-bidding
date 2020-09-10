@@ -38,11 +38,14 @@ public class ActivityDVO {
     /*承诺函标题*/
     private String promiseTitle;
 
+    /*承诺函内容*/
+    private String promiseText;
+
     /*附件路径*/
     private String filePath;
 
-    /*承诺函内容*/
-    private String promiseText;
+    /*竞标活动状态*/
+    private Integer activityStatus;
 
     /*竞品信息*/
     private List<GoodsDVO> goodsList;

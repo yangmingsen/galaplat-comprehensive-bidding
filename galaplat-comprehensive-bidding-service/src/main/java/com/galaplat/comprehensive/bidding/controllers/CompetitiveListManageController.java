@@ -9,12 +9,16 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.SupplierAccountParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -24,6 +28,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/jbxt/admin/bidmamanage")
+@Slf4j
 public class CompetitiveListManageController extends BaseController {
 
     @Autowired
@@ -87,10 +92,75 @@ public class CompetitiveListManageController extends BaseController {
         return manageService.saveBidActivityBasicInfo(infoParam, getUser().getName());
     }
 
-    @PostMapping("/getBidActivity")
+    @GetMapping("/getBidActivity")
     @RestfulResult
-    public Object saveBidActivityBasicInfo(String bidActivityCode) throws Exception {
+    public Object saveBidActivityBasicInfo(@RequestParam(value = "bidActivityCode") String bidActivityCode) throws Exception {
         return manageService.getBidActivityWithGoodsAndSupplier(bidActivityCode);
+    }
+
+
+    @PostMapping("/sendMsgAndMail")
+    @RestfulResult
+    public Object sendMsgAndMail(@RequestParam("bidActivityCode") String bidActivityCode,@RequestParam(value = "phone",required = false)String phone,
+                                 @RequestParam(value = "emailAdrress",required = false) String emailAdrress,@RequestParam(value = "type") String type) throws BaseException {
+        return manageService.sendMsgAndMail( bidActivityCode, phone, emailAdrress, type);
+    }
+
+
+    @GetMapping("/getSupplier")
+    @RestfulResult
+    public Object  listSupplierInfo(@RequestParam(value = "bidActivityCode")String bidActivityCode) {
+        return  manageService.listSupplierInfo(bidActivityCode);
+    }
+
+    @GetMapping("/getGoods")
+    @RestfulResult
+    public Object  listGoods(@RequestParam(value = "bidActivityCode")String bidActivityCode) {
+        return  manageService.listGoods(bidActivityCode);
+    }
+
+
+    @PostMapping("/savePromiseText")
+    @RestfulResult
+    public Object  savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws BaseException {
+        return  manageService.savePromiseTitle(bidActivityCode, promiseTitle, promiseText);
+    }
+
+    @PostMapping("/uploadFile")
+    @RestfulResult
+    public Object  rarFileUpload(@RequestParam("bidActivityCode") String bidActivityCode, @RequestPart("rarFile") MultipartFile rarFile) throws BaseException {
+        return  manageService.rarFileUpload(bidActivityCode, rarFile);
+    }
+
+
+    @PostMapping("/downloadFile")
+    @RestfulResult
+    public void  zipFileDownload(String bidActivityCode) throws BaseException {
+        MultipartFile file = manageService.getRarFile(bidActivityCode);
+        OutputStream os = null;
+        try {
+            byte[] files = file.getBytes();
+            response.setContentType("application/x-msdownload");
+            response.setCharacterEncoding("utf-8");
+            response.setContentLength((int) files.length);
+            response.setHeader("Content-Disposition", "attachment;filename=" + bidActivityCode + ".rar");
+            response.flushBuffer();
+            os = response.getOutputStream();
+            os.write(files);
+            os.flush();
+        } catch (IOException e) {
+            log.error("get file error ", e);
+            throw new BaseException("", "");
+        } finally {
+            try {
+                if (null != os) {
+                    os.close();
+                }
+            } catch (IOException e) {
+                log.error("get file error ", e);
+                throw new BaseException("", "");
+            }
+        }
     }
 
 

@@ -2,7 +2,9 @@ package com.galaplat.comprehensive.bidding.dao.impl;
 
 import java.util.List;
 
+import com.galaplat.base.core.common.utils.BeanCopyUtils;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.SupplierDVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -20,7 +22,7 @@ import com.github.pagehelper.PageInfo;
  * @date: 2020年06月17日
  */
 @Repository
-public   class JbxtUserDaoImpl implements IJbxtUserDao  {
+public  class JbxtUserDaoImpl implements IJbxtUserDao  {
 
 	@Autowired
 	private JbxtUserCustMapper mapper;
@@ -102,6 +104,15 @@ public   class JbxtUserDaoImpl implements IJbxtUserDao  {
 		return  mapper.updateBySomeParam(updateParam,conditionParam);
 	}
 
+	@Override
+	public List<SupplierDVO> listSupplierInfo(String bidActivityCode) {
+		List<JbxtUserDO> userDOList = mapper.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+		return BeanCopyUtils.copyList(userDOList, SupplierDVO.class);
+	}
 
+	@Override
+	public  JbxtUserDO getUserByParam( JbxtUserParam param) {
+		return mapper.getJbxtUser(param);
+	}
 
 }

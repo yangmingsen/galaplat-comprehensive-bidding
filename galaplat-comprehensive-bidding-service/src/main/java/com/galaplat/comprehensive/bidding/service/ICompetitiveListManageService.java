@@ -1,14 +1,14 @@
 package com.galaplat.comprehensive.bidding.service;
 
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dvos.ActivityDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.CompetitiveListDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.*;
 import com.galaplat.comprehensive.bidding.dao.params.BidActivityInfoParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.github.pagehelper.PageInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -97,4 +97,70 @@ public interface ICompetitiveListManageService {
      */
     ActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception;
 
+    /**
+     * 获取供应商的账号
+     * @return
+     */
+    String getUserName();
+
+    /**
+     * 获取供应商账号密码
+     * @return
+     */
+    String getPassword();
+
+    /**
+     * 检查竞标活动的状态是否是未导入数据，并且所有的数据已经新增
+     * @param bidActivityCode
+     * @return
+     */
+    boolean checkActivityInfoComplete(String bidActivityCode);
+
+    /**
+     * 发送短信与邮件
+     *
+     * 发送全部，传bidActivityCode，emailFile，type="all";
+     * 单个发送传短信：传bidActivityCode，phone，type="phone";
+     * 单个发送邮件：传bidActivityCode，emailAdrress，emailFile，type="email";
+     *
+     * @param bidActivityCode
+     * @param phone
+     * @param emailAdrress
+     * @param type
+     * @return
+     */
+    MessageAndEmialDVO sendMsgAndMail(String bidActivityCode, String phone, String emailAdrress, String type) throws BaseException;
+
+    /**
+     * 查询供应商
+     * @param bidActivityCode
+     * @return
+     */
+    List<SupplierDVO> listSupplierInfo(String bidActivityCode);
+
+    /**
+     * 查询竞品
+     * @param bidActivityCode
+     * @return
+     */
+    List<GoodsDVO> listGoods(String bidActivityCode);
+
+    /***
+     * 保存承诺函
+     * @param bidActivityCode
+     * @param promiseTitle
+     * @param promiseText
+     * @return
+     */
+    int savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws BaseException;
+
+    /**
+     * 上传附件
+     * @param bidActivityCode
+     * @param rarFile
+     * @return
+     */
+    String rarFileUpload(String bidActivityCode, MultipartFile rarFile);
+
+    MultipartFile getRarFile(String bidActivityCode);
 }

@@ -5,6 +5,7 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.SupplierDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
 import org.apache.ibatis.annotations.Param;
@@ -96,4 +97,20 @@ public interface IJbxtUserDao{
 	 * @return
 	 */
 	int updateBySomeParam(JbxtUserParam updateParam,  JbxtUserParam conditionParam);
+
+
+
+	/**
+	 * 查询供应商
+	 * @param bidActivityCode
+	 * @return
+	 */
+	List<SupplierDVO> listSupplierInfo(String bidActivityCode);
+
+	/***
+	 * 获取供应商
+	 * @param param
+	 * @return
+	 */
+	JbxtUserDO getUserByParam( JbxtUserParam param);
 }

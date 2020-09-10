@@ -24,7 +24,7 @@ public class SupplierDVO {
     /*手机号*/
    private String phone;
     /*邮箱地址*/
-   private String emailAdrress;
+   private String emailAddress;
     /*是否登录系统（0-从未登录，1-登录过）*/
    private Integer loginStatus;
     /* 短信发送状态（0-未发送，1-已发送，2-发送失败）*/

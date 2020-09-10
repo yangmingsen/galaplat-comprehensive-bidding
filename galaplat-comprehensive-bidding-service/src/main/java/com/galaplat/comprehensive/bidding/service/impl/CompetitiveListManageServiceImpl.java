@@ -1,6 +1,7 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
 import com.galaplat.base.core.common.exception.BaseException;
+import com.galaplat.baseplatform.messaging.plugin.feign.IFeiginMessageClient;
 import com.galaplat.comprehensive.bidding.dao.*;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
@@ -19,8 +20,11 @@ import com.galaplat.comprehensive.bidding.vos.RankInfoVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
 import com.github.pagehelper.PageInfo;
+import feign.Response;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -30,21 +34,32 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.galaplat.baseplatform.file.plugin.feign.IFileFeignClient;
+import org.galaplat.baseplatform.file.plugin.feign.vos.ImageVO;
+import org.galaplat.baseplatform.file.upload.untils.MyMultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.system.ApplicationHome;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 /**
  * @Description: 竞标单管理
@@ -78,7 +93,10 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private IdWorker worker;
 
     @Autowired
-    private IJbxtMinbidDao minbidDao;
+    private  IFileFeignClient fileFeignClient;
+
+    @Autowired
+    private IFeiginMessageClient messageClient;
 
     @Override
     public PageInfo listCompetitiveListPage(CompetitiveListQuery query) throws BaseException {
@@ -545,7 +563,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         Date predictBidDate = DateUtils.parseDate(infoParam.getPredictBidDateTime(),"yyyyMMddHHmmss");
         activityDO.setPredictBidDatetime(predictBidDate);
 
-        if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(), "add")) {
+        if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(), OPRATETYPE_ADD)) {
             activityDO.setCreator(userName);
             activityDO.setCreatedTime(new Date());
             activityDO.setUpdatedTime(new Date());
@@ -556,7 +574,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             if (count == 0) {
                 throw  new BaseException("新增竞标活动失败！","新增竞标活动失败！");
             }
-        } else if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(), "update")) {
+        } else if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(),OPRATETYPE_UPDATE)) {
             JbxtActivityDO sourceActivity = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
             if (null == sourceActivity ) {
                throw new BaseException("竞标单编码错误，竞标活动不存在！","竞标单编码错误，竞标活动不存在！");
@@ -580,7 +598,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             // 如果竞标描述和竞标预计时间改变则将所有邮件和短信状态置为未发送
             if (!StringUtils.equals(sourceActivity.getBidActivityInfo(), activityDO.getBidActivityInfo())
             || (sourceActivity.getPredictBidDatetime().compareTo(activityDO.getPredictBidDatetime()) != 0)) {
-            userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(0).sendSms(0).build(),
+            userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(0).sendSms(0).activityCode(bidActivityCode).build(),
                   JbxtUserParam.builder().activityCode(bidActivityCode).build());
             }
         } else {
@@ -592,6 +610,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public  ActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception {
         JbxtActivityDO activityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (null == activityDO) {
+        throw new BaseException("竞标编码为" + bidActivityCode + "的竞标活动不存在！","竞标编码为" + bidActivityCode + "的竞标活动不存在！");
+        }
         List<JbxtGoodsDVO> goodsDVOList = goodsDdao.getListJbxtGoodsByActivityCode(bidActivityCode);
         List<JbxtUserDO> userDOList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
 
@@ -618,7 +639,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                     .supplierName(e.getSupplierName())
                     .contactPerson(e.getContactPerson())
                     .phone(e.getPhone())
-                    .emailAdrress(e.getEmailAddress())
+                    .emailAddress(e.getEmailAddress())
                     .loginStatus(e.getLoginStatus())
                     .sendMail(e.getSendMail())
                     .sendSms(e.getSendSms())
@@ -627,15 +648,16 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         });
 
        return ActivityDVO.builder()
-                .bidActivityCode(activityDO.getCode())
+                .bidActivityCode(bidActivityCode)
                 .bidActivityInfo(activityDO.getBidActivityInfo())
                 .creator(activityDO.getCreator())
-                .createdDate(null != activityDO.getCreatedTime() ? DateFormatUtils.format(activityDO.getCreatedTime(),"yyyy-MM-dd") : "")
+                .createdDate(null != activityDO.getCreatedTime() ? DateFormatUtils.format(activityDO.getCreatedTime(),"yyyy-MM-d") : "")
                 .bidingType(activityDO.getBidingType())
-                .predictBidDatetime(null != activityDO.getPredictBidDatetime() ? DateFormatUtils.format(activityDO.getPredictBidDatetime(),"yyyy-MM-dd") : "")
+                .predictBidDatetime(null != activityDO.getPredictBidDatetime() ? DateFormatUtils.format(activityDO.getPredictBidDatetime(),"yyyy-MM-dd HH:mm:ss") : "")
                 .promiseTitle(activityDO.getPromiseTitle())
                 .promiseText(activityDO.getPromiseText())
                 .filePath(activityDO.getFilePath())
+                .activityStatus(activityDO.getStatus())
                 .goodsList(goodsDVOSList)
                 .supplierList(supplierDVOList)
                 .build();
@@ -649,7 +671,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      *
      * @return
      */
-    private String getUserName() {
+    @Override
+    public String getUserName() {
         String  words = "abcdefghijklmnopqrstuvwxyz";
         String userName = RandomStringUtils.random(2,words) + getShortCode(3)
                 + RandomStringUtils.random(1,words) ;
@@ -668,7 +691,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      *
      * @return
      */
-    private String getPassword() {
+    @Override
+    public String getPassword() {
         String  words = "abcdefghijklmnopqrstuvwxyz";
         String password = RandomStringUtils.random(2,words) + getShortCode(3)
                 + RandomStringUtils.random(2,words) + getShortCode(1);
@@ -697,12 +721,19 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param bidActivityCode
      * @return
      */
-    private boolean checkActivityInfoComplete(String  bidActivityCode) {
+    @Override
+    public boolean checkActivityInfoComplete(String bidActivityCode) {
+        boolean activityUnimportData = false;
         boolean promiseExists = false;
         boolean goodsExists = false;
         boolean supplierExists = false;
 
         JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+
+        if (ActivityStatusEnum.UNEXPORT.getCode().equals(jbxtActivityDO.getStatus())) {
+            activityUnimportData = true;
+        }
+
         if ( null != jbxtActivityDO && StringUtils.isNotBlank(jbxtActivityDO.getPromiseText())) {
             promiseExists = true;
         }
@@ -717,13 +748,255 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             supplierExists = true;
         }
 
-        if (supplierExists && goodsExists && promiseExists) {
-            return true;
-        } else {
-            return false;
+        return  supplierExists && goodsExists && promiseExists && activityUnimportData;
+
+    }
+
+    @Override
+     public  MessageAndEmialDVO sendMsgAndMail(String bidActivityCode, String phone, String emailAddress, String type) throws BaseException {
+        MessageAndEmialDVO messageAndEmialDVO = new MessageAndEmialDVO();
+
+        if (StringUtils.isAnyBlank(bidActivityCode,type)) {
+            throw new BaseException("bidActivityCode 或 type 参数异常！","bidActivityCode 或 type 参数异常！");
         }
 
+        JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (ActivityStatusEnum.FINISH.getCode().equals(jbxtActivityDO.getStatus())) {
+            throw new BaseException("竞标活动已结束不能发送短信或者发送邮箱！","竞标活动已结束不能发送短信或者发送邮箱！");
+        }
 
+        if (StringUtils.equals(type, "all")) {
+            List<SupplierDVO> supplierDVOS = userDao.listSupplierInfo(bidActivityCode);
+            List<String> allPhones = supplierDVOS.stream().map(e->e.getPhone()).collect(Collectors.toList());
+            List<String> allEmailAddress = supplierDVOS.stream().map(e->e.getEmailAddress()).collect(Collectors.toList());
+            Integer sendMailCount = 0;
+            Integer sendMessageCount = 0;
+            if (CollectionUtils.isNotEmpty(allEmailAddress)) {
+                for (String email: allEmailAddress) {
+                    sendMailCount += sendEmail(bidActivityCode, email);
+                }
+            }
+
+            if (CollectionUtils.isNotEmpty(allPhones)) {
+                for (String phoneNumber: allPhones) {
+                    sendMessageCount += sendPhone(bidActivityCode, phoneNumber);
+                }
+            }
+
+            messageAndEmialDVO.setEmailSeandStatus(CollectionUtils.isNotEmpty(allEmailAddress) && sendMailCount > 0 && sendMailCount == allEmailAddress.size()
+                    ? 1 :  (CollectionUtils.isNotEmpty(allEmailAddress) && sendMailCount == 0 ? 0 : 2));
+
+            messageAndEmialDVO.setMessageSendStatus(CollectionUtils.isNotEmpty(allPhones) && sendMessageCount > 0 && sendMessageCount == allPhones.size()
+                    ? 1 :  (CollectionUtils.isNotEmpty(allPhones) && sendMessageCount == 0 ? 0 : 2));
+
+            // TODO 发送邮件短信
+        } else if (StringUtils.equals(type, "phone")) {
+            // TODO 发送短信
+        } else if (StringUtils.equals(type, "email")) {
+            messageAndEmialDVO.setEmailSeandStatus(sendEmail(bidActivityCode, emailAddress));
+        } else {
+            throw new BaseException("type 参数值异常！","type 参数值异常！");
+        }
+        return messageAndEmialDVO;
+    }
+
+    @Override
+    public List<SupplierDVO> listSupplierInfo(String bidActivityCode) {
+        return  userDao.listSupplierInfo(bidActivityCode);
+    }
+
+    @Override
+    public List<GoodsDVO> listGoods(String bidActivityCode) {
+        List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        List<GoodsDVO> goodsDVOList = Lists.newArrayList();
+        if (CollectionUtils.isNotEmpty(goodsList)) {
+            goodsList.stream().forEach(e ->{
+                GoodsDVO goodsDVO = new GoodsDVO();
+                CopyUtil.copyPropertiesExceptEmpty(e, goodsDVO);
+                goodsDVO.setGoodsName(e.getName());
+                goodsDVO.setYearPurchaseNum(e.getNum());
+                goodsDVO.setBidTimeNum(e.getTimeNum());
+                goodsDVOList.add(goodsDVO);
+            });
+        }
+        return goodsDVOList;
+    }
+
+    @Override
+    public int  savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws  BaseException{
+
+        JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (null == jbxtActivityDO) {
+           throw  new BaseException("竞标单编号为" + bidActivityCode +"的竞标活动不存在！","竞标单编号为" + bidActivityCode +"的竞标活动不存在！");
+        }
+
+        if (ActivityStatusEnum.FINISH.getCode().equals(jbxtActivityDO.getStatus())) {
+            throw  new BaseException("竞标活动已结束不允许修改承诺函内容！","竞标活动已结束不允许修改承诺函内容！");
+        }
+
+        if (StringUtils.isNotBlank(promiseTitle) && promiseTitle.length() > 20) {
+            throw new BaseException("标题字数不能超过20个字！", "标题字数不能超过20个字！");
+        }
+        JbxtActivityParam updateActivityParam = JbxtActivityParam.builder().code(bidActivityCode).promiseTitle(promiseTitle).promiseText(promiseText).build();
+        JbxtActivityParam conditionActivityParam = JbxtActivityParam.builder().code(bidActivityCode).build();
+        if (checkActivityInfoComplete(bidActivityCode)) {
+            updateActivityParam.setStatus(ActivityStatusEnum.EXPORT_NO_SATRT.getCode());
+        }
+        return activityDao.updateJbxtActivityBySomeParam(updateActivityParam, conditionActivityParam);
+    }
+
+    /***
+     * 上传附件
+     * @param bidActivityCode
+     * @param rarFile
+     * @return
+     */
+    @Override
+    public String rarFileUpload(String bidActivityCode, MultipartFile rarFile) {
+        ImageVO imageVO =null;
+        String fileName = "";
+        try {
+            byte[]  bytes = rarFile.getBytes();
+            fileName = rarFile.getOriginalFilename();
+            MyMultipartFile myMultipartFile = new MyMultipartFile("file", "", "multipart/form-data", bytes);
+            imageVO = new ImageVO(bidActivityCode, fileName , "-", "-", myMultipartFile);
+        } catch (IOException e) {
+            log.error(" There is an error of uploadinfg file. 【{}】,【{}】", e.getMessage(),e );
+            e.printStackTrace();
+        }
+        try {
+            if (null != imageVO) {
+                String fileDir = fileFeignClient.addFile(imageVO);
+                fileDir = StringUtils.isNotBlank(fileName) ? fileDir + "/" + fileName : fileDir;
+                activityDao.updateBidActivity(JbxtActivityDO.builder().code(bidActivityCode).filePath(fileDir).build());
+                return fileDir;
+            }
+        } catch (BaseException e) {
+            log.error(" There is an error of uploadinfg file. 【{}】,【{}】", e.getMessage(),e );
+            e.printStackTrace();
+        }
+        return  null;
+    }
+
+    /***
+     * 获取附件
+     * @param bidActivityCode
+     * @return
+     */
+    @Override
+    public MultipartFile getRarFile(String bidActivityCode) {
+
+        MultipartFile cMultiFile = null;
+
+        try {
+            JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+            String [] fileInfo = null != activityDO && StringUtils.isNotBlank(activityDO.getFilePath())
+                    ? activityDO.getFilePath().split("/") : null;
+            String fileName = null;
+            String originFileName = null;
+            if (null != fileInfo) {
+                fileName = fileInfo[2].replace(".rar","");
+                originFileName = fileInfo[fileInfo.length - 1].replace(".rar","");
+            }
+            feign.Response response= fileFeignClient.getFile(fileName,"rar");
+            //获得文件流
+            Response.Body body = response.body();
+            try {
+                InputStream  inputStream = body.asInputStream();
+                MultipartFile multipartFile = new MockMultipartFile(bidActivityCode + ".rar",bidActivityCode + ".rar","", inputStream);
+                ApplicationHome h = new ApplicationHome(getClass());
+                String pathName = h.getDir().getAbsolutePath() + "/" + originFileName + ".rar";
+                File file = new File(pathName);
+                multipartFile.transferTo(file);
+                DiskFileItem fileItem = new DiskFileItem("file", "multipart/form-data", true, file.getName(), (int) file.length(), file);
+                IOUtils.copy(new FileInputStream(file), fileItem.getOutputStream());
+                cMultiFile = new CommonsMultipartFile(fileItem);
+
+            } catch (IOException e) {
+                log.error(" There is an error of getting file. 【{}】,【{}】", e.getMessage(),e );
+                e.printStackTrace();
+            }
+        } catch (BaseException e) {
+            log.error(" There is an error of getting file. 【{}】,【{}】", e.getMessage(),e );
+            e.printStackTrace();
+        }
+        return  cMultiFile;
+    }
+
+    /***
+     *  获取邮件内容字符串
+     * @param bidActivityCode
+     * @param emailAdress
+     * @return
+     */
+    private String getMailContent(String bidActivityCode, String emailAdress) throws  BaseException{
+        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        String  bidActivityInfo = activityDO.getBidActivityInfo();
+        String  predictBidDatetime = DateFormatUtils.format(activityDO.getPredictBidDatetime(), "yyyy-MM-dd HH:mm:ss");
+        JbxtUserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAdress).build());
+        if (null == userDO) {
+         throw  new BaseException("供应商信息获取错误！","供应商信息获取错误！");
+        }
+        String supplierName = userDO.getSupplierName();
+        String username = userDO.getUsername();
+        String password =  userDO.getPassword();
+
+        StringBuilder mailContent = new StringBuilder("");
+        if (!StringUtils.isAnyBlank(bidActivityInfo, predictBidDatetime, supplierName,username,password )) {
+            mailContent.append("致<B>").append(supplierName).append("</B>:</br>").append("您好！");
+            mailContent.append("<p>现邀请贵公司参与ESR举行的竞标活动，以下是本次竞标活动相关信息：").append("</br>");
+            mailContent.append("竞标单编号：").append(bidActivityCode).append("</br></p>");
+            mailContent.append("<p>竞标描述：").append(bidActivityInfo).append("</p>");
+            mailContent.append("<p>预计竞标日：<B>").append(predictBidDatetime).append("</B></p>");
+            mailContent.append("<p>账号：").append(username).append("</br>");
+            mailContent.append("密码：").append(password).append("</p>");
+            mailContent.append("<p>登录链接：https://www.esrcloud.com/jb/ ").append("（建议使用谷歌、火狐、360浏览器打开）</br>");
+            mailContent.append("温馨提示：请提前登录系统，熟悉系统操作与本次竞标的产品，如有疑问可联系对口业务人员；</p>");
+            mailContent.append("<p>附件为竞标须知，请查收！</br>");
+            mailContent.append(" 祝：竞标顺利！</br>");
+            mailContent.append(" ESR</p>");
+        }
+        return mailContent.toString();
+    }
+
+    /***
+     *  发送邮件
+     * @param bidActivityCode
+     * @param emailAddress
+     * @return
+     */
+    private  Integer sendEmail(String bidActivityCode, String emailAddress) throws BaseException {
+
+        Integer emailSeandStatus = null;
+        MultipartFile multipartFile = getRarFile(bidActivityCode);
+        String emailContent = getMailContent(bidActivityCode, emailAddress);
+
+        if (null != multipartFile && StringUtils.isNotBlank(emailAddress)) {
+            // 发送邮件
+            String  mailSendResult = messageClient.sendfile(emailAddress, "竞标活动通知",emailContent , multipartFile);
+            emailSeandStatus = StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, "\"1\"") ? 1: 0;
+
+            if (StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, "\"1\"")) {
+                userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(1).activityCode(bidActivityCode).build(),
+                        JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
+            } else {
+                userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(2).activityCode(bidActivityCode).build(),
+                        JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
+            }
+        }
+        return emailSeandStatus;
+    }
+
+
+    /**
+     * 发送短信
+     * @param bidActivityCode
+     * @param phoneNumber
+     * @return
+     * @throws BaseException
+     */
+    private  Integer sendPhone(String bidActivityCode, String phoneNumber) throws BaseException {
+        return 0;
     }
 
 }

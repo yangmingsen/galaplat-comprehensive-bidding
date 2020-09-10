@@ -3,10 +3,10 @@ import com.galaplat.base.core.common.params.Param;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 
-
- /**
+/**
  * 用户表Param
  * @author esr
  * @date: 2020年06月17日
@@ -21,6 +21,7 @@ public class JbxtUserParam extends Param {
 
     /*唯一编码*/
     private String code;
+
     /*用户名*/
     private String username;
     /*密码*/
@@ -45,9 +46,11 @@ public class JbxtUserParam extends Param {
      /*供应商名称*/
     private String supplierName;
 
+    /*供应商名称*/
+    private List<String> supplierNames;
+
      /*代号*/
      private String codeName;
-
 
      /*联系人*/
      private String contactPerson;
@@ -57,9 +60,9 @@ public class JbxtUserParam extends Param {
      private String emailAddress;
      /*是否登录系统*/
      private Integer loginStatus;
-     /*短信发送状态*/
+     /*短信发送状态 （0-未发送，1-已发送，2-发送失败）*/
      private Integer sendSms;
-     /*邮箱发送状态*/
+     /*邮箱发送状态 （0-未发送，1-已发送，2-发送失败）*/
      private Integer sendMail;
     public String getCode() {
         return code;

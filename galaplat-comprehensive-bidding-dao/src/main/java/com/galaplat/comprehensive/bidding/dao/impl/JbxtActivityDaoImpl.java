@@ -91,4 +91,9 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	public JbxtActivityDO getJbxtActivityByParam(JbxtActivityParam param) {
      return  mapper.getJbxtActivityByParam(param);
 	}
+
+	@Override
+	public int updateJbxtActivityBySomeParam(JbxtActivityParam updateParam, JbxtActivityParam conditionParam) {
+    return mapper.updateJbxtActivityBySomeParam(updateParam, conditionParam);
+	}
 }
