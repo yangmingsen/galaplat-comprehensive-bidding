@@ -7,6 +7,7 @@ import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminInfo;
@@ -14,6 +15,7 @@ import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
+import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -39,9 +41,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
     private final AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private final UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
-    private final IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
-    private final IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
-    private final IJbxtActivityService iJbxtActivityService = SpringUtil.getBean(IJbxtActivityService.class);
+    private final IJbxtUserService userService = SpringUtil.getBean(IJbxtUserService.class);
+    private final IJbxtBiddingService biddingService = SpringUtil.getBean(IJbxtBiddingService.class);
+    private final IJbxtActivityService activityService = SpringUtil.getBean(IJbxtActivityService.class);
+    private final IJbxtGoodsService goodsService = SpringUtil.getBean(IJbxtGoodsService.class);
     private final ActivityThreadManager activityManager = SpringUtil.getBean(ActivityThreadManager.class);
     private final MessageQueue messageQueue = SpringUtil.getBean(MessageQueue.class);
 
@@ -60,6 +63,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         // {type: 102, data: {adminCode: 22343423}}
         // {type: 213, data: {bidPrice: 32.345, goodsId: 234}}
         //{type: 217, data: {userCode: 23425345}}
+        // {type: 218, data: {bidPercent: 5, goodsId: 234}}
         // {type: 300, data: {activityCode: 2234343423}}
         // {type: 302, data: {activityCode: 2234343423, goodsId: 23425346}}
         // {type: 303, data: {adminCode: 23534534}}
@@ -68,9 +72,9 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             case 101: {
                 final String userCode = message.getData().get("userCode");
                 final String focusActivity = message.getData().get("activityCode");
-                final JbxtActivityDO activityEntity = iJbxtActivityService.findOneByCode(focusActivity);
+                final JbxtActivityDO activityEntity = activityService.findOneByCode(focusActivity);
 
-                final JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, focusActivity);
+                final JbxtUserDO jbxtUserDO = userService.selectByuserCodeAndActivityCode(userCode, focusActivity);
                 if (jbxtUserDO != null) { //验证该供应商是否存在
                     userChannelMapBean.put(userCode, ctx.channel());
                     userChannelMapBean.put(userCode, focusActivity);
@@ -122,6 +126,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             }
             break;
 
+            case 218: {
+                handler218Problem(message,ctx);
+            }
+
             //处理管理端主动请求(建立对目标活动关联)
             case 300: {
                 handler300Problem(message, ctx);
@@ -154,6 +162,8 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         }
     }
 
+
+
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
         // 当接收到数据后会自动调用
@@ -163,6 +173,43 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         } catch (Exception e) {
             LOGGER.info("channelRead0(ERROR): " + e.getMessage());
         }
+
+
+    }
+
+    private void handler218Problem(RequestMessage message, ChannelHandlerContext ctx) {
+        final String tStr1 = message.getData().get("bidPercent");
+        if (tStr1 == null || "".equals(tStr1)) {
+            LOGGER.info("handler218Problem: tStr1 is null or empty");
+            return;
+        }
+
+        final String tStr2 = message.getData().get("goodsId");
+        if (tStr2 == null || "".equals(tStr2)) {
+            LOGGER.info("handler218Problem: goodsId is null or empty");
+            return;
+        }
+
+        final Integer goodsId;
+        try {
+            goodsId = Integer.parseInt(tStr2);
+        } catch (NumberFormatException e) {
+            LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
+            return;
+        }
+
+        final int bidPercent;
+        try {
+            bidPercent = Integer.parseInt(tStr1);
+        } catch (NumberFormatException e) {
+            LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
+            return;
+        }
+
+        JbxtGoodsDO goods = goodsService.selectByGoodsId(goodsId);
+        BigDecimal firstPrice = goods.getFirstPrice();
+        String y = (1d - (bidPercent /100d))+"";
+
 
 
     }
@@ -205,7 +252,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         message.getData().put("activityCode", activityCode);
 
         //验证当前用提交价格 是否大于自己的上一次提交竞价
-        final JbxtBiddingDO lastUserMinBid = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+        final JbxtBiddingDO lastUserMinBid = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
         if (lastUserMinBid != null) {
             int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
             if (compareRes >= 0) {

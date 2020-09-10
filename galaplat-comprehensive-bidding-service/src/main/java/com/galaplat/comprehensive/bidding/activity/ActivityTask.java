@@ -45,7 +45,7 @@ public class ActivityTask implements Runnable {
     private Integer currentGoodsId;
     private int initTime; //初始化时间 秒
     /**
-     *1 进行 2暂停  3//重置 4 结束
+     * 1 进行 2暂停  3//重置 4 结束
      */
     private int status;
     private int remainingTime;  //剩余时间 秒
@@ -58,6 +58,8 @@ public class ActivityTask implements Runnable {
     private Integer supplierNum;
     //排名Map
     private Map<String, Integer> lastRankInfoMap = new HashMap<>(); // supplier -> rank
+    private Map<String, Integer> lastRankInfoMap2 = new HashMap<>(); // supplier -> rank
+
     private Map<String, BigDecimal> lastBidPrceMap = new HashMap<>(); // supplierCode -> BidPrice
     //竞价并列表Map
     private Map<BigDecimal, Map<String, RankInfo>> bidParaxtisInfoMap = new HashMap<>();
@@ -66,6 +68,7 @@ public class ActivityTask implements Runnable {
     private int delayedCondition; //延时条件 秒
     private int allowDelayedLength; //单次延时长度 秒
     private int allowDelayedTime; //允许延迟次数
+    private boolean thisGoodsAllowDelayed = true; //这个竞品是否允许延时 默认允许
     private int initAllowDelayedTime; //初始化允许的延迟次数
     private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
     private int lastRemainingTime = 0;// 记录上一次发生延迟的时间
@@ -76,6 +79,7 @@ public class ActivityTask implements Runnable {
 
     /**
      * 单次延时长度 秒
+     *
      * @return
      */
     public int getAllowDelayedLength() {
@@ -84,6 +88,7 @@ public class ActivityTask implements Runnable {
 
     /**
      * 允许延迟次数
+     *
      * @return
      */
     public int getAllowDelayedTime() {
@@ -92,6 +97,7 @@ public class ActivityTask implements Runnable {
 
     /**
      * 初始化允许的延迟次数
+     *
      * @return
      */
     public int getInitAllowDelayedTime() {
@@ -131,6 +137,7 @@ public class ActivityTask implements Runnable {
     /**
      * 获取当前延时时间 str
      * <p> 当现在处于延时时间时，调用该方法</p>
+     *
      * @return
      */
     public String getDelayRemainingTimeString() {
@@ -262,6 +269,7 @@ public class ActivityTask implements Runnable {
 
     /**
      * 根据初始化延迟时间和已经消耗的次数来判断
+     *
      * @return
      */
     public Boolean isTriggerDelayed() {
@@ -270,8 +278,9 @@ public class ActivityTask implements Runnable {
 
     /**
      * 获取剩余时间类型：
-     *   true: 延迟时间
-     *  false: 正常时间
+     * true: 延迟时间
+     * false: 正常时间
+     *
      * @return
      */
     public Boolean isRealAccessDealyedTime() {
@@ -346,6 +355,9 @@ public class ActivityTask implements Runnable {
          * @return
          */
         public Builder delayedCondition(Integer delayedCondition) {
+            if (delayedCondition < 1) {
+                this.activityTask.thisGoodsAllowDelayed = false;
+            }
             this.activityTask.delayedCondition = delayedCondition;
             return this;
         }
@@ -357,6 +369,9 @@ public class ActivityTask implements Runnable {
          * @return
          */
         public Builder allowDelayedLength(Integer allowDelayedLength) {
+            if (allowDelayedLength < 1) {
+                this.activityTask.thisGoodsAllowDelayed = false;
+            }
             this.activityTask.allowDelayedLength = allowDelayedLength;
             return this;
         }
@@ -368,6 +383,10 @@ public class ActivityTask implements Runnable {
          * @return
          */
         public Builder allowDelayedTime(Integer allowDelayedTime) {
+            if (allowDelayedTime < 1) {
+                this.activityTask.thisGoodsAllowDelayed = false;
+            }
+
             this.activityTask.allowDelayedTime = allowDelayedTime;
             this.activityTask.initAllowDelayedTime = allowDelayedTime;
             return this;
@@ -389,6 +408,7 @@ public class ActivityTask implements Runnable {
         List<JbxtBiddingDVO> minBidList = biddingService.selectMinBidTableBy(currentGoodsId, currentActivityCode);
         int len = minBidList.size();
 
+
         //计算排名
         for (int i = 0; i < len; i++) { //计算排名 价格=>排名
             JbxtBiddingDVO oneBid = minBidList.get(i);
@@ -406,7 +426,7 @@ public class ActivityTask implements Runnable {
             String supplierCode = oneBid.getUserCode();
             BigDecimal bidPrice = oneBid.getBid();
 
-            Integer lastRankPosition = lastRankInfoMap.get(supplierCode);
+            Integer lastRankPosition = lastRankInfoMap2.get(supplierCode);
             Integer newRankPostion = tmpRankMap.get(bidPrice);
             if (lastRankPosition == null) { //判断当前供应商是不是第一次竞价
                 //如果是第一次竞价
@@ -414,28 +434,47 @@ public class ActivityTask implements Runnable {
                     if (newRankPostion == 1) {
                         needNotifyTopUpdate = true;
                     }
-                    needDeedDelayed = decideDelayed(needDeedDelayed);
+                    if (thisGoodsAllowDelayed) {
+                        needDeedDelayed = decideDelayed(needDeedDelayed);
+                    }
                 }
             } else {
                 if (lastRankPosition > 1 && newRankPostion == 1) { //可以通知榜首更新
                     needNotifyTopUpdate = true;
                 }
 
-                if (lastRankPosition >= 1 && lastRankPosition <= 3) { //上一次位置在(1,3]; 加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
-                    if (newRankPostion < lastRankPosition) { //加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
-                        needDeedDelayed = decideDelayed(needDeedDelayed);
-                    }
-                    if (newRankPostion == lastRankPosition) {
+                if (thisGoodsAllowDelayed) {
+                    if (lastRankPosition >= 1 && lastRankPosition <= 3) { //上一次位置在(1,3]; 加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
+                        //判断当前报价是否与上次一样 如果一样不需要计算
+                        //如果不一样且比上一次小
+                        //判断上一次报价排名和当前报价排名是否一样
+                        //如果一样
+                        //第一种可能是第一名自己重新提交了最低价；
+                        //还有种可能是上次排名中当前供应商处于并列状态，那么此时如果提交了最新报价那么会使它进入新的排名
+                        //这两种情况都是需要判断是否延时
                         if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
-                            needDeedDelayed = this.decideDelayed(needDeedDelayed);
+                            if (newRankPostion < lastRankPosition) {
+                                needDeedDelayed = decideDelayed(needDeedDelayed);
+                            }
+
+                            //上一把自己是第一名 然后无聊 想争第一
+                            if (lastRankInfoMap2.get(supplierCode) == 1) {
+                                needDeedDelayed = decideDelayed(needDeedDelayed);
+                            }
+
+                            if (isParataxis(supplierCode)) {
+                                needDeedDelayed = decideDelayed(needDeedDelayed);
+                            }
+
+                        }
+
+                    } else if (lastRankPosition > 3) {// 上一次位置在 (3: +..)
+                        if (newRankPostion <= 3) {
+                            needDeedDelayed = decideDelayed(needDeedDelayed);
                         }
                     }
-
-                } else if (lastRankPosition > 3) {// 上一次位置在 (3: +..)
-                    if (newRankPostion <= 3) {
-                        needDeedDelayed = decideDelayed(needDeedDelayed);
-                    }
                 }
+
             }
             lastRankInfoMap.put(supplierCode, newRankPostion);
             lastBidPrceMap.put(supplierCode, bidPrice);
@@ -454,6 +493,7 @@ public class ActivityTask implements Runnable {
         }
         //更新
         //this.bidParaxtisInfoMap = rankInfoMap;
+        this.copyLastRankInfo(lastRankInfoMap, lastRankInfoMap2);
 
         //是否通知延时
         if (needDeedDelayed) {
@@ -510,6 +550,7 @@ public class ActivityTask implements Runnable {
     /**
      * 计算当前的延时时间
      * <p>注意: 该方法应当在活动进入延时时间时调用</p>
+     *
      * @return
      */
     private int computeCurrentDelayTime() {
@@ -526,6 +567,7 @@ public class ActivityTask implements Runnable {
     /**
      * 时间转换
      * <p>such as: 秒 -> 14:04</p>
+     *
      * @param sec
      * @return
      */
@@ -566,7 +608,9 @@ public class ActivityTask implements Runnable {
         this.remainingTimeType = false;//重置剩余时间为false
         this.allowDelayedTime = this.initAllowDelayedTime; //重置允许的延迟次数
         this.lastRankInfoMap = new HashMap<>();//重置历史排名榜
+        this.lastRankInfoMap2 = new HashMap<>();//重置历史排名榜
         this.lastRemainingTime = 0;
+        this.thisGoodsAllowDelayed = true;
 
         //重置db当前竞品的延迟过了次数
         JbxtGoodsVO newGoodsVO = new JbxtGoodsVO();
@@ -635,7 +679,7 @@ public class ActivityTask implements Runnable {
             String delayTimeString = this.getDelayRemainingTimeString();
             int delay = this.disappearTime > this.initTime ? 2 : 1;
             t_map.put("delay", Integer.toString(delay));
-           // t_map.put("remainingTime", delayTimeString);
+            // t_map.put("remainingTime", delayTimeString);
             //remainingTimeMessage.setData(t_map);
         }
         notifyAllAdmin(remainingTimeMessage, activityCode);
@@ -876,13 +920,18 @@ public class ActivityTask implements Runnable {
         }
     }
 
-
+    /**
+     * 判断当前供应商是否具有并列排名
+     *
+     * @param supplierCode
+     * @return
+     */
     public Boolean isParataxis(String supplierCode) {
-        final Map<String, Integer> map = this.lastRankInfoMap;
+        final Map<String, Integer> map = this.lastRankInfoMap2;
         Integer curSupplierrank = map.get(supplierCode);
         if (curSupplierrank == null) return false;
 
-        for( Map.Entry<String, Integer> entry : map.entrySet()) {
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
             //如果当前排名相同但是账号不同就表明有并列
             if (entry.getValue().equals(curSupplierrank) && !(entry.getKey().equals(supplierCode))) {
                 return true;
@@ -892,9 +941,11 @@ public class ActivityTask implements Runnable {
         return false;
     }
 
-
-
-
+    private void copyLastRankInfo(Map<String, Integer> originRankMap, Map<String, Integer> targetRankMap) {
+        for (Map.Entry<String, Integer> entry : originRankMap.entrySet()) {
+            targetRankMap.put(entry.getKey(), entry.getValue());
+        }
+    }
 
 
 }

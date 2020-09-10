@@ -55,7 +55,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 iJbxtBiddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
         if (curBidInfo != null) {
-            if (bid.compareTo(curBidInfo.getBid()) == -1) { //如果1 < 2 => -1
+            if (bid.compareTo(curBidInfo.getBid()) < 0) { //如果1 < 2 => -1
                 //处理提交
                saveBidDataToDB(activityCode, userCode, bid, goodsId, 2);
             }
@@ -112,7 +112,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
             return;
         }
 
-        final Map<String, String> map301 = new HashMap();
+        Map<String, String> map301 = new HashMap();
         map301.put("activityCode", activityCode);
         map301.put("userCode", userCode);
         map301.put("goodsId", goodsId.toString());
