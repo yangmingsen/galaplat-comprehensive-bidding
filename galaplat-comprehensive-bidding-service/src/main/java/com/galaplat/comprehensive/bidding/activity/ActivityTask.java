@@ -443,6 +443,13 @@ public class ActivityTask implements Runnable {
                     needNotifyTopUpdate = true;
                 }
 
+                if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
+                    //上一把自己和其他人是第一名 然后 想争第一 ， 当他变为新第一名，其他人的排名往后挪时。需要通知榜首更新
+                    if (lastRankInfoMap2.get(supplierCode) == 1) {
+                        needNotifyTopUpdate = true;
+                    }
+                }
+
                 if (thisGoodsAllowDelayed) {
                     if (lastRankPosition >= 1 && lastRankPosition <= 3) { //上一次位置在(1,3]; 加 ‘=’ 是为了处理多个第一名并列情况，然后其中某个人重新提交了最低价情况
                         //判断当前报价是否与上次一样 如果一样不需要计算

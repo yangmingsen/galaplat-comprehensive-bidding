@@ -42,6 +42,10 @@ public class JbxtBiddingDVO implements Serializable {
 
      private Integer bidPercent;
 
+     public void setBidPercent(Integer bidPercent) {
+         this.bidPercent = bidPercent;
+     }
+
      public Integer getBidPercent() {
          return bidPercent;
      }
