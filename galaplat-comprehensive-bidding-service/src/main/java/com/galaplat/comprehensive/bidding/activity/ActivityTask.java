@@ -445,8 +445,10 @@ public class ActivityTask implements Runnable {
 
                 if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
                     //上一把自己和其他人是第一名 然后 想争第一 ， 当他变为新第一名，其他人的排名往后挪时。需要通知榜首更新
-                    if (lastRankInfoMap2.get(supplierCode) == 1) {
-                        needNotifyTopUpdate = true;
+                    if (isParataxis(supplierCode)) {
+                        if (lastRankInfoMap2.get(supplierCode) == 1) {
+                            needNotifyTopUpdate = true;
+                        }
                     }
                 }
 
