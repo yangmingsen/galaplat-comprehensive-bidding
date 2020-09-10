@@ -40,6 +40,12 @@ public class JbxtBiddingDO implements Serializable {
 
      private Integer isdelay;
 
+     private Integer bidPercent;
+
+     public Integer getBidPercent() {
+         return bidPercent;
+     }
+
      public Integer getIsdelay() {
          return isdelay;
      }

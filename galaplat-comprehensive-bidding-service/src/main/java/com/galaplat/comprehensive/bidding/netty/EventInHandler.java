@@ -35,7 +35,6 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
     // 用来保存所有的客户端连接
     private static final ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
     private final Logger LOGGER = LoggerFactory.getLogger(EventInHandler.class);
 
@@ -190,7 +189,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             return;
         }
 
-        final Integer goodsId;
+        final int goodsId;
         try {
             goodsId = Integer.parseInt(tStr2);
         } catch (NumberFormatException e) {
@@ -208,11 +207,17 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
         JbxtGoodsDO goods = goodsService.selectByGoodsId(goodsId);
         BigDecimal firstPrice = goods.getFirstPrice();
-        String y = (1d - (bidPercent /100d))+"";
+        double y = (1d - (bidPercent /100d));
+        BigDecimal yy = new BigDecimal(y);
+        BigDecimal bidPrice = firstPrice.multiply(yy).
+                setScale(3,  BigDecimal.ROUND_HALF_UP); //保留3为小数
 
+        message.getData().put("bidPrice", bidPrice.toString());
 
-
+        handler213Problem(message, ctx);
     }
+
+
 
     private void handler213Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String tStr1 = message.getData().get("bidPrice");
@@ -265,6 +270,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         final QueueMessage queueMessage = new QueueMessage(213, message.getData());
         messageQueue.offer(queueMessage);
     }
+
 
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String activityCode = message.getData().get("activityCode");

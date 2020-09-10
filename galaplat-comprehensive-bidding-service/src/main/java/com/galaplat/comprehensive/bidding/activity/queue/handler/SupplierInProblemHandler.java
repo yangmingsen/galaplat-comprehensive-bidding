@@ -54,19 +54,21 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         final JbxtBiddingDO curBidInfo =
                 iJbxtBiddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
+        String percentStr = takeQueuemsg.getData().get("bidPercent");
+        Integer bidPercent = percentStr == null ? 0 : Integer.parseInt(percentStr);
         if (curBidInfo != null) {
             if (bid.compareTo(curBidInfo.getBid()) < 0) { //如果1 < 2 => -1
                 //处理提交
-               saveBidDataToDB(activityCode, userCode, bid, goodsId, 2);
+               saveBidDataToDB(activityCode, userCode, bid, goodsId, 2, bidPercent);
             }
         }  else { //如果没有最低报价(意味着数据库中没有该竞品的提交数据) 那么直接插入
-            saveBidDataToDB(activityCode, userCode, bid, goodsId,1);
+            saveBidDataToDB(activityCode, userCode, bid, goodsId,1, bidPercent);
         }
 
     }
 
     @Transactional( rollbackFor = Exception.class) //#issue
-    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
+    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, Integer bidPercent) {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
 
@@ -75,37 +77,40 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         //获取剩余时间类型
         final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
 
-        final JbxtBiddingVO jbv = new JbxtBiddingVO();
-        jbv.setBid(bid);
-        jbv.setUserCode(userCode);
-        jbv.setGoodsId(goodsId);
-        jbv.setActivityCode(activityCode); //设置当前活动id
-        jbv.setBidTime(bidTime);
+        final JbxtBiddingVO newBidVO = new JbxtBiddingVO();
+        newBidVO.setBid(bid);
+        newBidVO.setUserCode(userCode);
+        newBidVO.setGoodsId(goodsId);
+        newBidVO.setActivityCode(activityCode); //设置当前活动id
+        newBidVO.setBidTime(bidTime);
+        newBidVO.setBidPercent(bidPercent);
         if (!timeType) {
-            jbv.setIsdelay(1);
+            newBidVO.setIsdelay(1);
         } else {
-            jbv.setIsdelay(2);
+            newBidVO.setIsdelay(2);
         }
+
 
         try {
             //add to db
-            iJbxtBiddingService.insertJbxtBidding(jbv);
+            iJbxtBiddingService.insertJbxtBidding(newBidVO);
             if (status == 1) { //插入
-                iJbxtBiddingService.insertMinBidTableSelective(jbv);
+                iJbxtBiddingService.insertMinBidTableSelective(newBidVO);
             } else if (status == 2) { //更新
                 final JbxtBiddingDO minbidE = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
 
-                final JbxtBiddingVO var1 = new JbxtBiddingVO();
-                var1.setCode(minbidE.getCode());
-                var1.setBid(bid);
-                var1.setUpdatedTime(new Date());
-                var1.setBidTime(bidTime);
+                final JbxtBiddingVO updateBidVO = new JbxtBiddingVO();
+                updateBidVO.setCode(minbidE.getCode());
+                updateBidVO.setBid(bid);
+                updateBidVO.setUpdatedTime(new Date());
+                updateBidVO.setBidTime(bidTime);
+                updateBidVO.setBidPercent(bidPercent);
                 if (!timeType) {
-                    var1.setIsdelay(1);
+                    updateBidVO.setIsdelay(1);
                 } else {
-                    var1.setIsdelay(2);
+                    updateBidVO.setIsdelay(2);
                 }
-                iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(var1);
+                iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(updateBidVO);
             }
         }catch (Exception e) {
             LOGGER.info("saveBidDataToDB(ERROR): 更新竞价数据失败-"+e.getMessage());

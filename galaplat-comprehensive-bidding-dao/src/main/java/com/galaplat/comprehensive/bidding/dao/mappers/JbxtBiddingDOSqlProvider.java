@@ -16,6 +16,10 @@ public class JbxtBiddingDOSqlProvider {
         BEGIN();
         INSERT_INTO("t_jbxt_minbid");
 
+        if (record.getBidPercent() != null) {
+            VALUES("bid_percent", "#{bidPercent,jdbcType=INTEGER}");
+        }
+
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
@@ -74,6 +78,10 @@ public class JbxtBiddingDOSqlProvider {
         BEGIN();
         UPDATE("t_jbxt_minbid");
 
+        if (record.getBidPercent() != null) {
+            SET("bid_percent = #{bidPercent,jdbcType=INTEGER}");
+        }
+
         if (record.getIsdelay() != null) {
             SET("isdelay = #{isdelay, jdbcType=INTEGER}");
         }
@@ -131,7 +139,11 @@ public class JbxtBiddingDOSqlProvider {
     public String insertSelective(JbxtBiddingDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_bidding");
-        
+
+        if (record.getBidPercent() != null) {
+            VALUES("bid_percent", "#{bidPercent,jdbcType=INTEGER}");
+        }
+
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
@@ -191,6 +203,10 @@ public class JbxtBiddingDOSqlProvider {
     public String updateByPrimaryKeySelective(JbxtBiddingDO record) {
         BEGIN();
         UPDATE("t_jbxt_bidding");
+
+        if (record.getBidPercent() != null) {
+            SET("bid_percent = #{bidPercent,jdbcType=INTEGER}");
+        }
 
         if (record.getIsdelay() != null) {
             SET("isdelay = #{isdelay, jdbcType=INTEGER}");
