@@ -467,9 +467,9 @@ public class ActivityTask implements Runnable {
                             }
 
                             //上一把自己是第一名 然后无聊 想争第一
-                            if (lastRankInfoMap2.get(supplierCode) == 1) {
-                                needDeedDelayed = decideDelayed(needDeedDelayed);
-                            }
+//                            if (lastRankInfoMap2.get(supplierCode) == 1) {
+//                                needDeedDelayed = decideDelayed(needDeedDelayed);
+//                            }
 
                             if (isParataxis(supplierCode)) {
                                 needDeedDelayed = decideDelayed(needDeedDelayed);
