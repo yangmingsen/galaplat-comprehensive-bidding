@@ -38,22 +38,24 @@ public class JbxtBiddingDVO implements Serializable {
 
      private String bidTime;
 
-     @Override
-     public String toString() {
-         return "JbxtBiddingDVO{" +
-                 "code='" + code + '\'' +
-                 ", goodsId=" + goodsId +
-                 ", userCode='" + userCode + '\'' +
-                 ", activityCode='" + activityCode + '\'' +
-                 ", bid=" + bid +
-                 ", createdTime=" + createdTime +
-                 ", updatedTime=" + updatedTime +
-                 ", updator='" + updator + '\'' +
-                 ", creator='" + creator + '\'' +
-                 ", companyCode='" + companyCode + '\'' +
-                 ", sysCode='" + sysCode + '\'' +
-                 ", bidTime='" + bidTime + '\'' +
-                 '}';
+     private Integer isdelay;
+
+     private Integer bidPercent;
+
+     public void setBidPercent(Integer bidPercent) {
+         this.bidPercent = bidPercent;
+     }
+
+     public Integer getBidPercent() {
+         return bidPercent;
+     }
+
+     public Integer getIsdelay() {
+         return isdelay;
+     }
+
+     public void setIsdelay(Integer isdelay) {
+         this.isdelay = isdelay;
      }
 
      public String getBidTime() {

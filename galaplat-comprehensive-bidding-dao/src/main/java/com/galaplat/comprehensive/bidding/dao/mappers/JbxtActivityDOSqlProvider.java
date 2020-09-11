@@ -40,20 +40,12 @@ public class JbxtActivityDOSqlProvider {
             VALUES("updated_time", "#{updatedTime,jdbcType=TIMESTAMP}");
         }
 
-        if (record.getDeleteTime() != null) {
-            VALUES("delete_time", "#{deleteTime,jdbcType=TIMESTAMP}");
-        }
-
         if (record.getUpdator() != null) {
             VALUES("updator", "#{updator,jdbcType=VARCHAR}");
         }
 
         if (record.getCreator() != null) {
             VALUES("creator", "#{creator,jdbcType=VARCHAR}");
-        }
-
-        if (record.getDeleter() != null) {
-            VALUES("deleter", "#{deleter,jdbcType=VARCHAR}");
         }
 
         if (record.getCompanyCode() != null) {
@@ -74,6 +66,38 @@ public class JbxtActivityDOSqlProvider {
 
         if (record.getRecordStatus() != null) {
             VALUES("record_status", "#{recordStatus,jdbcType=INTEGER}");
+        }
+
+        if (record.getDeleteTime() != null) {
+            VALUES("delete_time", "#{deleteTime,jdbcType=TIMESTAMP}");
+        }
+
+        if (record.getDeleter() != null) {
+            VALUES("deleter", "#{deleter,jdbcType=VARCHAR}");
+        }
+
+        if (record.getBidingType() != null) {
+            VALUES("biding_type", "#{bidingType,jdbcType=INTEGER}");
+        }
+
+        if (record.getPredictBidDatetime() != null) {
+            VALUES("predict_bid_datetime", "#{predictBidDatetime,jdbcType=TIMESTAMP}");
+        }
+
+        if (record.getBidActivityInfo() != null) {
+            VALUES("bid_activity_info", "#{bidActivityInfo,jdbcType=VARCHAR}");
+        }
+
+        if (record.getPromiseTitle() != null) {
+            VALUES("promise_title", "#{promiseTitle,jdbcType=VARCHAR}");
+        }
+
+        if (record.getFilePath() != null) {
+            VALUES("file_path", "#{filePath,jdbcType=VARCHAR}");
+        }
+
+        if (record.getPromiseText() != null) {
+            VALUES("promise_text", "#{promiseText,jdbcType=LONGVARCHAR}");
         }
 
         return SQL();
@@ -103,20 +127,12 @@ public class JbxtActivityDOSqlProvider {
             SET("updated_time = #{updatedTime,jdbcType=TIMESTAMP}");
         }
 
-        if (record.getDeleteTime() != null) {
-            SET("delete_time = #{deleteTime,jdbcType=TIMESTAMP}");
-        }
-
         if (record.getUpdator() != null) {
             SET("updator = #{updator,jdbcType=VARCHAR}");
         }
 
         if (record.getCreator() != null) {
             SET("creator = #{creator,jdbcType=VARCHAR}");
-        }
-
-        if (record.getDeleter() != null) {
-            SET("deleter = #{deleter,jdbcType=VARCHAR}");
         }
 
         if (record.getCompanyCode() != null) {
@@ -137,6 +153,38 @@ public class JbxtActivityDOSqlProvider {
 
         if (record.getRecordStatus() != null) {
             SET("record_status = #{recordStatus,jdbcType=INTEGER}");
+        }
+
+        if (record.getDeleteTime() != null) {
+            SET("delete_time = #{deleteTime,jdbcType=TIMESTAMP}");
+        }
+
+        if (record.getDeleter() != null) {
+            SET("deleter = #{deleter,jdbcType=VARCHAR}");
+        }
+
+        if (record.getBidingType() != null) {
+            SET("biding_type = #{bidingType,jdbcType=INTEGER}");
+        }
+
+        if (record.getPredictBidDatetime() != null) {
+            SET("predict_bid_datetime = #{predictBidDatetime,jdbcType=TIMESTAMP}");
+        }
+
+        if (record.getBidActivityInfo() != null) {
+            SET("bid_activity_info = #{bidActivityInfo,jdbcType=VARCHAR}");
+        }
+
+        if (record.getPromiseTitle() != null) {
+            SET("promise_title = #{promiseTitle,jdbcType=VARCHAR}");
+        }
+
+        if (record.getFilePath() != null) {
+            SET("file_path = #{filePath,jdbcType=VARCHAR}");
+        }
+
+        if (record.getPromiseText() != null) {
+            SET("promise_text = #{promiseText,jdbcType=LONGVARCHAR}");
         }
 
         WHERE("code = #{code,jdbcType=VARCHAR}");

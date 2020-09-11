@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.bidding.netty;
+package com.galaplat.comprehensive.bidding.netty.channel;
 
 import io.netty.channel.Channel;
 import org.apache.commons.lang3.StringUtils;

@@ -2,13 +2,13 @@ package com.galaplat.comprehensive.bidding.activity;
 
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
-import com.galaplat.comprehensive.bidding.activity.queue.QueueMessage;
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.netty.AdminChannelMap;
-import com.galaplat.comprehensive.bidding.netty.pojo.Message;
-import com.galaplat.comprehensive.bidding.netty.UserChannelMap;
+import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
+import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
+import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
 import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
@@ -25,16 +25,20 @@ import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-
+/**
+ * 废弃
+ */
+@Deprecated
 public class ActivityThread extends Thread {
 
     private final Logger LOGGER = LoggerFactory.getLogger(ActivityThread.class);
     private final String currentActivityCode;
     private final String currentGoodsId;
-    private final Message remainingTimeMessage = new Message(100,null);
+    private final ResponseMessage remainingTimeMessage = new ResponseMessage(100,null);
     private final UserChannelMap userChannelMap = SpringUtil.getBean(UserChannelMap.class);
     private final AdminChannelMap adminChannel = SpringUtil.getBean(AdminChannelMap.class);
     private final IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+    //暂停状态控制Lock
     private final ReentrantLock lock =  new ReentrantLock();
     private final Condition continueRun = lock.newCondition();
     private final MessageQueue messageQueue = SpringUtil.getBean(MessageQueue.class);
@@ -81,7 +85,7 @@ public class ActivityThread extends Thread {
         return remainingTime;
     }
 
-    /***
+    /**
      * 获取当前剩余时间（字符串方式，例如 "15:34"）
      * @return
      */
@@ -107,7 +111,7 @@ public class ActivityThread extends Thread {
         return stringBuilder.toString();
     }
 
-    /***
+    /**
      * 获取当前剩余时间（秒）
      * @return
      */
@@ -115,7 +119,7 @@ public class ActivityThread extends Thread {
         return initTime;
     }
 
-    /***
+    /**
      * //1 进行 2暂停  3//重置 4 结束
      * @return
      */

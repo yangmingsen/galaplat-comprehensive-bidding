@@ -37,6 +37,26 @@ public class JbxtBiddingVO implements Serializable {
 
      private String bidTime;
 
+     private Integer isdelay;
+
+     private Integer bidPercent;
+
+     public Integer getBidPercent() {
+         return bidPercent;
+     }
+
+     public void setBidPercent(Integer bidPercent) {
+         this.bidPercent = bidPercent;
+     }
+
+     public Integer getIsdelay() {
+         return isdelay;
+     }
+
+     public void setIsdelay(Integer isdelay) {
+         this.isdelay = isdelay;
+     }
+
      public String getBidTime() {
          return bidTime;
      }

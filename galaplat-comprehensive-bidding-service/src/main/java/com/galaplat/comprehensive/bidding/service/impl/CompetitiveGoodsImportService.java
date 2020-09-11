@@ -1,12 +1,11 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.JsonUtils;
 import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
-import com.galaplat.comprehensive.bidding.annotations.AlisaField;
 import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
@@ -14,7 +13,9 @@ import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
+import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelStrParam;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
+import com.galaplat.comprehensive.bidding.utils.ImportExcelValidateMapUtil;
 import com.galaplat.comprehensive.bidding.utils.Tuple;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,15 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.constraints.NotNull;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**@
  * @Description: 竞标活动竞品导入
@@ -46,7 +40,7 @@ import java.util.Map;
  * @CreateDate: 2020/7/9 20:15
  */
 @Service("competitiveGoodsExcelService")
-public class CompetitiveGoodsImportService implements IImportSubMethodWithParamService<JbxtGoodsExcelParam> {
+public class CompetitiveGoodsImportService implements IImportSubMethodWithParamService<JbxtGoodsExcelStrParam> {
 
     private static final Logger log = LoggerFactory.getLogger(CompetitiveGoodsImportService.class);
 
@@ -62,9 +56,10 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
-    public List<JbxtGoodsExcelParam> insertExcelDate(List<Map<String, Object>> list, ImportVO importVO) {
+    public List<JbxtGoodsExcelStrParam> insertExcelDate(List<Map<String, Object>> list, ImportVO importVO) {
         if (CollectionUtils.isEmpty(list)) {return Collections.emptyList();}
-        List<JbxtGoodsExcelParam>  errorList = Lists.newArrayList();
+        List<JbxtGoodsExcelStrParam>  errorList = Lists.newArrayList();
+        List<JbxtGoodsExcelParam>  rightList = Lists.newArrayList();
         List<JbxtGoodsParam>  saveList = Lists.newArrayList();
 
         String creatorName = getCreatorName(importVO.getCreator());
@@ -72,7 +67,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         String activityCode= null;
 
         if (StringUtils.isNotEmpty(paramJson)) {
-            Map<String, Object> mapVO = JSONObject.parseObject(paramJson, new TypeReference<Map<String, Object>>() {
+            Map<String, Object> mapVO = JSON.parseObject(paramJson, new TypeReference<Map<String, Object>>() {
             });
             activityCode = (String) mapVO.get("bidActivityCode");
         }
@@ -86,12 +81,15 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         if (null != activityDO && CollectionUtils.isNotEmpty(list)) {
             for (Map<String, Object>  goodsMap: list) {
                 JbxtGoodsExcelParam goodsExcelParam = new JbxtGoodsExcelParam();
-                StringBuffer errorMsg = new StringBuffer("");
-                Tuple<String,JbxtGoodsExcelParam> paramTuple =  validateField(goodsExcelParam, goodsMap);
+                JbxtGoodsExcelStrParam goodsExceStrlParam = new JbxtGoodsExcelStrParam();
+                StringBuilder errorMsg = new StringBuilder("");
+                Tuple<String, JbxtGoodsExcelStrParam> paramTuple =  ImportExcelValidateMapUtil.validateField_1(JbxtGoodsExcelParam.class, goodsExceStrlParam, goodsMap);
                 errorMsg.append(paramTuple._1);
+                goodsExceStrlParam = paramTuple._2;
+                errorMsg.append(validateGoodsInfo(goodsExceStrlParam));
                 if (StringUtils.isNotEmpty(errorMsg.toString())) {
-                    goodsExcelParam = paramTuple._2;
-                    errorList.add(goodsExcelParam);
+                    goodsExceStrlParam.setErrorMsg(errorMsg.toString());
+                    errorList.add(goodsExceStrlParam);
                 } else {
                     try {
                         goodsExcelParam = JsonUtils.toObject(JsonUtils.toJson(goodsMap), JbxtGoodsExcelParam.class);
@@ -103,13 +101,16 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                         goodsExcelParam.setUpdatedTime(new Date());
                         goodsExcelParam.setCreator(creatorName);
                         goodsExcelParam.setStatus("0");
+                        rightList.add(goodsExcelParam);
                         JbxtGoodsParam goodsParam = new JbxtGoodsParam();
                         CopyUtil.copyPropertiesExceptEmpty(goodsExcelParam, goodsParam);
+                        goodsParam.setAddDelayTimes(0);// 已延长次数默认为0
                         saveList.add(goodsParam);
                 }
             }
             int insertCount = 0;
-            if (CollectionUtils.isNotEmpty(saveList)) {
+
+            if (CollectionUtils.isNotEmpty(saveList) && CollectionUtils.isEmpty(errorList)) {
                 goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
                 insertCount = goodsDao.batchInsert(saveList);
             }
@@ -118,7 +119,26 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                     && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
                 activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
             }
+            if (CollectionUtils.isNotEmpty(errorList)) {
 
+                rightList.stream().forEach(e ->{
+                    JbxtGoodsExcelStrParam excelStrParam = JbxtGoodsExcelStrParam.builder()
+                            .serialNumber(e.getSerialNumber())
+                            .code(e.getCode())
+                            .name(e.getName())
+                            .firstPrice(String.valueOf(e.getFirstPrice()))
+                            .retainPrice(String.valueOf(e.getRetainPrice()))
+                            .num(String.valueOf(e.getNum()))
+                            .timeNum(String.valueOf(e.getTimeNum()))
+                            .lastChangTime(String.valueOf(e.getLastChangTime()))
+                            .perDelayTime(String.valueOf(e.getPerDelayTime()))
+                            .delayTimes(String.valueOf(e.getDelayTimes()))
+                            .companyCode(e.getCompanyCode())
+                            .sysCode(e.getSysCode())
+                            .build();
+                    errorList.add(excelStrParam);
+                });
+            }
         }// if
 
         return errorList;
@@ -155,100 +175,34 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                 return creatorName;
     }
 
+    private String validateGoodsInfo(JbxtGoodsExcelStrParam excelParam) {
 
-    /**
-     * 校验导入数据,返回有异常的行
-     * @param param
-     * @param excelDataMap
-     * @return
-     */
-    private <T> Tuple<String,T> validateField(T param, Map<String, Object> excelDataMap) {
-        Field[] fileds = param.getClass().getDeclaredFields();
-        StringBuffer errorMsg = new StringBuffer("");
-        for (Field field : fileds) {
-            AlisaField  annotation = field.getAnnotation(AlisaField.class);
-            NotNull  notNull = field.getAnnotation(NotNull.class);
-            String  fieldName  = field.getName();
-            String  excelTitle;
-            StringBuffer  temErrorMsg  = new StringBuffer("") ;
-            if (annotation != null) {
-                excelTitle = annotation.value();
-                Class superclass = field.getType().getSuperclass();
-                Class clazz = field.getType();
-                String  fieldValue  = (String) excelDataMap.get(fieldName);
-                if (superclass  == Number.class
-                        || clazz == int.class
-                        || clazz == short.class
-                        || clazz == long.class
-                        || clazz == double.class
-                        || clazz == float.class ) {
-                    fieldValue = StringUtils.replace(fieldValue, ".","");
-                    if (!StringUtils.isNumeric(fieldValue)) {
-                        temErrorMsg.append(excelTitle).append("必须为数字！ ");
-                    }
-                }
-                if (notNull != null && StringUtils.isEmpty(fieldValue)) {
-                    temErrorMsg.append(notNull.message());
-                }
-                    try {
-                        String methodName = "set"+ capitalize(fieldName);
-                        Method method = param.getClass().getDeclaredMethod(methodName,clazz);
-                        if (null != method && StringUtils.isEmpty(temErrorMsg.toString())) {
-                            if (superclass == Number.class) {
-                                String valurStr = (String) excelDataMap.get(fieldName);
-                                method.invoke(param, getNumberValue(valurStr, clazz));
-                            } else {
-                                method.invoke(param, excelDataMap.get(fieldName));
-                            }
-                        }
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        log.error("导入校验异常{}{}",e.getMessage(),e );
-                    }
-                errorMsg.append(temErrorMsg);
-            }// if
-        }
+        StringBuilder error= new StringBuilder("");
+        String timeNuimStr = excelParam.getTimeNum();
+        String lastChangTimeStr = excelParam.getLastChangTime();
+        String perDelayTimeStr = excelParam.getPerDelayTime();
+        String delayTimesStr = excelParam.getDelayTimes();
 
-        if (StringUtils.isNotEmpty(errorMsg.toString())) {
-            try {
-                Method method = param.getClass().getDeclaredMethod("setErrorMsg",String.class);
-                    method.invoke(param,errorMsg.toString());
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
+        String regx = "^\\d+$";
+
+        Integer timeNum = StringUtils.isNotBlank(timeNuimStr)&& Pattern.compile(regx).matcher(timeNuimStr).find() ? Integer.parseInt(timeNuimStr) : null;
+        Integer lastChangTime = StringUtils.isNotBlank(lastChangTimeStr) && Pattern.compile(regx).matcher(lastChangTimeStr).find() ? Integer.parseInt(lastChangTimeStr) : null;
+        Integer perDelayTime = StringUtils.isNotBlank(perDelayTimeStr) && Pattern.compile(regx).matcher(perDelayTimeStr).find()  ? Integer.parseInt(perDelayTimeStr) : null;
+        Integer delayTimes = StringUtils.isNotBlank(delayTimesStr) && Pattern.compile(regx).matcher(delayTimesStr).find() ? Integer.parseInt(delayTimesStr) : null;
+
+        if (null != timeNum && timeNum > 60) {
+            error.append("竞标时长不能超过60分钟！");
         }
-        return new Tuple<>(errorMsg.toString(), param);
+        if (null != lastChangTime && null != timeNum && lastChangTime > timeNum * 60) {
+            error.append("延时窗口期不能超过竞标时长！");
+        }
+        if (null != perDelayTime && perDelayTime > 600) {
+            error.append("单次延长不能超过600秒！");
+        }
+        if (null != delayTimes && delayTimes > 100) {
+            error.append("延长次数不能超过100次！");
+        }
+        return error.toString();
     }
 
-    private String capitalize(String str) {
-        int strLen;
-        if (str != null && (strLen = str.length()) != 0) {
-            char firstChar = str.charAt(0);
-            char newChar = Character.toTitleCase(firstChar);
-            if (firstChar == newChar) {
-                return str;
-            } else {
-                char[] newChars = new char[strLen];
-                newChars[0] = newChar;
-                str.getChars(1, strLen, newChars, 1);
-                return String.valueOf(newChars);
-            }
-        } else {
-            return str;
-        }
-    }
-
-    private Object getNumberValue(String value, Class clazz) {
-        if (StringUtils.isNotEmpty(value) && clazz == BigDecimal.class) {
-            return new BigDecimal(value);
-        } else if (StringUtils.isNotEmpty(value) && clazz == Integer.class || clazz == int.class) {
-            return new Integer(value);
-        } else if (StringUtils.isNotEmpty(value) && clazz == Double.class || clazz == double.class) {
-            return new Double(value);
-        } else if (StringUtils.isNotEmpty(value) && clazz == Long.class || clazz == long.class) {
-            return new Long(value);
-        } else if (StringUtils.isNotEmpty(value) && clazz == Short.class || clazz == short.class) {
-            return new Short(value);
-        }
-        return null;
-    }
 }

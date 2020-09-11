@@ -40,7 +40,23 @@ public class JbxtGoodsDO implements Serializable {
     /*是否过期(0表示未过期，1表示为进行中, 2表示过期)*/
     private String status;
 
+    /*竞标时长*/
     private Integer timeNum;
+
+    /*需要延长竞标时长的最后的时间点，比如最后10秒，排名发生变化需要延长*/
+    private Integer lastChangTime;
+
+    /*每次延长的时长*/
+    private Integer perDelayTime;
+
+    /*延长次数*/
+    private Integer delayTimes;
+
+    /*已经延长的次数*/
+    private Integer addDelayTimes;
+
+    /*保留价*/
+    private BigDecimal retainPrice;
 
     public Integer getGoodsId() {
         return goodsId;
@@ -154,5 +170,48 @@ public class JbxtGoodsDO implements Serializable {
         this.timeNum = timeNum;
     }
 
+    public Integer getLastChangTime() {
+        return lastChangTime;
+    }
+
+    public void setLastChangTime(Integer lastChangTime) {
+        this.lastChangTime = lastChangTime;
+    }
+
+    public Integer getPerDelayTime() {
+        return perDelayTime;
+    }
+
+    public void setPerDelayTime(Integer perDelayTime) {
+        this.perDelayTime = perDelayTime;
+    }
+
+    public Integer getDelayTimes() {
+        return delayTimes;
+    }
+
+    public void setDelayTimes(Integer delayTimes) {
+        this.delayTimes = delayTimes;
+    }
+
+    /**
+     * 获取已经延迟的次数
+     * @return
+     */
+    public Integer getAddDelayTimes() {
+        return addDelayTimes;
+    }
+
+    public void setAddDelayTimes(Integer addDelayTimes) {
+        this.addDelayTimes = addDelayTimes;
+    }
+
+    public BigDecimal getRetainPrice() {
+        return retainPrice;
+    }
+
+    public void setRetainPrice(BigDecimal retainPrice) {
+        this.retainPrice = retainPrice;
+    }
 
 }

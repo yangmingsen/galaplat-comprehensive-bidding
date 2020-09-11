@@ -1,10 +1,10 @@
 package com.galaplat.comprehensive.bidding.activity.queue;
 
+import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 

@@ -36,6 +36,16 @@ public class JbxtBiddingQuery implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
+     private Integer isdelay;
+
+     public Integer getIsdelay() {
+         return isdelay;
+     }
+
+     public void setIsdelay(Integer isdelay) {
+         this.isdelay = isdelay;
+     }
+
     public String getCode() {
         return code;
     }
