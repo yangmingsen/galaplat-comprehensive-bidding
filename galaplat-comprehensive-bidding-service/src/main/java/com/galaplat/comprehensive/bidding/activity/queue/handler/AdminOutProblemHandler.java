@@ -111,6 +111,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                 res300t1.setMinBid(new BigDecimal("0.000"));
             }
 
+            LOGGER.info("userCode="+user1.getCode()+"  goodsId="+goodsId+"  activityCode="+activityCode);
             final List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
             final List<Res300t2> t2s = new ArrayList<>();
             if (cUserBidHistory.size() > 0) {

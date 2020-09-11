@@ -141,11 +141,21 @@ public class ActivityTask implements Runnable {
      * @return
      */
     public String getDelayRemainingTimeString() {
-        final boolean haveRemainingTime = this.disappearTime >= this.initTime; //如果消失的时间大于等于初始化时间，那么意味着可以使用延迟时间了
+        final boolean haveRemainingTime = isDelayedTime(); //如果消失的时间大于等于初始化时间，那么意味着可以使用延迟时间了
         final int delayTime = haveRemainingTime ? this.computeCurrentDelayTime() : this.initTime - this.disappearTime;
 
         return this.doTransferTimeStr(delayTime);
     }
+
+    /**
+     * true 为表示进入了延迟时间
+     * false表示为正常时间
+     * @return
+     */
+    public boolean isDelayedTime() {
+        return this.disappearTime > this.initTime;
+    }
+
 
     /**
      * 获取当前剩余时间（字符串方式，例如 "15:34"）
@@ -445,8 +455,10 @@ public class ActivityTask implements Runnable {
 
                 if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
                     //上一把自己和其他人是第一名 然后 想争第一 ， 当他变为新第一名，其他人的排名往后挪时。需要通知榜首更新
-                    if (lastRankInfoMap2.get(supplierCode) == 1) {
-                        needNotifyTopUpdate = true;
+                    if (isParataxis(supplierCode)) {
+                        if (lastRankInfoMap2.get(supplierCode) == 1) {
+                            needNotifyTopUpdate = true;
+                        }
                     }
                 }
 
@@ -465,9 +477,9 @@ public class ActivityTask implements Runnable {
                             }
 
                             //上一把自己是第一名 然后无聊 想争第一
-                            if (lastRankInfoMap2.get(supplierCode) == 1) {
-                                needDeedDelayed = decideDelayed(needDeedDelayed);
-                            }
+//                            if (lastRankInfoMap2.get(supplierCode) == 1) {
+//                                needDeedDelayed = decideDelayed(needDeedDelayed);
+//                            }
 
                             if (isParataxis(supplierCode)) {
                                 needDeedDelayed = decideDelayed(needDeedDelayed);

@@ -54,7 +54,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
     private void handler(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
         // 获取客户端发送过来的文本消息
         final String text = msg.text();
-        LOGGER.info("handler(reve msg): " + text);
+//        LOGGER.info("handler(reve msg): " + text);
         //System.out.println("接收到消息数据为：" + text);
         final RequestMessage message = JSON.parseObject(text, RequestMessage.class);
 
@@ -121,7 +121,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
             case 217: {
                 final String userCode = message.getData().get("userCode");
-                LOGGER.info("handler(msg): 来至于供应商端("+userCode+")的心跳");
+//                LOGGER.info("handler(msg): 来至于供应商端("+userCode+")的心跳");
             }
             break;
 
@@ -155,7 +155,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
             case 303: {
                 final String adminCode = message.getData().get("adminCode");
-                LOGGER.info("handler(msg): 来至于管理端("+adminCode+")的心跳");
+//                LOGGER.info("handler(msg): 来至于管理端("+adminCode+")的心跳");
             }
             break;
         }
