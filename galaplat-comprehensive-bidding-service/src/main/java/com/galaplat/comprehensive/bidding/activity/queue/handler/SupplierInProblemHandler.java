@@ -85,7 +85,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         newBidVO.setActivityCode(activityCode); //设置当前活动id
         newBidVO.setBidTime(bidTime);
         newBidVO.setBidPercent(bidPercent);
-        if (turnToDelayTime) {
+        if (!turnToDelayTime) {
             newBidVO.setIsdelay(1);
         } else {
             newBidVO.setIsdelay(2);
@@ -106,7 +106,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 updateBidVO.setUpdatedTime(new Date());
                 updateBidVO.setBidTime(bidTime);
                 updateBidVO.setBidPercent(bidPercent);
-                if (turnToDelayTime) {
+                if (!turnToDelayTime) {
                     updateBidVO.setIsdelay(1);
                 } else {
                     updateBidVO.setIsdelay(2);
