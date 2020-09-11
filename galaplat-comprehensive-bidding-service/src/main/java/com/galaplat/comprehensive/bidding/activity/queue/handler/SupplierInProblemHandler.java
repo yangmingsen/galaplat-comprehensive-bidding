@@ -76,6 +76,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         //获取剩余时间类型
         final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
+        final boolean turnToDelayTime = currentActivity.isDelayedTime();
 
         final JbxtBiddingVO newBidVO = new JbxtBiddingVO();
         newBidVO.setBid(bid);
@@ -84,7 +85,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         newBidVO.setActivityCode(activityCode); //设置当前活动id
         newBidVO.setBidTime(bidTime);
         newBidVO.setBidPercent(bidPercent);
-        if (!timeType) {
+        if (turnToDelayTime) {
             newBidVO.setIsdelay(1);
         } else {
             newBidVO.setIsdelay(2);
@@ -105,7 +106,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 updateBidVO.setUpdatedTime(new Date());
                 updateBidVO.setBidTime(bidTime);
                 updateBidVO.setBidPercent(bidPercent);
-                if (!timeType) {
+                if (turnToDelayTime) {
                     updateBidVO.setIsdelay(1);
                 } else {
                     updateBidVO.setIsdelay(2);
