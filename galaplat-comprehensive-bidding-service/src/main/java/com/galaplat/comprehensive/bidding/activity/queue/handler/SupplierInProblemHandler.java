@@ -67,7 +67,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
     }
 
-    @Transactional( rollbackFor = Exception.class) //#issue
+
     void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, Integer bidPercent) {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
