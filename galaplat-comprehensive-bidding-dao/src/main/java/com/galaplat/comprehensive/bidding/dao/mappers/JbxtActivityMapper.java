@@ -24,10 +24,7 @@ public interface JbxtActivityMapper {
             "company_code, sys_code, ",
             "supplier_num, status, ",
             "record_status, delete_time, ",
-            "deleter, biding_type, ",
-            "predict_bid_datetime, bid_activity_info, ",
-            "promise_title, file_path, ",
-            "promise_text)",
+            "deleter)",
             "values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
             "#{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, ",
             "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
@@ -35,10 +32,7 @@ public interface JbxtActivityMapper {
             "#{companyCode,jdbcType=VARCHAR}, #{sysCode,jdbcType=VARCHAR}, ",
             "#{supplierNum,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, ",
             "#{recordStatus,jdbcType=INTEGER}, #{deleteTime,jdbcType=TIMESTAMP}, ",
-            "#{deleter,jdbcType=VARCHAR}, #{bidingType,jdbcType=INTEGER}, ",
-            "#{predictBidDatetime,jdbcType=TIMESTAMP}, #{bidActivityInfo,jdbcType=VARCHAR}, ",
-            "#{promiseTitle,jdbcType=VARCHAR}, #{filePath,jdbcType=VARCHAR}, ",
-            "#{promiseText,jdbcType=LONGVARCHAR})"
+            "#{deleter,jdbcType=VARCHAR})"
     })
     int insert(JbxtActivityDO record);
 
@@ -48,9 +42,7 @@ public interface JbxtActivityMapper {
     @Select({
             "select",
             "code, name, start_time, end_time, created_time, updated_time, updator, creator, ",
-            "company_code, sys_code, supplier_num, status, record_status, delete_time, deleter, ",
-            "biding_type, predict_bid_datetime, bid_activity_info, promise_title, file_path, ",
-            "promise_text",
+            "company_code, sys_code, supplier_num, status, record_status, delete_time, deleter ",
             "from t_jbxt_activity",
             "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -70,12 +62,6 @@ public interface JbxtActivityMapper {
             @Result(column="record_status", property="recordStatus", jdbcType=JdbcType.INTEGER),
             @Result(column="delete_time", property="deleteTime", jdbcType=JdbcType.TIMESTAMP),
             @Result(column="deleter", property="deleter", jdbcType=JdbcType.VARCHAR),
-            @Result(column="biding_type", property="bidingType", jdbcType=JdbcType.INTEGER),
-            @Result(column="predict_bid_datetime", property="predictBidDatetime", jdbcType=JdbcType.TIMESTAMP),
-            @Result(column="bid_activity_info", property="bidActivityInfo", jdbcType=JdbcType.VARCHAR),
-            @Result(column="promise_title", property="promiseTitle", jdbcType=JdbcType.VARCHAR),
-            @Result(column="file_path", property="filePath", jdbcType=JdbcType.VARCHAR),
-            @Result(column="promise_text", property="promiseText", jdbcType=JdbcType.LONGVARCHAR)
     })
     JbxtActivityDO selectByPrimaryKey(String code);
 
