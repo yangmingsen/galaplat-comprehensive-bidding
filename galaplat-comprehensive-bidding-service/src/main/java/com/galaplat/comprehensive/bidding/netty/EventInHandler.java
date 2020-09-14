@@ -165,7 +165,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
         // 当接收到数据后会自动调用
-
+        if (msg == null) return;
         try {
             handler(ctx, msg);
         } catch (Exception e) {

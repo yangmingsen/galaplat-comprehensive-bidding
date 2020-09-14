@@ -63,11 +63,7 @@ public class JbxtGoodsServiceImpl implements GoodsService {
 
 
 			if (currentActivity != null) {
-				LOGGER.info("findAll(msg): currentThreadStatus="+currentActivity.getStatus());
-				LOGGER.info("findAll(msg): currentThread1="+currentActivity);
 				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId())) {
-					LOGGER.info("findAll(msg): currentThread2="+currentActivity);
-
 					int status = currentActivity.getStatus();
 					if (status == 2) {
 						sgv.setIsActive("3");
@@ -81,8 +77,6 @@ public class JbxtGoodsServiceImpl implements GoodsService {
 				}
 			} else {
 				sgv.setIsActive(goods.getStatus());
-				LOGGER.info("findAll(msg): currentThread="+currentActivity);
-
 			}
 			
             sgvs.add(sgv);

@@ -58,7 +58,9 @@ public class MyApplicationRunner implements ApplicationRunner {
             }
         }
 
+    }
 
+    private void runQueueMessageHandler(ApplicationArguments args) {
         //启动事件处理者
         QueueHandlerThreadSingleton queueHandlerThreadSingleton = QueueHandlerThreadSingleton.getInstance();
         queueHandlerThreadSingleton.start();
@@ -70,6 +72,9 @@ public class MyApplicationRunner implements ApplicationRunner {
 
         //run Netty
         runNetty(args);
+
+        //run messageHandler
+        runQueueMessageHandler(args);
 
     }
 }
