@@ -6,7 +6,6 @@ import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -52,7 +51,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         final Integer goodsId = Integer.parseInt(goodsIdStr);
         final BigDecimal bid = new BigDecimal(bidPriceStr);
         final JbxtBiddingDO curBidInfo =
-                iJbxtBiddingService. //获取当前用户最小竞价
+                biddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
         String percentStr = takeQueuemsg.getData().get("bidPercent");
         Integer bidPercent = percentStr == null ? 0 : Integer.parseInt(percentStr);
@@ -94,11 +93,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         try {
             //add to db
-            iJbxtBiddingService.insertJbxtBidding(newBidVO);
+            biddingService.insertJbxtBidding(newBidVO);
             if (status == 1) { //插入
-                iJbxtBiddingService.insertMinBidTableSelective(newBidVO);
+                biddingService.insertMinBidTableSelective(newBidVO);
             } else if (status == 2) { //更新
-                final JbxtBiddingDO minbidE = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                final JbxtBiddingDO minbidE = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
 
                 final JbxtBiddingVO updateBidVO = new JbxtBiddingVO();
                 updateBidVO.setCode(minbidE.getCode());
@@ -111,7 +110,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 } else {
                     updateBidVO.setIsdelay(2);
                 }
-                iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(updateBidVO);
+                biddingService.updateMinBidTableByPrimaryKeySelective(updateBidVO);
             }
         }catch (Exception e) {
             LOGGER.info("saveBidDataToDB(ERROR): 更新竞价数据失败-"+e.getMessage());

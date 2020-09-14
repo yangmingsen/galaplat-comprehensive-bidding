@@ -3,6 +3,7 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -73,13 +74,19 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
      */
     private void handlerSendOneSupplier(final String activityCode, final Integer goodsId, final String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            final CustomBidVO info = iJbxtGoodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode); //issue sort
-            final Boolean parataxis = activityManager.get(activityCode).isParataxis(userCode) ? Boolean.TRUE : Boolean.FALSE;
+            final CustomBidVO info = goodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode); //issue sort
+            ActivityTask activityTask = activityManager.get(activityCode);
+            final Boolean parataxis = activityTask.isParataxis(userCode) ? Boolean.TRUE : Boolean.FALSE;
+            final boolean needSendBidPercent = activityTask.getBidType() == 2;
             final Map<String, String> map = new HashMap<>();
             map.put("userRank", info.getUserRank().toString());
             map.put("goodsPrice", info.getGoodsPrice().toString());
             map.put("goodsId", info.getGoodsId().toString());
             map.put("parataxis", parataxis.toString());
+            if (needSendBidPercent) {
+                JbxtBiddingDO minBidRecord = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                map.put("bidPercent", minBidRecord.getBidPercent().toString());
+            }
 
 
             //推流到供应商客户端

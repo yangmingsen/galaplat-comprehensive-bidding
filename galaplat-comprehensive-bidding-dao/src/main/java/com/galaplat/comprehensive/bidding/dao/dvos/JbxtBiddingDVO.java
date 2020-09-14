@@ -40,13 +40,13 @@ public class JbxtBiddingDVO implements Serializable {
 
      private Integer isdelay;
 
-     private Integer bidPercent;
+     private BigDecimal bidPercent;
 
-     public void setBidPercent(Integer bidPercent) {
+     public void setBidPercent(BigDecimal bidPercent) {
          this.bidPercent = bidPercent;
      }
 
-     public Integer getBidPercent() {
+     public BigDecimal getBidPercent() {
          return bidPercent;
      }
 

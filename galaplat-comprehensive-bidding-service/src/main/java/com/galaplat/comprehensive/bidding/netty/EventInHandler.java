@@ -197,20 +197,24 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             return;
         }
 
-        final int bidPercent;
+        final BigDecimal bidPercent;
         try {
-            bidPercent = Integer.parseInt(tStr1);
+            bidPercent = new BigDecimal(tStr1);
         } catch (NumberFormatException e) {
             LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
             return;
         }
 
         JbxtGoodsDO goods = goodsService.selectByGoodsId(goodsId);
+
+
         BigDecimal firstPrice = goods.getFirstPrice();
-        double y = (1d - (bidPercent /100d));
-        BigDecimal yy = new BigDecimal(y);
-        BigDecimal bidPrice = firstPrice.multiply(yy).
-                setScale(3,  BigDecimal.ROUND_HALF_UP); //保留3为小数
+        BigDecimal one = new BigDecimal("1");
+        BigDecimal per100 = new BigDecimal("100");
+
+        BigDecimal divideRes = bidPercent.divide(per100,2,2);
+        BigDecimal subtractRes = one.subtract(divideRes);
+        BigDecimal bidPrice = firstPrice.multiply(subtractRes).setScale(3,  BigDecimal.ROUND_HALF_UP); //保留3为小数;
 
         message.getData().put("bidPrice", bidPrice.toString());
 

@@ -5,6 +5,7 @@ import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.ObjectQueueMessage;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
@@ -72,6 +73,7 @@ public class ActivityTask implements Runnable {
     private int initAllowDelayedTime; //初始化允许的延迟次数
     private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
     private int lastRemainingTime = 0;// 记录上一次发生延迟的时间
+    private int bidType = 1; //竞价方式 1为数值竞价 2为幅度竞价
 
     public int getDelayedCondition() {
         return delayedCondition;
@@ -106,6 +108,14 @@ public class ActivityTask implements Runnable {
 
     public Integer getSupplierNum() {
         return supplierNum;
+    }
+
+    public int getBidType() {
+        return bidType;
+    }
+
+    public void setBidType(int bidType) {
+        this.bidType = bidType;
     }
 
     /**
@@ -317,6 +327,7 @@ public class ActivityTask implements Runnable {
             activityTask.haveMinBid = false;
             activityTask.minSubmitMap = new HashMap<>();
             activityTask.disappearTime = 0;
+            activityTask.bidType = 1;
         }
 
         /**
@@ -332,6 +343,16 @@ public class ActivityTask implements Runnable {
 
         public Builder activityCode(String activityCode) {
             this.activityTask.currentActivityCode = activityCode;
+            return this;
+        }
+
+        /**
+         * 竞价方式 1为数值竞价 2为幅度竞价
+         * @param bidType
+         * @return
+         */
+        public Builder bidType(Integer bidType) {
+            this.activityTask.bidType = bidType;
             return this;
         }
 
@@ -554,12 +575,19 @@ public class ActivityTask implements Runnable {
                 final String activityCode = this.currentActivityCode;
                 final Integer userRank = rankInfo.getRank();
                 final Boolean parataxis = isParataxis ? Boolean.TRUE : Boolean.FALSE;
+                final boolean needSendBidPercent = this.bidType == 2;
                 ResponseMessage responseMessage = new ResponseMessage(200, new HashMap<String, Object>() {{
                     put("goodsPrice", goodsPrice);
                     put("goodsId", goodsId);
                     put("userRank", userRank);
                     put("parataxis", parataxis.toString());
+                    if (needSendBidPercent) {
+                        JbxtBiddingDO minBidRecord = biddingService.selectMinBidTableBy(supplierCode, new Integer(goodsId), activityCode);
+                        put("bidPercent", minBidRecord.getBidPercent());
+                    }
                 }});
+
+
                 notifyOptionSupplier(responseMessage, activityCode, supplierCode);
             }
         }

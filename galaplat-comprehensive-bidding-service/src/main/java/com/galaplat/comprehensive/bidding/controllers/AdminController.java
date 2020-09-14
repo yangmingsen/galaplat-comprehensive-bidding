@@ -137,8 +137,10 @@ public class AdminController extends BaseController {
                     final int allowDelayedLength = activityThread.getAllowDelayedLength();
                     final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
                     final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
+                    final int bidType = activityThread.getBidType();
                     final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum);
+                            allowDelayedLength,allowDelayedTime, supplierNum,
+                            bidType);
 
                     if (!startOk) {
                         String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
@@ -175,10 +177,12 @@ public class AdminController extends BaseController {
                 final int allowDelayedLength = goods.getPerDelayTime();
                 final int allowDelayedTime = goods.getDelayTimes();
                 final int supplierNum = activity.getSupplierNum();
+                final int bidType = activity.getBidingType();
 
                 this.startActivityTask(activityCode, goodsId.toString(), goods.getTimeNum(),
                         delayedCondition,
-                        allowDelayedLength,allowDelayedTime, supplierNum);
+                        allowDelayedLength,allowDelayedTime, supplierNum,
+                        bidType);
             }
             return new MyResult(true, "更新成功");
         } else {
@@ -233,10 +237,13 @@ public class AdminController extends BaseController {
                     final int delayedCondition = currentGoods.getLastChangTime();
                     final int allowDelayedLength = currentGoods.getPerDelayTime();
                     final int allowDelayedTime = currentGoods.getDelayTimes();
-                    final int supplierNum = activityService.findOneByCode(activityCode).getSupplierNum();
+                    JbxtActivityDO activityInfoDO = activityService.findOneByCode(activityCode);
+                    final int supplierNum = activityInfoDO.getSupplierNum();
+                    final int bidType = activityInfoDO.getBidingType();
+
                     startActivityTask(activityCode, currentGoods.getGoodsId().toString(),
                             currentGoods.getTimeNum(), delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum);
+                            allowDelayedLength,allowDelayedTime, supplierNum, bidType);
 
                     notify214Event(activityCode, currentGoods.getGoodsId());
 
@@ -304,37 +311,10 @@ public class AdminController extends BaseController {
         }
     }
 
-    /**
-     * 启动 一个活动线程
-     * @param activityCode
-     * @param goodsId
-     * @param initTime
-     * @return
-     */
-    private boolean startActivityThread1(String activityCode, String goodsId, int initTime) {
-        boolean startOK = true;
-        try {
-            closeLastActivityThread(activityCode);
-            //final ActivityTask newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
-            final ActivityTask.Builder newActivityTaskBuiler = new ActivityTask.Builder();
-            newActivityTaskBuiler.activityCode(activityCode).goodsId(Integer.parseInt(goodsId)).initTime(initTime*60);
-            ActivityTask newActivityTask = newActivityTaskBuiler.build();
-            activityThreadManager.put(activityCode, newActivityTask);
-            activityThreadManager.doTask(newActivityTask);
-          //  newActivityThread.start();
-
-            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityTask.getCurrentGoodsId() + ")活动成功");
-        } catch (Exception e) {
-            LOGGER.info("startActivity(ERROR): 启动" + activityCode + " 活动失败" + e.getMessage());
-            startOK = false;
-        }
-
-        return startOK;
-    }
 
 
     private boolean startActivityTask(String activityCode, String goodsId, int initTime, int delayedCondition,
-                                      int allowDelayedLength,  int allowDelayedTime, int supplierNum) {
+                                      int allowDelayedLength,  int allowDelayedTime, int supplierNum, int bidType) {
         boolean startOK = true;
         try {
             closeLastActivityThread(activityCode);
@@ -346,7 +326,8 @@ public class AdminController extends BaseController {
                     delayedCondition(delayedCondition).
                     allowDelayedLength(allowDelayedLength).
                     allowDelayedTime(allowDelayedTime).
-                    supplierNum(supplierNum);
+                    supplierNum(supplierNum).
+                    bidType(bidType);
 
             ActivityTask newActivityTask = newActivityTaskBuiler.build();
             activityThreadManager.put(activityCode, newActivityTask);

@@ -31,33 +31,35 @@ public class MyApplicationRunner implements ApplicationRunner {
     private void runNetty(ApplicationArguments args) {
         websocketServer.start(); //the Netty start point
 
-        final IJbxtActivityService iJbxtActivityServiceBeans = SpringUtil.getBean(IJbxtActivityService.class);
+        final IJbxtActivityService activityService = SpringUtil.getBean(IJbxtActivityService.class);
         final ActivityThreadManager activityMap = SpringUtil.getBean(ActivityThreadManager.class);
-        final List<JbxtActivityDVO> lists = iJbxtActivityServiceBeans.findAll();
-        for (JbxtActivityDVO jbxtActivityDVO : lists) {
-            if (jbxtActivityDVO.getStatus() == 3) {
-                final IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
-                final JbxtGoodsDO activeGoods = iJbxtGoodsService.selectActiveGoods(jbxtActivityDVO.getCode());
+        final List<JbxtActivityDVO> lists = activityService.findAll();
+        for (JbxtActivityDVO activityDO : lists) {
+            if (activityDO.getStatus() == 3) {
+                final IJbxtGoodsService goodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+                final JbxtGoodsDO activeGoods = goodsService.selectActiveGoods(activityDO.getCode());
                 if (activeGoods != null) {
                     final ActivityTask.Builder builder = new ActivityTask.Builder();
 
-                    builder.activityCode(jbxtActivityDVO.getCode()).
+                    builder.activityCode(activityDO.getCode()).
                             goodsId(activeGoods.getGoodsId()).
                             initTime(activeGoods.getTimeNum() * 60).
-                            supplierNum(jbxtActivityDVO.getSupplierNum()).
+                            supplierNum(activityDO.getSupplierNum()).
                             delayedCondition(activeGoods.getLastChangTime()).
                             allowDelayedLength(activeGoods.getPerDelayTime()).
-                            allowDelayedTime(activeGoods.getDelayTimes());
+                            allowDelayedTime(activeGoods.getDelayTimes()).
+                            bidType(activityDO.getBidingType());
 
                     ActivityTask activityTask = builder.build();
-                    activityMap.put(jbxtActivityDVO.getCode(), activityTask);
+                    activityMap.put(activityDO.getCode(), activityTask);
                     activityThreadManager.doTask(activityTask);
-                    LOGGER.info("启动 " + jbxtActivityDVO.getCode() + " 活动");
+                    LOGGER.info("启动 " + activityDO.getCode() + " 活动");
                 }
             }
         }
 
 
+        //启动事件处理者
         QueueHandlerThreadSingleton queueHandlerThreadSingleton = QueueHandlerThreadSingleton.getInstance();
         queueHandlerThreadSingleton.start();
     }

@@ -96,7 +96,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             }
 
         }
-        final List<JbxtUserDVO> userLists = iJbxtUserService.findAllByActivityCode(activityCode);
+        final List<JbxtUserDVO> userLists = userService.findAllByActivityCode(activityCode);
         final List<Res300t1> t1s = new ArrayList<>();
         for (final JbxtUserDVO user1 : userLists) {
             final Res300t1 res300t1 = new Res300t1();
@@ -104,7 +104,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             res300t1.setCodeName(user1.getCodeName());
             res300t1.setSupplierCode(user1.getCode());
 
-            final JbxtBiddingDO cUserMinBid = iJbxtBiddingService.selectMinBidTableBy(user1.getCode(), goodsId, activityCode);
+            final JbxtBiddingDO cUserMinBid = biddingService.selectMinBidTableBy(user1.getCode(), goodsId, activityCode);
             if (cUserMinBid != null) {
                 res300t1.setMinBid(cUserMinBid.getBid());
             } else {
@@ -112,7 +112,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             }
 
             LOGGER.info("userCode="+user1.getCode()+"  goodsId="+goodsId+"  activityCode="+activityCode);
-            final List<JbxtBiddingDVO> cUserBidHistory = iJbxtBiddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
+            final List<JbxtBiddingDVO> cUserBidHistory = biddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
             final List<Res300t2> t2s = new ArrayList<>();
             if (cUserBidHistory.size() > 0) {
 
@@ -133,7 +133,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final Res300 res300 = new Res300();
         res300.setGoodsId(goodsId);
 
-        JbxtGoodsDO currentGoods = iJbxtGoodsService.selectByGoodsId(goodsId); //获取当前竞品信息
+        JbxtGoodsDO currentGoods = goodsService.selectByGoodsId(goodsId); //获取当前竞品信息
         final int delayedNum = currentGoods.getAddDelayTimes();
         if (delayedNum != 0) {
             res300.setDelay(true); //设置是否出现延时判断字段
@@ -180,8 +180,8 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String userCode = takeQueuemsg.getData().get("userCode");
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         final Integer goodsId = Integer.parseInt(goodsIdStr);
-        final JbxtBiddingDO minbidInfo = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
-        final JbxtUserDO userInfo = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, activityCode);
+        final JbxtBiddingDO minbidInfo = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+        final JbxtUserDO userInfo = userService.selectByuserCodeAndActivityCode(userCode, activityCode);
 
         final Map<String, String> res301 = new HashMap<>();
         if (minbidInfo != null && userInfo !=null) {
