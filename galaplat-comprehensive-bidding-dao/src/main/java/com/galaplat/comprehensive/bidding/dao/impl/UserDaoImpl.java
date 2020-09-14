@@ -2,8 +2,10 @@ package com.galaplat.comprehensive.bidding.dao.impl;
 
 import java.util.List;
 
+import com.galaplat.base.core.common.utils.BeanCopyUtils;
 import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BidSupplierDVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
@@ -92,5 +94,25 @@ public   class UserDaoImpl implements UserDao {
 		return mapper.batchDeleteUser(userCodes, activityCode);
 	}
 
+	@Override
+	public  List<UserDO> listJbxtUser(JbxtUserParam param) {
+       return  mapper.listJbxtUser(param);
+	}
+
+	@Override
+	public int updateBySomeParam(JbxtUserParam updateParam,  JbxtUserParam conditionParam) {
+		return  mapper.updateBySomeParam(updateParam,conditionParam);
+	}
+
+	@Override
+	public List<BidSupplierDVO> listSupplierInfo(String bidActivityCode) {
+		List<UserDO> userDOList = mapper.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+		return BeanCopyUtils.copyList(userDOList, BidSupplierDVO.class);
+	}
+
+	@Override
+	public  UserDO getUserByParam( JbxtUserParam param) {
+		return mapper.getJbxtUser(param);
+	}
 
 }

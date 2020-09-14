@@ -5,8 +5,10 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.UserDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BidSupplierDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 用户表Dao
@@ -80,4 +82,35 @@ public interface UserDao {
 	 * @return
 	 */
 	int batchDeleteUser(List<String> userCodes,String activityCode);
+
+	/**
+	 * 查询供应商
+	 * @param param
+	 * @return
+	 */
+	List<UserDO> listJbxtUser(@Param("param") JbxtUserParam param);
+
+	/**
+	 * 修改
+	 * @param updateParam
+	 * @param conditionParam
+	 * @return
+	 */
+	int updateBySomeParam(JbxtUserParam updateParam,  JbxtUserParam conditionParam);
+
+
+
+	/**
+	 * 查询供应商
+	 * @param bidActivityCode
+	 * @return
+	 */
+	List<BidSupplierDVO> listSupplierInfo(String bidActivityCode);
+
+	/***
+	 * 获取供应商
+	 * @param param
+	 * @return
+	 */
+	UserDO getUserByParam( JbxtUserParam param);
 }

@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao;
 
 import java.util.List;
-
+import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.CompetitiveListDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.ActivityDVO;
@@ -14,13 +14,15 @@ import com.github.pagehelper.PageInfo;
  * @author esr
  * @date: 2020年06月17日
  */
-public interface ActivityDao {
+public interface ActivityDao{
 
 
     /**
 	 * 添加活动表
 	 */
 	int insertJbxtActivity(ActivityDO entity);
+
+	 PageInfo<ActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException;
 
 	 public List<ActivityDVO> findAll();
 
@@ -63,5 +65,19 @@ public interface ActivityDao {
 	  * 更新竞标活动
 	  */
 	int updateBidActivity(ActivityDO entity);
+
+	 /**
+	  *
+	  * @return
+	  */
+	ActivityDO getJbxtActivityByParam(JbxtActivityParam param);
+
+	/***
+	 * 修改竞标活动部门内容
+	 * @param updateParam
+	 * @param conditionParam
+	 * @return
+	 */
+	int updateJbxtActivityBySomeParam(JbxtActivityParam updateParam, JbxtActivityParam conditionParam);
 
 }

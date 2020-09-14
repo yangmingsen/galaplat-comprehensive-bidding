@@ -25,8 +25,10 @@ public class GoodsDVO implements Serializable {
     private Date createdTime;
     /*更新时间如果没有默认创建时间，修改数据必须更新*/
     private Date updatedTime;
-
+     /*起拍价*/
     private BigDecimal firstPrice;
+     /*保留价*/
+    private BigDecimal retainPrice;
     /*创建人*/
     private String creator;
     /*公司唯一编码*/
@@ -52,16 +54,6 @@ public class GoodsDVO implements Serializable {
      /*已经延长的次数*/
      private Integer addDelayTimes;
 
-     /*保留价*/
-     private BigDecimal retainPrice;
-
-     public BigDecimal getRetainPrice() {
-         return retainPrice;
-     }
-
-     public void setRetainPrice(BigDecimal retainPrice) {
-         this.retainPrice = retainPrice;
-     }
 
      public Integer getTimeNum() {
          return timeNum;
@@ -119,6 +111,13 @@ public class GoodsDVO implements Serializable {
 
      public void setFirstPrice(BigDecimal firstPrice) {
          this.firstPrice = firstPrice;
+     }
+     public BigDecimal getRetainPrice() {
+         return retainPrice;
+     }
+
+     public void setRetainPrice(BigDecimal retainPrice) {
+         this.retainPrice = retainPrice;
      }
 
      public String getCreator() {

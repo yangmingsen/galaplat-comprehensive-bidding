@@ -15,6 +15,7 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelStrParam;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
+import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.ImportExcelValidateMapUtil;
 import com.galaplat.comprehensive.bidding.utils.Tuple;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
@@ -52,6 +53,9 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
 
     @Autowired
     private ActivityDao activityDao;
+
+    @Autowired
+    private ICompetitiveListManageService manageService;
 
 
     @Override

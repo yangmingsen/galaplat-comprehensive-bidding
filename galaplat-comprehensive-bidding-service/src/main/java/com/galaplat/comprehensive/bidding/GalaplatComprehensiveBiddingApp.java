@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding;
 
+import com.galaplat.baseplatform.messaging.plugin.MessagingPlugin;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
@@ -33,7 +34,7 @@ import com.galaplat.baseplatform.serialnumber.plugin2.SerialnumberPlugin2;
 @EnableAsync
 @EnableFeignClients
 @org.springframework.context.annotation.Import({com.galaplat.base.core.springboot.CommonConfig.class, PermissionPlugin.class,
-	SerialnumberPlugin2.class, FilePlugin.class, UploadPlugin.class})
+	SerialnumberPlugin2.class, FilePlugin.class, UploadPlugin.class,  MessagingPlugin.class})
 @EnableMBeanExport(registration = org.springframework.jmx.support.RegistrationPolicy.IGNORE_EXISTING)
 public class GalaplatComprehensiveBiddingApp implements CommandLineRunner {
 

@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.dao.impl;
 
+import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.dvos.CompetitiveListDVO;
 import com.galaplat.comprehensive.bidding.dao.params.CompetitiveListParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import java.util.List;
  * @date: 2020年06月17日
  */
  @Repository
-public   class ActivityDaoImpl implements ActivityDao {
+public  class ActivityDaoImpl implements ActivityDao  {
 
 	@Autowired
 	private JbxtActivityCustMapper mapper;
@@ -36,17 +37,27 @@ public   class ActivityDaoImpl implements ActivityDao {
 	        return mapper.updateByPrimaryKey(entity);
 	}
 
+	@Override
 	public int updateByPrimaryKeySelective(ActivityDO entity) {
     	return mapper.updateByPrimaryKeySelective(entity);
 	}
 
+	@Override
 	public ActivityDO findOneByCode(String code) {
     	return mapper.selectByPrimaryKey(code);
 	}
 
 	@Override
 	public List<ActivityDVO> findAllByStatus(Integer status) {
-		return mapper.selectAllByStatus(status);
+		return null;
+	}
+
+
+	@Override
+	public PageInfo<ActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException {
+	       PageHelper.startPage(jbxtactivityParam.getPn(), jbxtactivityParam.getPs());
+		   return new PageInfo<ActivityDVO>(mapper.getJbxtActivityList(jbxtactivityParam));
+
 	}
 
 	@Override
@@ -83,4 +94,13 @@ public   class ActivityDaoImpl implements ActivityDao {
 	}
 
 
+	@Override
+	public ActivityDO getJbxtActivityByParam(JbxtActivityParam param) {
+     return  mapper.getJbxtActivityByParam(param);
+	}
+
+	@Override
+	public int updateJbxtActivityBySomeParam(JbxtActivityParam updateParam, JbxtActivityParam conditionParam) {
+    return mapper.updateJbxtActivityBySomeParam(updateParam, conditionParam);
+	}
 }

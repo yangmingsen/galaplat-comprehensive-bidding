@@ -48,8 +48,31 @@ public class JbxtActivityParam extends Param {
      /*记录的状态，1-在用，0-删除*/
      private Integer recordStatus;
 
+    /*删除时间*/
+    private Date deleteTime;
+    /*删除人*/
+    private String deleter;
+
     /* 供应商代号和账号*/
     private List<SupplierAccountParam> supplierAccountParams;
+
+    /*出价方式(1-数值，2-降幅)*/
+    private Integer bidingType;
+
+    /*预计竞标日*/
+    private Date predictBidDatetime;
+
+    /*竞标描述*/
+    private String bidActivityInfo;
+
+    /*承诺函标题*/
+    private String promiseTitle;
+
+    /*附件路径*/
+    private String filePath;
+
+    /*承诺函内容*/
+    private String promiseText;
 
      public static long getSerialVersionUID() {
          return serialVersionUID;

@@ -38,5 +38,11 @@ public class CompetitiveListDVO {
     /*参与供应商人数*/
     private Integer joinSupplierNum;
 
+    /*预计竞标日*/
+    private String predictBidDateTime;
+
+    /*	出价方式(1-数值，2-降幅)*/
+    private Integer bidingType;
+
 
 }
