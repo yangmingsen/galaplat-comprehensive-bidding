@@ -49,7 +49,7 @@ public  class ActivityDaoImpl implements ActivityDao  {
 
 	@Override
 	public List<ActivityDVO> findAllByStatus(Integer status) {
-		return null;
+		return mapper.selectAllByStatus(status);
 	}
 
 
