@@ -2,17 +2,16 @@ package com.galaplat.comprehensive.bidding.controllers;
 
 import com.galaplat.base.core.springboot.annotations.RestfulResult;
 import com.galaplat.baseplatform.permissions.controllers.BaseController;
-import com.galaplat.comprehensive.bidding.activity.ActivityInfoMap;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
-import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
+import com.galaplat.comprehensive.bidding.service.BiddingService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
 import org.slf4j.Logger;
@@ -29,28 +28,73 @@ import java.util.Map;
 @RequestMapping("/jbxt/admin")
 public class AdminController extends BaseController {
 
-    @Autowired
-    IJbxtGoodsService jbxtgoodsService;
-
     Logger LOGGER = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private ActivityThreadManager activityThreadManager;
 
     @Autowired
-    private IJbxtGoodsService iJbxtGoodsService;
+    private GoodsService goodsService;
 
     @Autowired
-    private IJbxtActivityService iJbxtActivityService;
+    private ActivityService activityService;
 
     @Autowired
-    private IJbxtBiddingService iJbxtBiddingService;
+    private BiddingService biddingService;
 
     @Autowired
     private MessageQueue messageQueue;
 
-    @Autowired
-    private ActivityInfoMap activityInfoMap;
+    @RequestMapping("/activity/goodsStatus")
+    @RestfulResult
+    public Object updateCurrentActivityStatus(String activityCode, Integer goodsId,  Integer status) {
+        if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
+        if (status == null) return new MyResult(false, "status不能为null");
+
+        final ActivityTask currentActivity = activityThreadManager.get(activityCode);
+        MyResult myResult = null;
+        if (currentActivity != null) {
+            myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
+        } else {
+            myResult = this.handlerTheAcitvityThreadNotExistCondition(activityCode, goodsId);
+        }
+        return myResult;
+    }
+
+
+    @RequestMapping("/goods/findAll")
+    @RestfulResult
+    public Object findAll(String activityCode) {
+        if (activityCode != null && (!activityCode.equals(""))) {
+            return new MyResult(true, "获取data成功", goodsService.findAll(activityCode));
+        } else {
+            return new MyResult(false, "出错: activityCode不能为空哦(*￣︶￣)");
+        }
+    }
+
+
+    @RequestMapping("/goods/next")
+    @RestfulResult
+    public Object next(String activityCode) {
+        final MyResult checkNextRes = checkNextReq(activityCode);
+        if (!checkNextRes.isSuccess()) return checkNextRes;
+
+        final GoodsDO jbxtGoodsDO = goodsService.selectActiveGoods(activityCode); //get 正在进行goods
+        if (jbxtGoodsDO != null) {
+            final JbxtGoodsVO tj = new JbxtGoodsVO();
+            tj.setGoodsId(jbxtGoodsDO.getGoodsId());
+            tj.setStatus("2");
+            try {
+                goodsService.updateJbxtGoods(tj);
+            } catch (Exception e) {
+                final String info = "next(ERROR): 切换活动: " + activityCode + " goodsId: " + jbxtGoodsDO.getGoodsId() + " 状态为2失败. info=" + e.getMessage();
+                LOGGER.info(info);
+                return new MyResult(false, info);
+            }
+            LOGGER.info("next(msg): 修改goodsId("+tj.getGoodsId()+")为2");
+        }
+        return switchActivityGoods(activityCode);
+    }
 
 
     /***
@@ -62,8 +106,8 @@ public class AdminController extends BaseController {
     private boolean resetBidData(String activityCode, Integer goodsId) {
         boolean delOk = true;
         try {
-            iJbxtBiddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
-            iJbxtBiddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
+            biddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
+            biddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
         } catch (Exception e) {
             delOk = false;
             LOGGER.info("resetBidData(ERROR): "+e.getMessage());
@@ -91,10 +135,12 @@ public class AdminController extends BaseController {
                     final int initTime = activityThread.getInitTime() / 60;
                     final int delayedCondition = activityThread.getDelayedCondition();
                     final int allowDelayedLength = activityThread.getAllowDelayedLength();
-                    final int allowDelayedTime = activityThread.getAllowDelayedTime();
-                    final int supplierNum = activityThread.getSupplierNum();
+                    final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
+                    final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
+                    final int bidType = activityThread.getBidType();
                     final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum);
+                            allowDelayedLength,allowDelayedTime, supplierNum,
+                            bidType);
 
                     if (!startOk) {
                         String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
@@ -102,7 +148,7 @@ public class AdminController extends BaseController {
                         return new MyResult(false, info);
                     }
 
-                    activityThreadManager.get(activityCode).setStatus(3);
+                    //activityThreadManager.get(activityCode).setStatus(3);
                     return new MyResult(true, "更新成功");
                 }
             } else {
@@ -122,19 +168,21 @@ public class AdminController extends BaseController {
      * @return
      */
     private MyResult handlerTheAcitvityThreadNotExistCondition(String activityCode, Integer goodsId) {
-        final JbxtActivityDO activity = iJbxtActivityService.findOneByCode(activityCode);
-        final JbxtGoodsDO goods = iJbxtGoodsService.selectByGoodsId(goodsId);
+        final ActivityDO activity = activityService.findOneByCode(activityCode);
+        final GoodsDO goods = goodsService.selectByGoodsId(goodsId);
         if (activity != null && goods != null) {
             final Integer curActivityStatus = activity.getStatus();
             if (curActivityStatus == 3) { //如果为进行状态
                 final int delayedCondition = goods.getLastChangTime();
                 final int allowDelayedLength = goods.getPerDelayTime();
                 final int allowDelayedTime = goods.getDelayTimes();
-                final int supplier = activity.getSupplierNum();
+                final int supplierNum = activity.getSupplierNum();
+                final int bidType = activity.getBidingType();
 
                 this.startActivityTask(activityCode, goodsId.toString(), goods.getTimeNum(),
                         delayedCondition,
-                        allowDelayedLength,allowDelayedTime, supplier);
+                        allowDelayedLength,allowDelayedTime, supplierNum,
+                        bidType);
             }
             return new MyResult(true, "更新成功");
         } else {
@@ -143,62 +191,13 @@ public class AdminController extends BaseController {
         }
     }
 
-    @RequestMapping("/activity/goodsStatus")
-    @RestfulResult
-    public Object updateCurrentActivityStatus(String activityCode, Integer goodsId,  Integer status) {
-        if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
-        if (status == null) return new MyResult(false, "status不能为null");
 
-        final ActivityTask currentActivity = activityThreadManager.get(activityCode);
-        MyResult myResult = null;
-        if (currentActivity != null) {
-            myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
-        } else {
-            myResult = this.handlerTheAcitvityThreadNotExistCondition(activityCode, goodsId);
-        }
-        return myResult;
-    }
-
-
-    @RequestMapping("/goods/findAll")
-    @RestfulResult
-    public Object findAll(String activityCode) {
-        if (activityCode != null && (!activityCode.equals(""))) {
-            return new MyResult(true, "获取data成功", jbxtgoodsService.findAll(activityCode));
-        } else {
-            return new MyResult(false, "出错: activityCode不能为空哦(*￣︶￣)");
-        }
-    }
-
-
-    @RequestMapping("/goods/next")
-    @RestfulResult
-    public Object next(String activityCode) {
-        final MyResult checkNextRes = checkNextReq(activityCode);
-        if (!checkNextRes.isSuccess()) return checkNextRes;
-
-        final JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectActiveGoods(activityCode); //get 正在进行goods
-        if (jbxtGoodsDO != null) {
-            final JbxtGoodsVO tj = new JbxtGoodsVO();
-            tj.setGoodsId(jbxtGoodsDO.getGoodsId());
-            tj.setStatus("2");
-            try {
-                jbxtgoodsService.updateJbxtGoods(tj);
-            } catch (Exception e) {
-                final String info = "next(ERROR): 切换活动: " + activityCode + " goodsId: " + jbxtGoodsDO.getGoodsId() + " 状态为2失败. info=" + e.getMessage();
-                LOGGER.info(info);
-                return new MyResult(false, info);
-            }
-            LOGGER.info("next(msg): 修改goodsId("+tj.getGoodsId()+")为2");
-        }
-        return switchActivityGoods(activityCode);
-    }
     private MyResult checkNextReq(String activityCode) {
         if (activityCode == null || activityCode.equals("")) {
             return new MyResult(false, "错误: activityCode不能为空哦(*￣︶￣)", null);
         }
 
-        final JbxtActivityDO activityEntity = iJbxtActivityService.findOneByCode(activityCode);
+        final ActivityDO activityEntity = activityService.findOneByCode(activityCode);
         if (activityEntity == null) {
             final String errorInfo = "错误: 当前活动" + activityCode + "不存在";
             LOGGER.info("next(msg): " + errorInfo);
@@ -209,9 +208,9 @@ public class AdminController extends BaseController {
     }
 
     private Object switchActivityGoods(String activityCode) {
-        final List<JbxtGoodsDVO> goodsList = jbxtgoodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
+        final List<GoodsDVO> goodsList = goodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
         for (int i = 0; i < goodsList.size(); i++) {
-            final JbxtGoodsDVO currentGoods = goodsList.get(i);
+            final GoodsDVO currentGoods = goodsList.get(i);
             if ("0".equals(currentGoods.getStatus())) {
                 //更新当前竞品状态为 1
                 final JbxtGoodsVO newGoodsStatus = new JbxtGoodsVO();
@@ -221,13 +220,13 @@ public class AdminController extends BaseController {
                 try {
                     if (i == 0) {
                         //更新竞品单 当前竞品单状态为进行中
-                        final JbxtActivityDO tActivity = new JbxtActivityDO();
+                        final ActivityDO tActivity = new ActivityDO();
                         tActivity.setCode(activityCode);
                         tActivity.setStatus(3);
 
-                        iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
+                        activityService.updateByPrimaryKeySelective(tActivity);
                     }
-                    iJbxtGoodsService.updateJbxtGoods(newGoodsStatus);
+                    goodsService.updateJbxtGoods(newGoodsStatus);
                     LOGGER.info("switchActivityGoods(msg): 切换下一竞品goodsId("+newGoodsStatus.getGoodsId()+")为1");
                     switchOk = true;
                 } catch (Exception e) {
@@ -238,10 +237,13 @@ public class AdminController extends BaseController {
                     final int delayedCondition = currentGoods.getLastChangTime();
                     final int allowDelayedLength = currentGoods.getPerDelayTime();
                     final int allowDelayedTime = currentGoods.getDelayTimes();
-                    final int supplierNum = activityInfoMap.get(activityCode).getSupplierNum();
+                    ActivityDO activityInfoDO = activityService.findOneByCode(activityCode);
+                    final int supplierNum = activityInfoDO.getSupplierNum();
+                    final int bidType = activityInfoDO.getBidingType();
+
                     startActivityTask(activityCode, currentGoods.getGoodsId().toString(),
                             currentGoods.getTimeNum(), delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum);
+                            allowDelayedLength,allowDelayedTime, supplierNum, bidType);
 
                     notify214Event(activityCode, currentGoods.getGoodsId());
 
@@ -253,16 +255,16 @@ public class AdminController extends BaseController {
         }
 
         //处理手动切换最后一个的情况
-        final JbxtActivityDO activity = iJbxtActivityService.findOneByCode(activityCode);
+        final ActivityDO activity = activityService.findOneByCode(activityCode);
         if (activity != null) {
             if (activity.getStatus() == 3) {
-                final JbxtActivityDO tActivity = new JbxtActivityDO();
+                final ActivityDO tActivity = new ActivityDO();
                 tActivity.setCode(activityCode);
                 tActivity.setStatus(4);
                 boolean updateActivityStatus = false;
 
                 try {
-                    iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
+                    activityService.updateByPrimaryKeySelective(tActivity);
                     updateActivityStatus = true;
                 } catch (Exception e) {
                     LOGGER.info("switchActivityGoods(ERROR): 更新活动("+activityCode+")结束结束失败");
@@ -309,37 +311,10 @@ public class AdminController extends BaseController {
         }
     }
 
-    /**
-     * 启动 一个活动线程
-     * @param activityCode
-     * @param goodsId
-     * @param initTime
-     * @return
-     */
-    private boolean startActivityThread1(String activityCode, String goodsId, int initTime) {
-        boolean startOK = true;
-        try {
-            closeLastActivityThread(activityCode);
-            //final ActivityTask newActivityThread = new ActivityThread(activityCode, goodsId, initTime * 60, 1);
-            final ActivityTask.Builder newActivityTaskBuiler = new ActivityTask.Builder();
-            newActivityTaskBuiler.activityCode(activityCode).goodsId(Integer.parseInt(goodsId)).initTime(initTime*60);
-            ActivityTask newActivityTask = newActivityTaskBuiler.build();
-            activityThreadManager.put(activityCode, newActivityTask);
-            activityThreadManager.doTask(newActivityTask);
-          //  newActivityThread.start();
-
-            LOGGER.info("startActivity(msg): 启动" + activityCode + " 商品(" + newActivityTask.getCurrentGoodsId() + ")活动成功");
-        } catch (Exception e) {
-            LOGGER.info("startActivity(ERROR): 启动" + activityCode + " 活动失败" + e.getMessage());
-            startOK = false;
-        }
-
-        return startOK;
-    }
 
 
     private boolean startActivityTask(String activityCode, String goodsId, int initTime, int delayedCondition,
-                                      int allowDelayedLength,  int allowDelayedTime, int supplierNum) {
+                                      int allowDelayedLength,  int allowDelayedTime, int supplierNum, int bidType) {
         boolean startOK = true;
         try {
             closeLastActivityThread(activityCode);
@@ -350,7 +325,9 @@ public class AdminController extends BaseController {
                     initTime(initTime*60).
                     delayedCondition(delayedCondition).
                     allowDelayedLength(allowDelayedLength).
-                    allowDelayedTime(allowDelayedTime);
+                    allowDelayedTime(allowDelayedTime).
+                    supplierNum(supplierNum).
+                    bidType(bidType);
 
             ActivityTask newActivityTask = newActivityTaskBuiler.build();
             activityThreadManager.put(activityCode, newActivityTask);

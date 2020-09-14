@@ -5,16 +5,18 @@ import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminInfo;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
-import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
+import com.galaplat.comprehensive.bidding.service.BiddingService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
+import com.galaplat.comprehensive.bidding.service.UserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -26,22 +28,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     // 用来保存所有的客户端连接
     private static final ChannelGroup clients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:MM");
 
     private final Logger LOGGER = LoggerFactory.getLogger(EventInHandler.class);
 
     private final AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private final UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
-    private final IJbxtUserService iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
-    private final IJbxtBiddingService iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
-    private final IJbxtActivityService iJbxtActivityService = SpringUtil.getBean(IJbxtActivityService.class);
+    private final UserService userService = SpringUtil.getBean(UserService.class);
+    private final BiddingService biddingService = SpringUtil.getBean(BiddingService.class);
+    private final ActivityService activityService = SpringUtil.getBean(ActivityService.class);
+    private final GoodsService goodsService = SpringUtil.getBean(GoodsService.class);
     private final ActivityThreadManager activityManager = SpringUtil.getBean(ActivityThreadManager.class);
     private final MessageQueue messageQueue = SpringUtil.getBean(MessageQueue.class);
 
@@ -52,7 +53,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
     private void handler(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
         // 获取客户端发送过来的文本消息
         final String text = msg.text();
-        LOGGER.info("handler(reve msg): " + text);
+//        LOGGER.info("handler(reve msg): " + text);
         //System.out.println("接收到消息数据为：" + text);
         final RequestMessage message = JSON.parseObject(text, RequestMessage.class);
 
@@ -60,6 +61,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         // {type: 102, data: {adminCode: 22343423}}
         // {type: 213, data: {bidPrice: 32.345, goodsId: 234}}
         //{type: 217, data: {userCode: 23425345}}
+        // {type: 218, data: {bidPercent: 5, goodsId: 234}}
         // {type: 300, data: {activityCode: 2234343423}}
         // {type: 302, data: {activityCode: 2234343423, goodsId: 23425346}}
         // {type: 303, data: {adminCode: 23534534}}
@@ -68,9 +70,9 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             case 101: {
                 final String userCode = message.getData().get("userCode");
                 final String focusActivity = message.getData().get("activityCode");
-                final JbxtActivityDO activityEntity = iJbxtActivityService.findOneByCode(focusActivity);
+                final ActivityDO activityEntity = activityService.findOneByCode(focusActivity);
 
-                final JbxtUserDO jbxtUserDO = iJbxtUserService.selectByuserCodeAndActivityCode(userCode, focusActivity);
+                final UserDO jbxtUserDO = userService.selectByuserCodeAndActivityCode(userCode, focusActivity);
                 if (jbxtUserDO != null) { //验证该供应商是否存在
                     userChannelMapBean.put(userCode, ctx.channel());
                     userChannelMapBean.put(userCode, focusActivity);
@@ -118,9 +120,13 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
             case 217: {
                 final String userCode = message.getData().get("userCode");
-                LOGGER.info("handler(msg): 来至于供应商端("+userCode+")的心跳");
+//                LOGGER.info("handler(msg): 来至于供应商端("+userCode+")的心跳");
             }
             break;
+
+            case 218: {
+                handler218Problem(message,ctx);
+            }
 
             //处理管理端主动请求(建立对目标活动关联)
             case 300: {
@@ -148,11 +154,13 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
             case 303: {
                 final String adminCode = message.getData().get("adminCode");
-                LOGGER.info("handler(msg): 来至于管理端("+adminCode+")的心跳");
+//                LOGGER.info("handler(msg): 来至于管理端("+adminCode+")的心跳");
             }
             break;
         }
     }
+
+
 
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
@@ -166,6 +174,53 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
 
     }
+
+    private void handler218Problem(RequestMessage message, ChannelHandlerContext ctx) {
+        final String tStr1 = message.getData().get("bidPercent");
+        if (tStr1 == null || "".equals(tStr1)) {
+            LOGGER.info("handler218Problem: tStr1 is null or empty");
+            return;
+        }
+
+        final String tStr2 = message.getData().get("goodsId");
+        if (tStr2 == null || "".equals(tStr2)) {
+            LOGGER.info("handler218Problem: goodsId is null or empty");
+            return;
+        }
+
+        final int goodsId;
+        try {
+            goodsId = Integer.parseInt(tStr2);
+        } catch (NumberFormatException e) {
+            LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
+            return;
+        }
+
+        final BigDecimal bidPercent;
+        try {
+            bidPercent = new BigDecimal(tStr1);
+        } catch (NumberFormatException e) {
+            LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
+            return;
+        }
+
+        GoodsDO goods = goodsService.selectByGoodsId(goodsId);
+
+
+        BigDecimal firstPrice = goods.getFirstPrice();
+        BigDecimal one = new BigDecimal("1");
+        BigDecimal per100 = new BigDecimal("100");
+
+        BigDecimal divideRes = bidPercent.divide(per100,2,2);
+        BigDecimal subtractRes = one.subtract(divideRes);
+        BigDecimal bidPrice = firstPrice.multiply(subtractRes).setScale(3,  BigDecimal.ROUND_HALF_UP); //保留3为小数;
+
+        message.getData().put("bidPrice", bidPrice.toString());
+
+        handler213Problem(message, ctx);
+    }
+
+
 
     private void handler213Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String tStr1 = message.getData().get("bidPrice");
@@ -205,10 +260,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         message.getData().put("activityCode", activityCode);
 
         //验证当前用提交价格 是否大于自己的上一次提交竞价
-        final JbxtBiddingDO lastUserMinBid = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+        final BiddingDO lastUserMinBid = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
         if (lastUserMinBid != null) {
             int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
-            if (compareRes == 0 || compareRes == 1) {
+            if (compareRes >= 0) {
                 LOGGER.info("channelRead0-case213: 当前竞价(" + bidPrice + ")大于或等于历史竞价(" + lastUserMinBid.getBid() + ")");
                 return;
             }
@@ -218,6 +273,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         final QueueMessage queueMessage = new QueueMessage(213, message.getData());
         messageQueue.offer(queueMessage);
     }
+
 
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String activityCode = message.getData().get("activityCode");

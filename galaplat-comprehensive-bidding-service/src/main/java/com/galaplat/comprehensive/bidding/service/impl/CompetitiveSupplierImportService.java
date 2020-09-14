@@ -7,10 +7,10 @@ import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.JsonUtils;
 import com.galaplat.base.core.common.utils.RegexUtils;
 import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
-import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
-import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.ActivityDao;
+import com.galaplat.comprehensive.bidding.dao.UserDao;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
@@ -58,10 +58,10 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
     private IFeignPermissions feignPermissions;
 
     @Autowired
-    private IJbxtUserDao userDao;
+    private UserDao userDao;
 
     @Autowired
-    private IJbxtActivityDao activityDao;
+    private ActivityDao activityDao;
 
     @Autowired
     private ICompetitiveListManageService manageService;
@@ -85,7 +85,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
             });
             activityCode = (String) mapVO.get("bidActivityCode");
         }
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
         // 如果竞标活动的状态是结束时，不允许导入
         if (activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
             return Collections.emptyList();
@@ -126,7 +126,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
             }
 
             if (CollectionUtils.isNotEmpty(saveList)) {
-                List<JbxtUserDO> oldSupplierList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(activityCode).build());
+                List<UserDO> oldSupplierList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(activityCode).build());
                 List<JbxtUserParam> addSuppliers = getAddSupplierList(oldSupplierList, saveList, creatorName, activityCode);
                 List<JbxtUserParam> updateSuppliers = getUpdateSupplierList(oldSupplierList, saveList, creatorName, activityCode);
                 List<String> deleteCodes = getDeleteSupplierList(oldSupplierList, saveList);
@@ -148,7 +148,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 }
             }
             if (manageService.checkActivityInfoComplete(activityCode)) {
-                activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+                activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
             }
         }// if
         return errorList;
@@ -212,7 +212,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
      * @param bidActivityCode
      * @return
      */
-    private List<JbxtUserParam> getAddSupplierList(List<JbxtUserDO> oldSupplierList, List<JbxtUserParam> excelList, String userName, String bidActivityCode) {
+    private List<JbxtUserParam> getAddSupplierList(List<UserDO> oldSupplierList, List<JbxtUserParam> excelList, String userName, String bidActivityCode) {
         if ( CollectionUtils.isEmpty(excelList)) {
             return Collections.emptyList();
         }
@@ -235,7 +235,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
             });
             return excelList;
         }
-        Map<String, JbxtUserDO> oldSupplierMap = Maps.uniqueIndex(oldSupplierList, o -> o.getSupplierName());
+        Map<String, UserDO> oldSupplierMap = Maps.uniqueIndex(oldSupplierList, o -> o.getSupplierName());
         List<JbxtUserParam> addSupplierList = Lists.newArrayList();
         excelList.stream().forEach(excelSupplier -> {
             if (!oldSupplierMap.containsKey(excelSupplier.getSupplierName())) {
@@ -265,15 +265,15 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
      * @param excelList
      * @return
      */
-    private List<JbxtUserParam> getUpdateSupplierList(List<JbxtUserDO> oldSupplierList, List<JbxtUserParam> excelList, String userName, String bidActivityCode) {
+    private List<JbxtUserParam> getUpdateSupplierList(List<UserDO> oldSupplierList, List<JbxtUserParam> excelList, String userName, String bidActivityCode) {
         if (CollectionUtils.isEmpty(oldSupplierList) || CollectionUtils.isEmpty(excelList)) {
             return Collections.emptyList();
         }
-        Map<String, JbxtUserDO> oldSupplierMap = Maps.uniqueIndex(oldSupplierList, o -> o.getSupplierName());
+        Map<String, UserDO> oldSupplierMap = Maps.uniqueIndex(oldSupplierList, o -> o.getSupplierName());
         List<JbxtUserParam> updateSupplierList = Lists.newArrayList();
         excelList.stream().forEach(excelSupplier -> {
             if (oldSupplierMap.containsKey(excelSupplier.getSupplierName())) {
-                JbxtUserDO userDO = oldSupplierMap.get(excelSupplier.getSupplierName());
+                UserDO userDO = oldSupplierMap.get(excelSupplier.getSupplierName());
                 if (userDO.getSupplierName().equals(excelSupplier.getSupplierName()) && (
                         !userDO.getPhone().equals(excelSupplier.getPhone())
                                 || !userDO.getEmailAddress().equals(excelSupplier.getEmailAddress())
@@ -299,7 +299,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
      * @param excelList
      * @return
      */
-    private List<String> getDeleteSupplierList(List<JbxtUserDO> oldSupplierList, List<JbxtUserParam> excelList) {
+    private List<String> getDeleteSupplierList(List<UserDO> oldSupplierList, List<JbxtUserParam> excelList) {
         if (CollectionUtils.isEmpty(oldSupplierList) || CollectionUtils.isEmpty(excelList)) {
             return Collections.emptyList();
         }
@@ -329,7 +329,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 log.error("There is an error of getting CodeName【{}】,【{}】", e.getMessage(), e);
                 e.printStackTrace();
             }
-            List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).codeName(codeName).build());
+            List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).codeName(codeName).build());
             if (CollectionUtils.isEmpty(userDOList)) {
                 break;
             }

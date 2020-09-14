@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
@@ -40,10 +40,10 @@ public interface JbxtActivityMapper {
             "#{promiseTitle,jdbcType=VARCHAR}, #{filePath,jdbcType=VARCHAR}, ",
             "#{promiseText,jdbcType=LONGVARCHAR})"
     })
-    int insert(JbxtActivityDO record);
+    int insert(ActivityDO record);
 
     @InsertProvider(type=JbxtActivityDOSqlProvider.class, method="insertSelective")
-    int insertSelective(JbxtActivityDO record);
+    int insertSelective(ActivityDO record);
 
     @Select({
             "select",
@@ -77,10 +77,10 @@ public interface JbxtActivityMapper {
             @Result(column="file_path", property="filePath", jdbcType=JdbcType.VARCHAR),
             @Result(column="promise_text", property="promiseText", jdbcType=JdbcType.LONGVARCHAR)
     })
-    JbxtActivityDO selectByPrimaryKey(String code);
+    ActivityDO selectByPrimaryKey(String code);
 
     @UpdateProvider(type=JbxtActivityDOSqlProvider.class, method="updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(JbxtActivityDO record);
+    int updateByPrimaryKeySelective(ActivityDO record);
 
     @Update({
             "update t_jbxt_activity",
@@ -106,7 +106,7 @@ public interface JbxtActivityMapper {
             "promise_text = #{promiseText,jdbcType=LONGVARCHAR}",
             "where code = #{code,jdbcType=VARCHAR}"
     })
-    int updateByPrimaryKeyWithBLOBs(JbxtActivityDO record);
+    int updateByPrimaryKeyWithBLOBs(ActivityDO record);
 
     @Update({
             "update t_jbxt_activity",
@@ -131,5 +131,7 @@ public interface JbxtActivityMapper {
             "file_path = #{filePath,jdbcType=VARCHAR}",
             "where code = #{code,jdbcType=VARCHAR}"
     })
-    int updateByPrimaryKey(JbxtActivityDO record);
+    int updateByPrimaryKey(ActivityDO record);
+
+
 }

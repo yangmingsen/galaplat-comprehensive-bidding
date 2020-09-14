@@ -3,9 +3,9 @@ package com.galaplat.comprehensive.bidding.service.impl;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.baseplatform.messaging.plugin.feign.IFeiginMessageClient;
 import com.galaplat.comprehensive.bidding.dao.*;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.*;
 import com.galaplat.comprehensive.bidding.dao.params.*;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
@@ -80,19 +80,22 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private static final String OPRATETYPE_UPDATE = "update";
 
     @Autowired
-    private IJbxtActivityDao activityDao;
+    private ActivityDao activityDao;
 
     @Autowired
-    private IJbxtUserDao userDao;
+    private UserDao userDao;
 
     @Autowired
-    private IJbxtGoodsDao goodsDdao;
+    private GoodsDao goodsDdao;
 
     @Autowired
-    private IJbxtBiddingDao biddingDao;
+    private BiddingDao biddingDao;
 
     @Autowired
     private IdWorker worker;
+
+    @Autowired
+    private IJbxtMinbidDao minbidDao;
 
     @Autowired
     private  IFileFeignClient fileFeignClient;
@@ -171,7 +174,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         if (StringUtils.equals(type, OPRATETYPE_ADD) && StringUtils.isEmpty(bidActivityCode)) {
             activityCode = worker.nextId();
         } else if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
-            JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+            ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
             if (null != activityDO) {
                 activityParam.setStatus(activityDO.getStatus());
                 if (activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
@@ -179,7 +182,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 }
             }
         }
-        JbxtActivityDO activityDO = JbxtActivityDO.builder()
+        ActivityDO activityDO = ActivityDO.builder()
                 .code(activityCode)
                 .companyCode(StringUtils.isEmpty(bidActivityCode) ? activityParam.getCompanyCode() : null)
                 .sysCode(StringUtils.isEmpty(bidActivityCode) ? activityParam.getSysCode() : null)
@@ -222,7 +225,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public List<SupplierAccountVO> listSupplierAccount(String bidActivityCode) throws BaseException {
         List<SupplierAccountVO> accountVOS = Lists.newArrayList();
-        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
         userDOList.stream().forEach(e -> {
             SupplierAccountVO accountVO = new SupplierAccountVO();
             CopyUtil.copyPropertiesExceptEmpty(e, accountVO);
@@ -244,11 +247,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             throw new BaseException("竞标编码不能为空！", "竞标编码不能为空！");
         }
         int maxBidNum = 0;
-        List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        List<GoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
         List<List<String>> bidPriceRankData = new ArrayList<>();
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
         int index = 1;
-        for (JbxtGoodsDO goods : goodsList) {
+        for (GoodsDO goods : goodsList) {
             // 查询某竞标活动某竞品的所有用户
             List<String> allBidUserCodes = biddingDao.listBidActivityUsers(JbxtBiddingParam.builder().goodsId(goods.getGoodsId())
                     .activityCode(goods.getActivityCode()).build());
@@ -346,7 +349,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param goods
      * @return
      */
-    private Map<String,Object> getMinBidList(JbxtGoodsDO goods,  List<String> allBidUserCodes) {
+    private Map<String,Object> getMinBidList(GoodsDO goods, List<String> allBidUserCodes) {
 
         List<BidDVO> minBidList = new ArrayList<>();
         for (int i = 0; i < allBidUserCodes.size(); i++) {
@@ -375,7 +378,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         for (int i = 0; i < bids.size(); i++) {
             BidDVO bid = bids.get(i);
             RankInfoVO rankInfo = map.get(bid.getBid());
-            JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(bid.getUserCode()).build());
+            UserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(bid.getUserCode()).build());
             String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName() : bid.getUserCode();
             if (rankInfo == null) {
                 RankInfoVO newRankInfo = new RankInfoVO();
@@ -404,7 +407,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param index
      * @return
      */
-    private Map<String,Object> getBidPriceFinalRank(JbxtGoodsDO goods, List<String> allBidUserCodes, int index) {
+    private Map<String,Object> getBidPriceFinalRank(GoodsDO goods, List<String> allBidUserCodes, int index) {
         Map<String,Object> resultMap = new HashMap<>();
 
         List<String> res = new ArrayList<>();
@@ -441,14 +444,14 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         return  resultMap;
     }
 
-    public  List<String> getBidPriceDetail(String userCode, JbxtGoodsDO goods, String activityCode) {
+    public  List<String> getBidPriceDetail(String userCode, GoodsDO goods, String activityCode) {
         List<BidDVO> bids = biddingDao.getOneSupplierBidPriceDeatil(JbxtBiddingParam.builder()
                 .userCode(userCode).goodsId(goods.getGoodsId()).activityCode(activityCode).build());
         List<String> res = new ArrayList<>();
         res.add(goods.getCode());
         res.add(goods.getName());
 
-        JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(userCode).build());
+        UserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(userCode).build());
         String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName()  : userCode;
         res.add((userName));
 
@@ -472,7 +475,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private int batchInsertOrUpdate(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) {
         List<JbxtUserParam> saveUserParamList = Lists.newArrayList();
         supplierAccountParamList.forEach(e -> {
-            List<JbxtUserDO> userDOList = null;
+            List<UserDO> userDOList = null;
             // 修改的的时候
             if (StringUtils.isNotEmpty(bidActivityCode)) {
                  userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
@@ -516,7 +519,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      */
     private int batchDeleteUser(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) throws  Exception {
         List<String> deleteUserList = Lists.newArrayList();
-        List<JbxtUserDO> currentUserDOList = null;
+        List<UserDO> currentUserDOList = null;
         currentUserDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
         currentUserDOList.stream().forEach(e->{
             int time = 0;
@@ -561,7 +564,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         int count = 0;
 
         String bidActivityCode = infoParam.getBidActivityCode();
-        JbxtActivityDO activityDO = new JbxtActivityDO();
+        ActivityDO activityDO = new ActivityDO();
         activityDO.setCode(bidActivityCode);
         activityDO.setBidingType(infoParam.getBidingType());
         activityDO.setBidActivityInfo(infoParam.getBidActivityInfo());
@@ -580,7 +583,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 throw  new BaseException("新增竞标活动失败！","新增竞标活动失败！");
             }
         } else if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(),OPRATETYPE_UPDATE)) {
-            JbxtActivityDO sourceActivity = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+            ActivityDO sourceActivity = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
             if (null == sourceActivity ) {
                throw new BaseException("竞标单编码错误，竞标活动不存在！","竞标单编码错误，竞标活动不存在！");
             }
@@ -608,22 +611,22 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             }
         } else {
             throw  new BaseException("操作类型错误！","操作类型错误！");
-        }
+     }
     return bidActivityCode;
     }
 
     @Override
-    public  ActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception {
-        JbxtActivityDO activityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+    public BidActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception {
+        ActivityDO activityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
         if (null == activityDO) {
         throw new BaseException("竞标编码为" + bidActivityCode + "的竞标活动不存在！","竞标编码为" + bidActivityCode + "的竞标活动不存在！");
         }
-        List<JbxtGoodsDVO> goodsDVOList = goodsDdao.getListJbxtGoodsByActivityCode(bidActivityCode);
-        List<JbxtUserDO> userDOList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+        List<GoodsDVO> goodsDVOList = goodsDdao.getListJbxtGoodsByActivityCode(bidActivityCode);
+        List<UserDO> userDOList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
 
-        List<GoodsDVO> goodsDVOSList = Lists.newArrayList();
+        List<BidGoodsDVO> goodsDVOSList = Lists.newArrayList();
         goodsDVOList.stream().forEach(e->{
-            GoodsDVO dvo = GoodsDVO.builder()
+            BidGoodsDVO dvo = BidGoodsDVO.builder()
                     .code(e.getCode())
                     .goodsName(e.getName())
                     .firstPrice(e.getFirstPrice())
@@ -637,9 +640,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             goodsDVOSList.add(dvo);
         });
 
-        List<SupplierDVO> supplierDVOList = Lists.newArrayList();
+        List<BidSupplierDVO> supplierDVOList = Lists.newArrayList();
         userDOList.stream().forEach(e->{
-            SupplierDVO dvo = SupplierDVO.builder()
+            BidSupplierDVO dvo = BidSupplierDVO.builder()
                     .codeName(e.getCodeName())
                     .supplierName(e.getSupplierName())
                     .contactPerson(e.getContactPerson())
@@ -659,7 +662,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             fileName = fileInfo[fileInfo.length-1];
         }
 
-       return ActivityDVO.builder()
+       return BidActivityDVO.builder()
                 .bidActivityCode(bidActivityCode)
                 .bidActivityInfo(activityDO.getBidActivityInfo())
                 .creator(activityDO.getCreator())
@@ -688,7 +691,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String  words = "abcdefghijklmnopqrstuvwxyz";
         String userName = RandomStringUtils.random(2,words) + getShortCode(3)
                 + RandomStringUtils.random(1,words) ;
-        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
+        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         while (CollectionUtils.isNotEmpty(userDOList)) {
             userName = RandomStringUtils.random(2,words) + getShortCode(3)
                     + RandomStringUtils.random(1,words) ;
@@ -708,7 +711,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String  words = "abcdefghijklmnopqrstuvwxyz";
         String password = RandomStringUtils.random(2,words) + getShortCode(3)
                 + RandomStringUtils.random(2,words) + getShortCode(1);
-        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().password(password).build());
+        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().password(password).build());
         while (CollectionUtils.isNotEmpty(userDOList)) {
             password =  RandomStringUtils.random(2,words) + getShortCode(3)
                     + RandomStringUtils.random(2,words) + getShortCode(1);
@@ -740,22 +743,22 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         boolean goodsExists = false;
         boolean supplierExists = false;
 
-        JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        ActivityDO ActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
 
-        if (ActivityStatusEnum.UNEXPORT.getCode().equals(jbxtActivityDO.getStatus())) {
+        if (ActivityStatusEnum.UNEXPORT.getCode().equals(ActivityDO.getStatus())) {
             activityUnimportData = true;
         }
 
-        if ( null != jbxtActivityDO && StringUtils.isNotBlank(jbxtActivityDO.getPromiseText())) {
+        if ( null != ActivityDO && StringUtils.isNotBlank(ActivityDO.getPromiseText())) {
             promiseExists = true;
         }
 
-        List<JbxtGoodsDO>   goodsDOs  = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        List<GoodsDO>   goodsDOs  = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
         if ( CollectionUtils.isNotEmpty(goodsDOs)) {
             goodsExists = true;
         }
 
-        List<JbxtUserDVO> users = userDao.findAllByActivityCode(bidActivityCode);
+        List<UserDVO> users = userDao.findAllByActivityCode(bidActivityCode);
         if ( CollectionUtils.isNotEmpty(users)) {
             supplierExists = true;
         }
@@ -772,13 +775,13 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             throw new BaseException("bidActivityCode 或 type 参数异常！","bidActivityCode 或 type 参数异常！");
         }
 
-        JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
-        if (ActivityStatusEnum.FINISH.getCode().equals(jbxtActivityDO.getStatus())) {
+        ActivityDO ActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (ActivityStatusEnum.FINISH.getCode().equals(ActivityDO.getStatus())) {
             throw new BaseException("竞标活动已结束不能发送短信或者发送邮箱！","竞标活动已结束不能发送短信或者发送邮箱！");
         }
 
         if (StringUtils.equals(type, "all")) {
-            List<SupplierDVO> supplierDVOS = userDao.listSupplierInfo(bidActivityCode);
+            List<BidSupplierDVO> supplierDVOS = userDao.listSupplierInfo(bidActivityCode);
             List<String> allPhones = supplierDVOS.stream().map(e->e.getPhone()).collect(Collectors.toList());
             List<String> allEmailAddress = supplierDVOS.stream().map(e->e.getEmailAddress()).collect(Collectors.toList());
             Integer sendMailCount = 0;
@@ -814,17 +817,17 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     @Override
-    public List<SupplierDVO> listSupplierInfo(String bidActivityCode) {
+    public List<BidSupplierDVO> listSupplierInfo(String bidActivityCode) {
         return  userDao.listSupplierInfo(bidActivityCode);
     }
 
     @Override
-    public List<GoodsDVO> listGoods(String bidActivityCode) {
-        List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
-        List<GoodsDVO> goodsDVOList = Lists.newArrayList();
+    public List<BidGoodsDVO> listGoods(String bidActivityCode) {
+        List<GoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        List<BidGoodsDVO> goodsDVOList = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(goodsList)) {
             goodsList.stream().forEach(e ->{
-                GoodsDVO goodsDVO = new GoodsDVO();
+                BidGoodsDVO goodsDVO = new BidGoodsDVO();
                 CopyUtil.copyPropertiesExceptEmpty(e, goodsDVO);
                 goodsDVO.setGoodsName(e.getName());
                 goodsDVO.setYearPurchaseNum(e.getNum());
@@ -838,12 +841,12 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public int  savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws  BaseException{
 
-        JbxtActivityDO jbxtActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
-        if (null == jbxtActivityDO) {
+        ActivityDO ActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (null == ActivityDO) {
            throw  new BaseException("竞标单编号为" + bidActivityCode +"的竞标活动不存在！","竞标单编号为" + bidActivityCode +"的竞标活动不存在！");
         }
 
-        if (ActivityStatusEnum.FINISH.getCode().equals(jbxtActivityDO.getStatus())) {
+        if (ActivityStatusEnum.FINISH.getCode().equals(ActivityDO.getStatus())) {
             throw  new BaseException("竞标活动已结束不允许修改承诺函内容！","竞标活动已结束不允许修改承诺函内容！");
         }
 
@@ -895,7 +898,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             if (null != imageVO) {
                 String fileDir = fileFeignClient.addFile(imageVO);
                 fileDir = StringUtils.isNotBlank(fileName) ? fileDir + "/" + fileName : fileDir;
-                activityDao.updateBidActivity(JbxtActivityDO.builder().code(bidActivityCode).filePath(fileDir).build());
+                activityDao.updateBidActivity(ActivityDO.builder().code(bidActivityCode).filePath(fileDir).build());
                 return fileName;
             }
         } catch (BaseException e) {
@@ -961,7 +964,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public Tuple3<String, String, String> getFileAllName(String bidActivityCode) {
         Tuple3<String, String, String> stringTuple3  = Tuple3.createTuple(null,null,null);
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
         String [] fileInfo = null != activityDO && StringUtils.isNotBlank(activityDO.getFilePath())
                 ? activityDO.getFilePath().split("/") : null;
 
@@ -1001,10 +1004,10 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @return
      */
     private String getMailContent(String bidActivityCode, String emailAdress) throws  BaseException{
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
         String  bidActivityInfo = activityDO.getBidActivityInfo();
         String  predictBidDatetime = DateFormatUtils.format(activityDO.getPredictBidDatetime(), "yyyy-MM-dd HH:mm:ss");
-        JbxtUserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAdress).build());
+        UserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAdress).build());
         if (null == userDO) {
          throw  new BaseException("供应商信息获取错误！","供应商信息获取错误！");
         }
@@ -1038,7 +1041,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      */
     private  Integer sendEmail(String bidActivityCode, String emailAddress) throws BaseException {
         String cs2 = "\"1\"";
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
         if (null == activityDO) {
             throw  new BaseException("竞标活动不存在!","竞标活动不存在!");
         }
@@ -1089,13 +1092,13 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String bidActivityPassword = null;
         String tempcode  = PhoneTempleteEnum.BIDDINGMSG.getCode();
 
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
         if (null != activityDO) {
             bidActivityInfo = activityDO.getBidActivityInfo();
             bidActivityDateTime = DateFormatUtils.format(activityDO.getPredictBidDatetime(), "yyyy-MM-dd HH:mm:ss");
         }
 
-        JbxtUserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+        UserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
         if (null != userDO) {
             bidActivityAccount = userDO.getUsername();
             bidActivityPassword = userDO.getPassword();

@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao.mappers.custs;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.UserDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.mappers.JbxtUserMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
@@ -31,7 +31,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column="company_code", property="companyCode", jdbcType=JdbcType.VARCHAR),
             @Result(column="sys_code", property="sysCode", jdbcType=JdbcType.VARCHAR)
     })
-    JbxtUserDO selectByUsernameKey(String username);
+    UserDO selectByUsernameKey(String username);
 
 
 
@@ -57,7 +57,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
             @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
     })
-    JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+    UserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
 
 
     @Select({
@@ -82,10 +82,10 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
             @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
     })
-    JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
+    UserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
 
-    List<JbxtUserDVO> getJbxtUserList(JbxtUserParam jbxtuserParam);
+    List<UserDVO> getJbxtUserList(JbxtUserParam jbxtuserParam);
 
     @Select({
             "select",
@@ -109,7 +109,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
             @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
     })
-    List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+    List<UserDVO> findAllByActivityCode(String activityCode);
 
 
     @Insert({"<script>",
@@ -186,7 +186,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column="supplier_name", property="supplierName", jdbcType=JdbcType.VARCHAR),
             @Result(column="code_name", property="codeName", jdbcType=JdbcType.VARCHAR)
     })
-    List<JbxtUserDO> getUser(@Param("param")JbxtUserParam userParam);
+    List<UserDO> getUser(@Param("param")JbxtUserParam userParam);
 
     @Select({
             "<script>",
@@ -302,7 +302,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column = "send_sms", property = "sendSms", jdbcType = JdbcType.INTEGER),
             @Result(column = "send_mail", property = "sendMail", jdbcType = JdbcType.INTEGER),
     })
-    List<JbxtUserDO> listJbxtUser(@Param("param") JbxtUserParam param);
+    List<UserDO> listJbxtUser(@Param("param") JbxtUserParam param);
 
     @Update({
             " <script>",
@@ -466,7 +466,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             @Result(column = "send_sms", property = "sendSms", jdbcType = JdbcType.INTEGER),
             @Result(column = "send_mail", property = "sendMail", jdbcType = JdbcType.INTEGER),
     })
-    JbxtUserDO getJbxtUser(@Param("param") JbxtUserParam param);
+    UserDO getJbxtUser(@Param("param") JbxtUserParam param);
 
 }
 

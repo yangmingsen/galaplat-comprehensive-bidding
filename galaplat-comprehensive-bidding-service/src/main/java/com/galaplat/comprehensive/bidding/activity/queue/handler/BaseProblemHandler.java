@@ -8,9 +8,9 @@ import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
-import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
+import com.galaplat.comprehensive.bidding.service.BiddingService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
+import com.galaplat.comprehensive.bidding.service.UserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
@@ -28,19 +28,19 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     protected final UserChannelMap userChannelMap;
     protected final AdminChannelMap adminChannel;
     protected final MessageQueue messageQueue;
-    protected final IJbxtGoodsService iJbxtGoodsService; //竞品服务
+    protected final GoodsService goodsService; //竞品服务
     protected final ActivityThreadManager activityManager;
-    protected final IJbxtUserService iJbxtUserService;
-    protected final IJbxtBiddingService iJbxtBiddingService;
+    protected final UserService userService;
+    protected final BiddingService biddingService;
 
     public BaseProblemHandler() {
         this.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
         this.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
         this.messageQueue = SpringUtil.getBean(MessageQueue.class);
-        this.iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+        this.goodsService = SpringUtil.getBean(GoodsService.class);
         this.activityManager = SpringUtil.getBean(ActivityThreadManager.class);
-        this.iJbxtUserService = SpringUtil.getBean(IJbxtUserService.class);
-        this.iJbxtBiddingService = SpringUtil.getBean(IJbxtBiddingService.class);
+        this.userService = SpringUtil.getBean(UserService.class);
+        this.biddingService = SpringUtil.getBean(BiddingService.class);
     }
 
     @Override

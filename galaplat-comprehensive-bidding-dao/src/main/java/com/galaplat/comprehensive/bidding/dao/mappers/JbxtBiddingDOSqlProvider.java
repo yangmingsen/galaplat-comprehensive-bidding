@@ -8,13 +8,17 @@ import static org.apache.ibatis.jdbc.SqlBuilder.UPDATE;
 import static org.apache.ibatis.jdbc.SqlBuilder.VALUES;
 import static org.apache.ibatis.jdbc.SqlBuilder.WHERE;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 
 public class JbxtBiddingDOSqlProvider {
 
-    public String insertMinBidTableSelective(JbxtBiddingDO record) {
+    public String insertMinBidTableSelective(BiddingDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_minbid");
+
+        if (record.getBidPercent() != null) {
+            VALUES("bid_percent", "#{bidPercent,jdbcType=INTEGER}");
+        }
 
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
@@ -70,9 +74,13 @@ public class JbxtBiddingDOSqlProvider {
 
         return SQL();
     }
-    public String updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record) {
+    public String updateMinBidTableByPrimaryKeySelective(BiddingDO record) {
         BEGIN();
         UPDATE("t_jbxt_minbid");
+
+        if (record.getBidPercent() != null) {
+            SET("bid_percent = #{bidPercent,jdbcType=INTEGER}");
+        }
 
         if (record.getIsdelay() != null) {
             SET("isdelay = #{isdelay, jdbcType=INTEGER}");
@@ -128,10 +136,14 @@ public class JbxtBiddingDOSqlProvider {
     }
 
 
-    public String insertSelective(JbxtBiddingDO record) {
+    public String insertSelective(BiddingDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_bidding");
-        
+
+        if (record.getBidPercent() != null) {
+            VALUES("bid_percent", "#{bidPercent,jdbcType=INTEGER}");
+        }
+
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
@@ -188,9 +200,13 @@ public class JbxtBiddingDOSqlProvider {
         return SQL();
     }
 
-    public String updateByPrimaryKeySelective(JbxtBiddingDO record) {
+    public String updateByPrimaryKeySelective(BiddingDO record) {
         BEGIN();
         UPDATE("t_jbxt_bidding");
+
+        if (record.getBidPercent() != null) {
+            SET("bid_percent = #{bidPercent,jdbcType=INTEGER}");
+        }
 
         if (record.getIsdelay() != null) {
             SET("isdelay = #{isdelay, jdbcType=INTEGER}");

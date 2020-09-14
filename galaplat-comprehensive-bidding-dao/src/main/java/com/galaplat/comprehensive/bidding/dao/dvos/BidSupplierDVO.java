@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SupplierDVO {
+public class BidSupplierDVO {
     /*代号*/
    private String codeName;
     /*供应商*/

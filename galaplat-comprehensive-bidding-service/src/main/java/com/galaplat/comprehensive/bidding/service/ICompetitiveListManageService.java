@@ -96,7 +96,7 @@ public interface ICompetitiveListManageService {
      * @return
      * @throws Exception
      */
-    ActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception;
+    BidActivityDVO getBidActivityWithGoodsAndSupplier(String bidActivityCode) throws Exception;
 
     /**
      * 获取供应商的账号
@@ -137,14 +137,14 @@ public interface ICompetitiveListManageService {
      * @param bidActivityCode
      * @return
      */
-    List<SupplierDVO> listSupplierInfo(String bidActivityCode);
+    List<BidSupplierDVO> listSupplierInfo(String bidActivityCode);
 
     /**
      * 查询竞品
      * @param bidActivityCode
      * @return
      */
-    List<GoodsDVO> listGoods(String bidActivityCode);
+    List<BidGoodsDVO> listGoods(String bidActivityCode);
 
     /***
      * 保存承诺函

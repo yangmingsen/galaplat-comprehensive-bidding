@@ -1,4 +1,4 @@
-package com.galaplat.comprehensive.bidding.dao.dos;
+package com.galaplat.comprehensive.bidding.dao.dvos;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -6,14 +6,14 @@ import java.util.Date;
 
 
  /**
- * 竞价表DO
+ * 竞价表DVO
  * @author esr
  * @date: 2020年06月17日
  */
-public class JbxtBiddingDO implements Serializable {
+public class BiddingDVO implements Serializable {
     private static final long serialVersionUID = 1L;
-
-     /*唯一编码*/
+    
+    /*唯一编码*/
     private String code;
     /*竞品id*/
     private Integer goodsId;
@@ -40,6 +40,16 @@ public class JbxtBiddingDO implements Serializable {
 
      private Integer isdelay;
 
+     private BigDecimal bidPercent;
+
+     public void setBidPercent(BigDecimal bidPercent) {
+         this.bidPercent = bidPercent;
+     }
+
+     public BigDecimal getBidPercent() {
+         return bidPercent;
+     }
+
      public Integer getIsdelay() {
          return isdelay;
      }
@@ -56,7 +66,7 @@ public class JbxtBiddingDO implements Serializable {
          this.bidTime = bidTime;
      }
 
-    public String getCode() {
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {

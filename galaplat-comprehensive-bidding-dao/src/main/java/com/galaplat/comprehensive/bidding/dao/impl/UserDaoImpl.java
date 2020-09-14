@@ -3,14 +3,14 @@ package com.galaplat.comprehensive.bidding.dao.impl;
 import java.util.List;
 
 import com.galaplat.base.core.common.utils.BeanCopyUtils;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.SupplierDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BidSupplierDVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.dao.UserDao;
+import com.galaplat.comprehensive.bidding.dao.dvos.UserDVO;
 import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtUserCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageHelper;
@@ -22,50 +22,50 @@ import com.github.pagehelper.PageInfo;
  * @date: 2020年06月17日
  */
 @Repository
-public  class JbxtUserDaoImpl implements IJbxtUserDao  {
+public   class UserDaoImpl implements UserDao {
 
 	@Autowired
 	private JbxtUserCustMapper mapper;
 
 	@Override
-	public List<JbxtUserDVO> findAllByActivityCode(String activityCode) {
+	public List<UserDVO> findAllByActivityCode(String activityCode) {
 		return mapper.findAllByActivityCode(activityCode);
 	}
 
 	@Override
-	public int insertJbxtUser(JbxtUserDO entity){
+	public int insertJbxtUser(UserDO entity){
 		return mapper.insert(entity);
 	}
 
 	@Override
-	public int updateJbxtUser(JbxtUserDO entity){
+	public int updateJbxtUser(UserDO entity){
 		return mapper.updateByPrimaryKey(entity);
 	}
 
 	@Override
-	public PageInfo<JbxtUserDVO> getJbxtUserPage(JbxtUserParam jbxtuserParam) throws BaseException{
+	public PageInfo<UserDVO> getJbxtUserPage(JbxtUserParam jbxtuserParam) throws BaseException{
 		PageHelper.startPage(jbxtuserParam.getPn(), jbxtuserParam.getPs());
-		return new PageInfo<>(mapper.getJbxtUserList(jbxtuserParam));
+		return new PageInfo<UserDVO>(mapper.getJbxtUserList(jbxtuserParam));
 
 	}
 
 	@Override
-	public JbxtUserDO getJbxtUser(JbxtUserParam jbxtuserParam){
+	public UserDO getJbxtUser(JbxtUserParam jbxtuserParam){
 		return mapper.selectByPrimaryKey(jbxtuserParam.getCode());
 	}
 
 	@Override
-	public JbxtUserDO getJbxtUserByUsername(String username){
+	public UserDO getJbxtUserByUsername(String username){
 		return mapper.selectByUsernameKey(username);
 	}
 
 	@Override
-	public JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
+	public UserDO selectByuserCodeAndActivityCode(String userCode, String activityCode) {
 		return mapper.selectByuserCodeAndActivityCode(userCode,activityCode);
 	}
 
 	@Override
-	public JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode) {
+	public UserDO selectByUsernameAndActivityCode(String username, String activityCode) {
 		return mapper.selectByUsernameAndActivityCode(username,activityCode);
 	}
 
@@ -75,7 +75,7 @@ public  class JbxtUserDaoImpl implements IJbxtUserDao  {
 	}
 
 	@Override
-	public List<JbxtUserDO> getUser(JbxtUserParam userParam) {
+	public List<UserDO> getUser(JbxtUserParam userParam) {
 		return mapper.getUser(userParam);
 	}
 
@@ -95,7 +95,7 @@ public  class JbxtUserDaoImpl implements IJbxtUserDao  {
 	}
 
 	@Override
-	public  List<JbxtUserDO> listJbxtUser(JbxtUserParam param) {
+	public  List<UserDO> listJbxtUser(JbxtUserParam param) {
        return  mapper.listJbxtUser(param);
 	}
 
@@ -105,13 +105,13 @@ public  class JbxtUserDaoImpl implements IJbxtUserDao  {
 	}
 
 	@Override
-	public List<SupplierDVO> listSupplierInfo(String bidActivityCode) {
-		List<JbxtUserDO> userDOList = mapper.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
-		return BeanCopyUtils.copyList(userDOList, SupplierDVO.class);
+	public List<BidSupplierDVO> listSupplierInfo(String bidActivityCode) {
+		List<UserDO> userDOList = mapper.listJbxtUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+		return BeanCopyUtils.copyList(userDOList, BidSupplierDVO.class);
 	}
 
 	@Override
-	public  JbxtUserDO getUserByParam( JbxtUserParam param) {
+	public  UserDO getUserByParam( JbxtUserParam param) {
 		return mapper.getJbxtUser(param);
 	}
 

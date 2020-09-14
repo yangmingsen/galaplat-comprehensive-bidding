@@ -2,11 +2,10 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -51,22 +50,24 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         // business start
         final Integer goodsId = Integer.parseInt(goodsIdStr);
         final BigDecimal bid = new BigDecimal(bidPriceStr);
-        final JbxtBiddingDO curBidInfo =
-                iJbxtBiddingService. //获取当前用户最小竞价
+        final BiddingDO curBidInfo =
+                biddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
+        String percentStr = takeQueuemsg.getData().get("bidPercent");
+        BigDecimal bidPercent = percentStr == null ? new BigDecimal("0.00") : new BigDecimal(percentStr);
         if (curBidInfo != null) {
-            if (bid.compareTo(curBidInfo.getBid()) == -1) { //如果1 < 2 => -1
+            if (bid.compareTo(curBidInfo.getBid()) < 0) { //如果1 < 2 => -1
                 //处理提交
-               saveBidDataToDB(activityCode, userCode, bid, goodsId, 2);
+               saveBidDataToDB(activityCode, userCode, bid, goodsId, 2, bidPercent);
             }
         }  else { //如果没有最低报价(意味着数据库中没有该竞品的提交数据) 那么直接插入
-            saveBidDataToDB(activityCode, userCode, bid, goodsId,1);
+            saveBidDataToDB(activityCode, userCode, bid, goodsId,1, bidPercent);
         }
 
     }
 
-    @Transactional( rollbackFor = Exception.class) //#issue
-    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status) {
+
+    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, BigDecimal bidPercent) {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
 
@@ -74,45 +75,49 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         //获取剩余时间类型
         final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
+        final boolean turnToDelayTime = currentActivity.isDelayedTime();
 
-        final JbxtBiddingVO jbv = new JbxtBiddingVO();
-        jbv.setBid(bid);
-        jbv.setUserCode(userCode);
-        jbv.setGoodsId(goodsId);
-        jbv.setActivityCode(activityCode); //设置当前活动id
-        jbv.setBidTime(bidTime);
-        if (!timeType) {
-            jbv.setIsdelay(1);
+        final JbxtBiddingVO newBidVO = new JbxtBiddingVO();
+        newBidVO.setBid(bid);
+        newBidVO.setUserCode(userCode);
+        newBidVO.setGoodsId(goodsId);
+        newBidVO.setActivityCode(activityCode); //设置当前活动id
+        newBidVO.setBidTime(bidTime);
+        newBidVO.setBidPercent(bidPercent);
+        if (!turnToDelayTime) {
+            newBidVO.setIsdelay(1);
         } else {
-            jbv.setIsdelay(2);
+            newBidVO.setIsdelay(2);
         }
+
 
         try {
             //add to db
-            iJbxtBiddingService.insertJbxtBidding(jbv);
+            biddingService.insertJbxtBidding(newBidVO);
             if (status == 1) { //插入
-                iJbxtBiddingService.insertMinBidTableSelective(jbv);
+                biddingService.insertMinBidTableSelective(newBidVO);
             } else if (status == 2) { //更新
-                final JbxtBiddingDO minbidE = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                final BiddingDO minbidE = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
 
-                final JbxtBiddingVO var1 = new JbxtBiddingVO();
-                var1.setCode(minbidE.getCode());
-                var1.setBid(bid);
-                var1.setUpdatedTime(new Date());
-                var1.setBidTime(bidTime);
-                if (!timeType) {
-                    var1.setIsdelay(1);
+                final JbxtBiddingVO updateBidVO = new JbxtBiddingVO();
+                updateBidVO.setCode(minbidE.getCode());
+                updateBidVO.setBid(bid);
+                updateBidVO.setUpdatedTime(new Date());
+                updateBidVO.setBidTime(bidTime);
+                updateBidVO.setBidPercent(bidPercent);
+                if (!turnToDelayTime) {
+                    updateBidVO.setIsdelay(1);
                 } else {
-                    var1.setIsdelay(2);
+                    updateBidVO.setIsdelay(2);
                 }
-                iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(var1);
+                biddingService.updateMinBidTableByPrimaryKeySelective(updateBidVO);
             }
         }catch (Exception e) {
             LOGGER.info("saveBidDataToDB(ERROR): 更新竞价数据失败-"+e.getMessage());
             return;
         }
 
-        final Map<String, String> map301 = new HashMap();
+        Map<String, String> map301 = new HashMap();
         map301.put("activityCode", activityCode);
         map301.put("userCode", userCode);
         map301.put("goodsId", goodsId.toString());
@@ -138,7 +143,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         messageQueue.offer(new QueueMessage(200,map200));
 
         //检查是否更新top提示
-        final List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
+        final List<BiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
         activityManager.get(activityCode).updateTopMinBid(theTopBids);*/
     }
 

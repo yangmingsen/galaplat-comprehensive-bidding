@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
@@ -37,10 +37,10 @@ public interface JbxtGoodsMapper {
             "#{perDelayTime,jdbcType=INTEGER}, #{delayTimes,jdbcType=INTEGER}, ",
             "#{addDelayTimes,jdbcType=INTEGER}, #{retainPrice,jdbcType=DECIMAL})"
     })
-    int insert(JbxtGoodsDO record);
+    int insert(GoodsDO record);
 
     @InsertProvider(type=JbxtGoodsDOSqlProvider.class, method="insertSelective")
-    int insertSelective(JbxtGoodsDO record);
+    int insertSelective(GoodsDO record);
 
     @Select({
             "select",
@@ -71,10 +71,10 @@ public interface JbxtGoodsMapper {
             @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
             @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
-    JbxtGoodsDO selectByPrimaryKey(Integer goodsId);
+    GoodsDO selectByPrimaryKey(Integer goodsId);
 
     @UpdateProvider(type=JbxtGoodsDOSqlProvider.class, method="updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(JbxtGoodsDO record);
+    int updateByPrimaryKeySelective(GoodsDO record);
 
     @Update({
             "update t_jbxt_goods",
@@ -98,7 +98,7 @@ public interface JbxtGoodsMapper {
             "retain_price = #{retainPrice,jdbcType=DECIMAL}",
             "where goods_id = #{goodsId,jdbcType=INTEGER}"
     })
-    int updateByPrimaryKey(JbxtGoodsDO record);
+    int updateByPrimaryKey(GoodsDO record);
 
 
 }

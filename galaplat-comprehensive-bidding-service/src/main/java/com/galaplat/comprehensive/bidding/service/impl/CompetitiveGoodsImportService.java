@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.JsonUtils;
 import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
-import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
-import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.ActivityDao;
+import com.galaplat.comprehensive.bidding.dao.GoodsDao;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
+import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelStrParam;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.ImportExcelValidateMapUtil;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**@
  * @Description: 竞标活动竞品导入
@@ -38,7 +41,7 @@ import java.util.*;
  * @CreateDate: 2020/7/9 20:15
  */
 @Service("competitiveGoodsExcelService")
-public class CompetitiveGoodsImportService implements IImportSubMethodWithParamService<JbxtGoodsExcelParam> {
+public class CompetitiveGoodsImportService implements IImportSubMethodWithParamService<JbxtGoodsExcelStrParam> {
 
     private static final Logger log = LoggerFactory.getLogger(CompetitiveGoodsImportService.class);
 
@@ -46,20 +49,20 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
     private IFeignPermissions feignPermissions;
 
     @Autowired
-    private IJbxtGoodsDao goodsDao;
+    private GoodsDao goodsDao;
 
     @Autowired
-    private IJbxtActivityDao  activityDao;
+    private ActivityDao activityDao;
 
     @Autowired
-    private ICompetitiveListManageService  manageService;
+    private ICompetitiveListManageService manageService;
 
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
-    public List<JbxtGoodsExcelParam> insertExcelDate(List<Map<String, Object>> list, ImportVO importVO) {
+    public List<JbxtGoodsExcelStrParam> insertExcelDate(List<Map<String, Object>> list, ImportVO importVO) {
         if (CollectionUtils.isEmpty(list)) {return Collections.emptyList();}
-        List<JbxtGoodsExcelParam>  errorList = Lists.newArrayList();
+        List<JbxtGoodsExcelStrParam>  errorList = Lists.newArrayList();
         List<JbxtGoodsExcelParam>  rightList = Lists.newArrayList();
         List<JbxtGoodsParam>  saveList = Lists.newArrayList();
 
@@ -72,7 +75,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
             });
             activityCode = (String) mapVO.get("bidActivityCode");
         }
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
         // 如果竞标活动的状态时竞标中或者已结束时，不允许导入
         if (activityDO.getStatus().equals(ActivityStatusEnum.BIDING.getCode())
                 || activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())){
@@ -82,14 +85,15 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         if (null != activityDO && CollectionUtils.isNotEmpty(list)) {
             for (Map<String, Object>  goodsMap: list) {
                 JbxtGoodsExcelParam goodsExcelParam = new JbxtGoodsExcelParam();
+                JbxtGoodsExcelStrParam goodsExceStrlParam = new JbxtGoodsExcelStrParam();
                 StringBuilder errorMsg = new StringBuilder("");
-                Tuple<String,JbxtGoodsExcelParam> paramTuple =  ImportExcelValidateMapUtil.validateField(goodsExcelParam, goodsMap);
+                Tuple<String, JbxtGoodsExcelStrParam> paramTuple =  ImportExcelValidateMapUtil.validateField_1(JbxtGoodsExcelParam.class, goodsExceStrlParam, goodsMap);
                 errorMsg.append(paramTuple._1);
-                goodsExcelParam = paramTuple._2;
-                errorMsg.append(validateGoodsInfo(goodsExcelParam));
+                goodsExceStrlParam = paramTuple._2;
+                errorMsg.append(validateGoodsInfo(goodsExceStrlParam));
                 if (StringUtils.isNotEmpty(errorMsg.toString())) {
-                    goodsExcelParam.setErrorMsg(errorMsg.toString());
-                    errorList.add(goodsExcelParam);
+                    goodsExceStrlParam.setErrorMsg(errorMsg.toString());
+                    errorList.add(goodsExceStrlParam);
                 } else {
                     try {
                         goodsExcelParam = JsonUtils.toObject(JsonUtils.toJson(goodsMap), JbxtGoodsExcelParam.class);
@@ -108,16 +112,36 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                         saveList.add(goodsParam);
                 }
             }
+            int insertCount = 0;
 
             if (CollectionUtils.isNotEmpty(saveList) && CollectionUtils.isEmpty(errorList)) {
                 goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
-                goodsDao.batchInsert(saveList);
+                insertCount = goodsDao.batchInsert(saveList);
             }
-            if (manageService.checkActivityInfoComplete(activityCode)) {
-                activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+            List<GoodsDO> activityGoodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode).build());
+            if (activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())
+                    && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
+                activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
             }
             if (CollectionUtils.isNotEmpty(errorList)) {
-            errorList.addAll(rightList);
+
+                rightList.stream().forEach(e ->{
+                    JbxtGoodsExcelStrParam excelStrParam = JbxtGoodsExcelStrParam.builder()
+                            .serialNumber(e.getSerialNumber())
+                            .code(e.getCode())
+                            .name(e.getName())
+                            .firstPrice(String.valueOf(e.getFirstPrice()))
+                            .retainPrice(String.valueOf(e.getRetainPrice()))
+                            .num(String.valueOf(e.getNum()))
+                            .timeNum(String.valueOf(e.getTimeNum()))
+                            .lastChangTime(String.valueOf(e.getLastChangTime()))
+                            .perDelayTime(String.valueOf(e.getPerDelayTime()))
+                            .delayTimes(String.valueOf(e.getDelayTimes()))
+                            .companyCode(e.getCompanyCode())
+                            .sysCode(e.getSysCode())
+                            .build();
+                    errorList.add(excelStrParam);
+                });
             }
         }// if
 
@@ -155,22 +179,31 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                 return creatorName;
     }
 
-    private String validateGoodsInfo(JbxtGoodsExcelParam excelParam) {
+    private String validateGoodsInfo(JbxtGoodsExcelStrParam excelParam) {
+
         StringBuilder error= new StringBuilder("");
-        Integer timeNum = excelParam.getTimeNum();
-        Integer lastChangTime = excelParam.getLastChangTime();
-        Integer perDelayTime = excelParam.getPerDelayTime();
-        Integer delayTimes = excelParam.getDelayTimes();
-        if (timeNum > 60) {
+        String timeNuimStr = excelParam.getTimeNum();
+        String lastChangTimeStr = excelParam.getLastChangTime();
+        String perDelayTimeStr = excelParam.getPerDelayTime();
+        String delayTimesStr = excelParam.getDelayTimes();
+
+        String regx = "^\\d+$";
+
+        Integer timeNum = StringUtils.isNotBlank(timeNuimStr)&& Pattern.compile(regx).matcher(timeNuimStr).find() ? Integer.parseInt(timeNuimStr) : null;
+        Integer lastChangTime = StringUtils.isNotBlank(lastChangTimeStr) && Pattern.compile(regx).matcher(lastChangTimeStr).find() ? Integer.parseInt(lastChangTimeStr) : null;
+        Integer perDelayTime = StringUtils.isNotBlank(perDelayTimeStr) && Pattern.compile(regx).matcher(perDelayTimeStr).find()  ? Integer.parseInt(perDelayTimeStr) : null;
+        Integer delayTimes = StringUtils.isNotBlank(delayTimesStr) && Pattern.compile(regx).matcher(delayTimesStr).find() ? Integer.parseInt(delayTimesStr) : null;
+
+        if (null != timeNum && timeNum > 60) {
             error.append("竞标时长不能超过60分钟！");
         }
-        if (lastChangTime > timeNum * 60) {
+        if (null != lastChangTime && null != timeNum && lastChangTime > timeNum * 60) {
             error.append("延时窗口期不能超过竞标时长！");
         }
-        if (perDelayTime > 600) {
+        if (null != perDelayTime && perDelayTime > 600) {
             error.append("单次延长不能超过600秒！");
         }
-        if (delayTimes > 100) {
+        if (null != delayTimes && delayTimes > 100) {
             error.append("延长次数不能超过100次！");
         }
         return error.toString();
