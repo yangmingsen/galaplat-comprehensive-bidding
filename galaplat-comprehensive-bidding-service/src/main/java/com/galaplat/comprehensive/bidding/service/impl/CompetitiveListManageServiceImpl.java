@@ -11,10 +11,12 @@ import com.galaplat.comprehensive.bidding.dao.params.*;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
 import com.galaplat.comprehensive.bidding.enums.CodeNameEnum;
+import com.galaplat.comprehensive.bidding.enums.PhoneTempleteEnum;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
+import com.galaplat.comprehensive.bidding.utils.Tuple3;
 import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
 import com.galaplat.comprehensive.bidding.vos.RankInfoVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
@@ -97,6 +99,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
     @Autowired
     private IFeiginMessageClient messageClient;
+
+    @Autowired
+    IFeiginMessageClient fmi;
 
     @Override
     public PageInfo listCompetitiveListPage(CompetitiveListQuery query) throws BaseException {
@@ -647,16 +652,23 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             supplierDVOList.add(dvo);
         });
 
+        String filePath = activityDO.getFilePath();
+        String fileName = "";
+        if (StringUtils.isNotBlank(filePath)) {
+            String [] fileInfo = filePath.split("/");
+            fileName = fileInfo[fileInfo.length-1];
+        }
+
        return ActivityDVO.builder()
                 .bidActivityCode(bidActivityCode)
                 .bidActivityInfo(activityDO.getBidActivityInfo())
                 .creator(activityDO.getCreator())
-                .createdDate(null != activityDO.getCreatedTime() ? DateFormatUtils.format(activityDO.getCreatedTime(),"yyyy-MM-d") : "")
+                .createdDate(null != activityDO.getCreatedTime() ? DateFormatUtils.format(activityDO.getCreatedTime(),"yyyy-MM-dd") : "")
                 .bidingType(activityDO.getBidingType())
                 .predictBidDatetime(null != activityDO.getPredictBidDatetime() ? DateFormatUtils.format(activityDO.getPredictBidDatetime(),"yyyy-MM-dd HH:mm:ss") : "")
                 .promiseTitle(activityDO.getPromiseTitle())
                 .promiseText(activityDO.getPromiseText())
-                .filePath(activityDO.getFilePath())
+                .filePath(fileName)
                 .activityStatus(activityDO.getStatus())
                 .goodsList(goodsDVOSList)
                 .supplierList(supplierDVOList)
@@ -779,7 +791,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
             if (CollectionUtils.isNotEmpty(allPhones)) {
                 for (String phoneNumber: allPhones) {
-                    sendMessageCount += sendPhone(bidActivityCode, phoneNumber);
+                    sendMessageCount += sendPhoneMsg(bidActivityCode, phoneNumber);
                 }
             }
 
@@ -789,10 +801,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             messageAndEmialDVO.setMessageSendStatus(CollectionUtils.isNotEmpty(allPhones) && sendMessageCount > 0 && sendMessageCount == allPhones.size()
                     ? 1 :  (CollectionUtils.isNotEmpty(allPhones) && sendMessageCount == 0 ? 0 : 2));
 
-            // TODO 发送邮件短信
         } else if (StringUtils.equals(type, "phone")) {
-            // TODO 发送短信
+            // 只发送短信
+            messageAndEmialDVO.setMessageSendStatus(sendPhoneMsg(bidActivityCode,phone));
         } else if (StringUtils.equals(type, "email")) {
+            // 只发送邮件
             messageAndEmialDVO.setEmailSeandStatus(sendEmail(bidActivityCode, emailAddress));
         } else {
             throw new BaseException("type 参数值异常！","type 参数值异常！");
@@ -852,9 +865,23 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @return
      */
     @Override
-    public String rarFileUpload(String bidActivityCode, MultipartFile rarFile) {
+    public String fileUpload(String bidActivityCode, MultipartFile rarFile) {
         ImageVO imageVO =null;
-        String fileName = "";
+
+        Tuple3<String, String , String > stringTuple3 = getFileAllName(bidActivityCode);
+        String fileName = stringTuple3._1; // 文件名
+        String originFileName = stringTuple3._2; // 原文件名
+        String extendName =  stringTuple3._3; // 扩展名
+
+        if (StringUtils.isNotBlank(fileName) || StringUtils.isNotBlank(originFileName)|| StringUtils.isNotBlank(extendName)) {
+            try {
+                fileFeignClient.delete(fileName);
+            } catch (BaseException e) {
+                log.error("There is an error of deleting file .【{}】,【{}】",e.getMessage(),e );
+                e.printStackTrace();
+            }
+        }
+
         try {
             byte[]  bytes = rarFile.getBytes();
             fileName = rarFile.getOriginalFilename();
@@ -869,7 +896,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 String fileDir = fileFeignClient.addFile(imageVO);
                 fileDir = StringUtils.isNotBlank(fileName) ? fileDir + "/" + fileName : fileDir;
                 activityDao.updateBidActivity(JbxtActivityDO.builder().code(bidActivityCode).filePath(fileDir).build());
-                return fileDir;
+                return fileName;
             }
         } catch (BaseException e) {
             log.error(" There is an error of uploadinfg file. 【{}】,【{}】", e.getMessage(),e );
@@ -884,44 +911,88 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @return
      */
     @Override
-    public MultipartFile getRarFile(String bidActivityCode) {
+    public MultipartFile getfile(String bidActivityCode) throws BaseException{
 
         MultipartFile cMultiFile = null;
 
         try {
-            JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
-            String [] fileInfo = null != activityDO && StringUtils.isNotBlank(activityDO.getFilePath())
-                    ? activityDO.getFilePath().split("/") : null;
-            String fileName = null;
-            String originFileName = null;
-            if (null != fileInfo) {
-                fileName = fileInfo[2].replace(".rar","");
-                originFileName = fileInfo[fileInfo.length - 1].replace(".rar","");
-            }
-            feign.Response response= fileFeignClient.getFile(fileName,"rar");
-            //获得文件流
-            Response.Body body = response.body();
-            try {
-                InputStream  inputStream = body.asInputStream();
-                MultipartFile multipartFile = new MockMultipartFile(bidActivityCode + ".rar",bidActivityCode + ".rar","", inputStream);
-                ApplicationHome h = new ApplicationHome(getClass());
-                String pathName = h.getDir().getAbsolutePath() + "/" + originFileName + ".rar";
-                File file = new File(pathName);
-                multipartFile.transferTo(file);
-                DiskFileItem fileItem = new DiskFileItem("file", "multipart/form-data", true, file.getName(), (int) file.length(), file);
-                IOUtils.copy(new FileInputStream(file), fileItem.getOutputStream());
-                cMultiFile = new CommonsMultipartFile(fileItem);
+            Tuple3<String, String , String > stringTuple3 = getFileAllName(bidActivityCode);
+            // 文件名
+            String fileName = stringTuple3._1;
+            // 原文件名
+            String originFileName = stringTuple3._2;
+            // 扩展名
+            String extendName =  stringTuple3._3;
 
-            } catch (IOException e) {
-                log.error(" There is an error of getting file. 【{}】,【{}】", e.getMessage(),e );
-                e.printStackTrace();
+            if (!StringUtils.isAnyBlank(fileName, extendName)) {
+                feign.Response response = fileFeignClient.getFile(fileName,extendName);
+                Response.Body body = response.body();
+                try {
+
+                    InputStream  inputStream = body.asInputStream();
+                    MultipartFile multipartFile = new MockMultipartFile(bidActivityCode + "." + extendName,originFileName + "." + extendName,"", inputStream);
+                    ApplicationHome h = new ApplicationHome(getClass());
+                    String pathName = h.getDir().getAbsolutePath() + "/" + originFileName + "." + extendName;
+                    File file = new File(pathName);
+                    multipartFile.transferTo(file);
+                    DiskFileItem fileItem = new DiskFileItem("file", "multipart/form-data", true, file.getName(), (int) file.length(), file);
+                    IOUtils.copy(new FileInputStream(file), fileItem.getOutputStream());
+                    cMultiFile = new CommonsMultipartFile(fileItem);
+
+                } catch (IOException e) {
+                    log.error(" There is an error of getting file. 【{}】,【{}】", e.getMessage(),e );
+                    e.printStackTrace();
+                }
             }
+
         } catch (BaseException e) {
             log.error(" There is an error of getting file. 【{}】,【{}】", e.getMessage(),e );
             e.printStackTrace();
         }
         return  cMultiFile;
     }
+
+
+    /**
+     * 获取文件的各种名称
+     * @param bidActivityCode
+     * @return
+     */
+    @Override
+    public Tuple3<String, String, String> getFileAllName(String bidActivityCode) {
+        Tuple3<String, String, String> stringTuple3  = Tuple3.createTuple(null,null,null);
+        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        String [] fileInfo = null != activityDO && StringUtils.isNotBlank(activityDO.getFilePath())
+                ? activityDO.getFilePath().split("/") : null;
+
+        // 文件名
+        String fileName = null;
+        // 原文件名
+        String originFileName = null;
+        // 扩展名
+        String extendName =  null;
+
+        if (null != fileInfo) {
+            fileName = fileInfo[fileInfo.length - 2];
+            originFileName = fileInfo[fileInfo.length - 1];
+        }
+
+        if (StringUtils.isNotBlank(originFileName)) {
+            String[] originFileNameArray = originFileName.split("\\.");
+            originFileName = originFileNameArray[0];
+        }
+
+        if (StringUtils.isNotBlank(fileName)) {
+            String[] fileNameArray = fileName.split("\\.");
+            fileName = fileNameArray[0];
+            extendName = fileNameArray[1];
+        }
+        stringTuple3._1 = fileName;
+        stringTuple3._2 = originFileName;
+        stringTuple3._3 = extendName;
+        return stringTuple3;
+    }
+
 
     /***
      *  获取邮件内容字符串
@@ -966,24 +1037,38 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @return
      */
     private  Integer sendEmail(String bidActivityCode, String emailAddress) throws BaseException {
-
-        Integer emailSeandStatus = null;
-        MultipartFile multipartFile = getRarFile(bidActivityCode);
+        String cs2 = "\"1\"";
+        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (null == activityDO) {
+            throw  new BaseException("竞标活动不存在!","竞标活动不存在!");
+        }
+        String filePath = activityDO.getFilePath();
+        Integer emailSeandStatus;
+        String  mailSendResult = null;
+        MultipartFile multipartFile = null;
         String emailContent = getMailContent(bidActivityCode, emailAddress);
 
+        if (StringUtils.isNotBlank(filePath)) {
+            multipartFile = getfile(bidActivityCode);
+        }
         if (null != multipartFile && StringUtils.isNotBlank(emailAddress)) {
             // 发送邮件
-            String  mailSendResult = messageClient.sendfile(emailAddress, "竞标活动通知",emailContent , multipartFile);
-            emailSeandStatus = StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, "\"1\"") ? 1: 0;
-
-            if (StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, "\"1\"")) {
-                userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(1).activityCode(bidActivityCode).build(),
-                        JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
-            } else {
-                userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(2).activityCode(bidActivityCode).build(),
-                        JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
-            }
+            mailSendResult = messageClient.sendfile(emailAddress, "竞标活动通知",emailContent , multipartFile);
+        } else if (StringUtils.isBlank(filePath) && StringUtils.isNotBlank(emailAddress)) {
+            mailSendResult = messageClient.sendemail(emailAddress, "竞标活动通知",emailContent);
         }
+
+
+        if (StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, cs2)) {
+            userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(1).activityCode(bidActivityCode).build(),
+                    JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
+        } else {
+            userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(2).activityCode(bidActivityCode).build(),
+                    JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
+        }
+
+        emailSeandStatus = StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, cs2) ? 1: 0;
+
         return emailSeandStatus;
     }
 
@@ -995,8 +1080,46 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @return
      * @throws BaseException
      */
-    private  Integer sendPhone(String bidActivityCode, String phoneNumber) throws BaseException {
-        return 0;
+    private  Integer sendPhoneMsg(String bidActivityCode, String phoneNumber) throws BaseException {
+
+        String supplierName = null;
+        String bidActivityInfo = null;
+        String bidActivityDateTime = null;
+        String bidActivityAccount = null;
+        String bidActivityPassword = null;
+        String tempcode  = PhoneTempleteEnum.BIDDINGMSG.getCode();
+
+        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (null != activityDO) {
+            bidActivityInfo = activityDO.getBidActivityInfo();
+            bidActivityDateTime = DateFormatUtils.format(activityDO.getPredictBidDatetime(), "yyyy-MM-dd HH:mm:ss");
+        }
+
+        JbxtUserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+        if (null != userDO) {
+            bidActivityAccount = userDO.getUsername();
+            bidActivityPassword = userDO.getPassword();
+            supplierName = userDO.getSupplierName();
+        }
+
+        if (!StringUtils.isAnyBlank(phoneNumber, supplierName, bidActivityCode,
+                bidActivityInfo, bidActivityDateTime, bidActivityAccount, bidActivityPassword, tempcode)) {
+            String result = fmi.sendBidMsg(phoneNumber, supplierName, bidActivityCode, bidActivityInfo, bidActivityDateTime,
+                    bidActivityAccount, bidActivityPassword, tempcode);
+            if (StringUtils.isNotBlank(result) && result.equals("\"1\"")) {
+                userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(1).activityCode(bidActivityCode).build(),
+                        JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+                return 1;
+            } else {
+                userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(2).activityCode(bidActivityCode).build(),
+                        JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+                return 0;
+            }
+        } else {
+            userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(2).activityCode(bidActivityCode).build(),
+                    JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+            return 0;
+        }
     }
 
 }

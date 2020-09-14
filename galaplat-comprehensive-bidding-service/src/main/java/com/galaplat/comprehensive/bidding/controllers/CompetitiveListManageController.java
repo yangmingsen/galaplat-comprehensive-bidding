@@ -9,8 +9,10 @@ import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.SupplierAccountParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
+import com.galaplat.comprehensive.bidding.utils.Tuple3;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -102,8 +104,8 @@ public class CompetitiveListManageController extends BaseController {
     @PostMapping("/sendMsgAndMail")
     @RestfulResult
     public Object sendMsgAndMail(@RequestParam("bidActivityCode") String bidActivityCode,@RequestParam(value = "phone",required = false)String phone,
-                                 @RequestParam(value = "emailAdrress",required = false) String emailAdrress,@RequestParam(value = "type") String type) throws BaseException {
-        return manageService.sendMsgAndMail( bidActivityCode, phone, emailAdrress, type);
+                                 @RequestParam(value = "emailAddress",required = false) String emailAddress,@RequestParam(value = "type") String type) throws BaseException {
+        return manageService.sendMsgAndMail( bidActivityCode, phone, emailAddress, type);
     }
 
 
@@ -128,38 +130,35 @@ public class CompetitiveListManageController extends BaseController {
 
     @PostMapping("/uploadFile")
     @RestfulResult
-    public Object  rarFileUpload(@RequestParam("bidActivityCode") String bidActivityCode, @RequestPart("rarFile") MultipartFile rarFile) throws BaseException {
-        return  manageService.rarFileUpload(bidActivityCode, rarFile);
+    public Object  fileUpload(@RequestParam("bidActivityCode") String bidActivityCode, @RequestPart("rarFile") MultipartFile rarFile) {
+        return  manageService.fileUpload(bidActivityCode, rarFile);
     }
 
 
     @PostMapping("/downloadFile")
     @RestfulResult
-    public void  zipFileDownload(String bidActivityCode) throws BaseException {
-        MultipartFile file = manageService.getRarFile(bidActivityCode);
+    public void  fileDownload(String bidActivityCode) throws BaseException {
+        MultipartFile file = manageService.getfile(bidActivityCode);
+        Tuple3<String ,String ,String > tuple3 = manageService.getFileAllName(bidActivityCode);
+
+        if (null == tuple3 || null == file || StringUtils.isBlank(tuple3._2) || StringUtils.isBlank(tuple3._3)) {
+            throw  new BaseException("下载文件异常！","下载文件异常！");
+        }
+
         OutputStream os = null;
         try {
             byte[] files = file.getBytes();
             response.setContentType("application/x-msdownload");
             response.setCharacterEncoding("utf-8");
-            response.setContentLength((int) files.length);
-            response.setHeader("Content-Disposition", "attachment;filename=" + bidActivityCode + ".rar");
+            response.setContentLength(files.length);
+            response.setHeader("Content-Disposition", "attachment;filename=" + tuple3._2 + tuple3._3);
             response.flushBuffer();
             os = response.getOutputStream();
             os.write(files);
             os.flush();
         } catch (IOException e) {
-            log.error("get file error ", e);
-            throw new BaseException("", "");
-        } finally {
-            try {
-                if (null != os) {
-                    os.close();
-                }
-            } catch (IOException e) {
-                log.error("get file error ", e);
-                throw new BaseException("", "");
-            }
+            log.error("get file error {},{}", e.getMessage(), e);
+            throw new BaseException("下载文件异常！", "下载文件异常！");
         }
     }
 

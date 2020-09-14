@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class MessageAndEmialDVO {
 
     /*短信发送状态（发送失败-0； 发送成功-1； 部分发送成功-2）*/
-   private int messageSendStatus;
+   private Integer messageSendStatus = null;
    /*发送结果（发送失败-0； 发送成功-1； 部分发送成功-2）*/
-   private int emailSeandStatus;
+   private Integer emailSeandStatus = null;
 
 }

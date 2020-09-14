@@ -5,6 +5,7 @@ import com.galaplat.comprehensive.bidding.dao.dvos.*;
 import com.galaplat.comprehensive.bidding.dao.params.BidActivityInfoParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
+import com.galaplat.comprehensive.bidding.utils.Tuple3;
 import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
 import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.github.pagehelper.PageInfo;
@@ -160,7 +161,20 @@ public interface ICompetitiveListManageService {
      * @param rarFile
      * @return
      */
-    String rarFileUpload(String bidActivityCode, MultipartFile rarFile);
+    String fileUpload(String bidActivityCode, MultipartFile rarFile);
 
-    MultipartFile getRarFile(String bidActivityCode);
+    /**
+     * 获取文件
+     * @param bidActivityCode
+     * @return
+     * @throws BaseException
+     */
+    MultipartFile getfile(String bidActivityCode)throws BaseException;
+
+    /**
+     *  获取文件的文件名
+     * @param bidActivityCode
+     * @return
+     */
+    Tuple3<String, String, String> getFileAllName(String bidActivityCode);
 }

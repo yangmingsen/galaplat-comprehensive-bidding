@@ -9,11 +9,11 @@ import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
 import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
 import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
+import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.ImportExcelValidateMapUtil;
 import com.galaplat.comprehensive.bidding.utils.Tuple;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
@@ -50,6 +50,9 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
 
     @Autowired
     private IJbxtActivityDao  activityDao;
+
+    @Autowired
+    private ICompetitiveListManageService  manageService;
 
 
     @Override
@@ -105,19 +108,16 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                         saveList.add(goodsParam);
                 }
             }
-            int insertCount = 0;
 
             if (CollectionUtils.isNotEmpty(saveList) && CollectionUtils.isEmpty(errorList)) {
                 goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
-                insertCount = goodsDao.batchInsert(saveList);
+                goodsDao.batchInsert(saveList);
             }
-            List<JbxtGoodsDO> activityGoodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode).build());
-            if (activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())
-                    && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
+            if (manageService.checkActivityInfoComplete(activityCode)) {
                 activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
             }
             if (CollectionUtils.isNotEmpty(errorList)) {
-                errorList.addAll(rightList);
+            errorList.addAll(rightList);
             }
         }// if
 
@@ -164,7 +164,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
         if (timeNum > 60) {
             error.append("竞标时长不能超过60分钟！");
         }
-        if (lastChangTime > timeNum) {
+        if (lastChangTime > timeNum * 60) {
             error.append("延时窗口期不能超过竞标时长！");
         }
         if (perDelayTime > 600) {
