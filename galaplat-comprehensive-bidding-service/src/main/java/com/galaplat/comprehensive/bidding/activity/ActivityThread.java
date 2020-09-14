@@ -3,14 +3,14 @@ package com.galaplat.comprehensive.bidding.activity;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BiddingDVO;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
-import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
@@ -37,7 +37,7 @@ public class ActivityThread extends Thread {
     private final ResponseMessage remainingTimeMessage = new ResponseMessage(100,null);
     private final UserChannelMap userChannelMap = SpringUtil.getBean(UserChannelMap.class);
     private final AdminChannelMap adminChannel = SpringUtil.getBean(AdminChannelMap.class);
-    private final IJbxtGoodsService iJbxtGoodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+    private final GoodsService goodsService = SpringUtil.getBean(GoodsService.class);
     //暂停状态控制Lock
     private final ReentrantLock lock =  new ReentrantLock();
     private final Condition continueRun = lock.newCondition();
@@ -157,13 +157,13 @@ public class ActivityThread extends Thread {
      * 设置榜首信息
      * @param theTopBids 处于第一名的竞价列表
      */
-    public void updateTopMinBid(List<JbxtBiddingDVO> theTopBids) {
+    public void updateTopMinBid(List<BiddingDVO> theTopBids) {
         if (theTopBids.size() == 0 ) return;
 
         if (haveMinBid) {
             if (this.minBid.compareTo(theTopBids.get(0).getBid()) == 1) {
                 //处理第一名提交竞价后还是第一名的情况
-                for (JbxtBiddingDVO tbid : theTopBids) {
+                for (BiddingDVO tbid : theTopBids) {
                     BigDecimal ttbidPrice = minSubmitMap.get(tbid.getUserCode());
                     if (ttbidPrice != null) {
                         return;
@@ -308,14 +308,14 @@ public class ActivityThread extends Thread {
      *
      */
     private void endTheCurrentGoodsActivity() {
-        final JbxtGoodsDO jbxtGoodsDO = iJbxtGoodsService.selectByGoodsId(Integer.parseInt(currentGoodsId));
+        final GoodsDO jbxtGoodsDO = goodsService.selectByGoodsId(Integer.parseInt(currentGoodsId));
         if (jbxtGoodsDO != null) {
             JbxtGoodsVO jbxtgoodsVO = new JbxtGoodsVO();
             jbxtgoodsVO.setGoodsId(Integer.parseInt(currentGoodsId));
             jbxtgoodsVO.setStatus("2");
 
             try {
-                iJbxtGoodsService.updateJbxtGoods(jbxtgoodsVO);
+                goodsService.updateJbxtGoods(jbxtgoodsVO);
                 LOGGER.info("endTheCurrentGoodsActivity(msg): 活动: "+currentActivityCode+" 竞品id: "+currentGoodsId+" 结束");
             } catch (Exception e) {
                 LOGGER.info("endTheCurrentGoodsActivity(ERROR): "+e.getMessage());
@@ -331,7 +331,7 @@ public class ActivityThread extends Thread {
     private boolean isfinallyGoods() {
         final String activitCode = this.currentActivityCode;
         final Integer goodsId = Integer.parseInt(this.currentGoodsId);
-        final List<SimpleGoodsVO> goods = iJbxtGoodsService.findAll(activitCode);
+        final List<SimpleGoodsVO> goods = goodsService.findAll(activitCode);
         final int goodsLength = goods.size();
         if (goodsLength > 0) {
             final int endGoodsIdx =goodsLength-1;
@@ -344,19 +344,19 @@ public class ActivityThread extends Thread {
     }
 
     private void autoCloseCurrentActivity() {
-        final IJbxtActivityService iJbxtActivityService = SpringUtil.getBean(IJbxtActivityService.class);
+        final ActivityService activityService = SpringUtil.getBean(ActivityService.class);
         final String activityCode = this.currentActivityCode;
-        final JbxtActivityDO activity = iJbxtActivityService.findOneByCode(activityCode);
+        final ActivityDO activity = activityService.findOneByCode(activityCode);
 
         if (activity != null) {
             if (activity.getStatus() == 3) {
-                final JbxtActivityDO tActivity = new JbxtActivityDO();
+                final ActivityDO tActivity = new ActivityDO();
                 tActivity.setCode(activityCode);
                 tActivity.setStatus(4);
                 boolean updateActivityStatus = false;
 
                 try {
-                    iJbxtActivityService.updateByPrimaryKeySelective(tActivity);
+                    activityService.updateByPrimaryKeySelective(tActivity);
                     updateActivityStatus = true;
                 } catch (Exception e) {
                     LOGGER.info("switchActivityGoods(ERROR): 更新活动("+activityCode+")结束结束失败");
@@ -411,10 +411,10 @@ public class ActivityThread extends Thread {
      * 更新榜首 提示
      * @param theTopBids
      */
-    private void updateMinSubmitInfo(List<JbxtBiddingDVO> theTopBids) {
+    private void updateMinSubmitInfo(List<BiddingDVO> theTopBids) {
         this.minSubmitMap.clear();
         for (int i = 0; i < theTopBids.size(); i++) {
-            final JbxtBiddingDVO ttBid = theTopBids.get(i);
+            final BiddingDVO ttBid = theTopBids.get(i);
             this.minSubmitMap.put(ttBid.getUserCode(), ttBid.getBid());
         }
         this.minBid = theTopBids.get(0).getBid();

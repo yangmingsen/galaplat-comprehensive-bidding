@@ -2,9 +2,9 @@ package com.galaplat.comprehensive.bidding.service.impl;
 
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.comprehensive.bidding.dao.*;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
 import com.galaplat.comprehensive.bidding.dao.params.*;
 import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
@@ -60,16 +60,16 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private static final String OPRATETYPE_UPDATE = "update";
 
     @Autowired
-    private IJbxtActivityDao activityDao;
+    private ActivityDao activityDao;
 
     @Autowired
-    private IJbxtUserDao userDao;
+    private UserDao userDao;
 
     @Autowired
-    private IJbxtGoodsDao goodsDdao;
+    private GoodsDao goodsDdao;
 
     @Autowired
-    private IJbxtBiddingDao biddingDao;
+    private BiddingDao biddingDao;
 
     @Autowired
     private IdWorker worker;
@@ -145,7 +145,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         if (StringUtils.equals(type, OPRATETYPE_ADD) && StringUtils.isEmpty(bidActivityCode)) {
             activityCode = worker.nextId();
         } else if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
-            JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
+            ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
             if (null != activityDO) {
                 activityParam.setStatus(activityDO.getStatus());
                 if (activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
@@ -153,7 +153,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 }
             }
         }
-        JbxtActivityDO activityDO = JbxtActivityDO.builder()
+        ActivityDO activityDO = ActivityDO.builder()
                 .code(activityCode)
                 .companyCode(StringUtils.isEmpty(bidActivityCode) ? activityParam.getCompanyCode() : null)
                 .sysCode(StringUtils.isEmpty(bidActivityCode) ? activityParam.getSysCode() : null)
@@ -196,7 +196,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     @Override
     public List<SupplierAccountVO> listSupplierAccount(String bidActivityCode) throws BaseException {
         List<SupplierAccountVO> accountVOS = Lists.newArrayList();
-        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
+        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
         userDOList.stream().forEach(e -> {
             SupplierAccountVO accountVO = new SupplierAccountVO();
             CopyUtil.copyPropertiesExceptEmpty(e, accountVO);
@@ -218,11 +218,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             throw new BaseException("竞标编码不能为空！", "竞标编码不能为空！");
         }
         int maxBidNum = 0;
-        List<JbxtGoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
+        List<GoodsDO> goodsList = goodsDdao.listGoods(JbxtGoodsParam.builder().activityCode(bidActivityCode).build());
         List<List<String>> bidPriceRankData = new ArrayList<>();
         List<List<String>> bidPriceDdetailData = new ArrayList<>();
         int index = 1;
-        for (JbxtGoodsDO goods : goodsList) {
+        for (GoodsDO goods : goodsList) {
             // 查询某竞标活动某竞品的所有用户
             List<String> allBidUserCodes = biddingDao.listBidActivityUsers(JbxtBiddingParam.builder().goodsId(goods.getGoodsId())
                     .activityCode(goods.getActivityCode()).build());
@@ -320,7 +320,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param goods
      * @return
      */
-    private Map<String,Object> getMinBidList(JbxtGoodsDO goods,  List<String> allBidUserCodes) {
+    private Map<String,Object> getMinBidList(GoodsDO goods, List<String> allBidUserCodes) {
 
         List<BidDVO> minBidList = new ArrayList<>();
         for (int i = 0; i < allBidUserCodes.size(); i++) {
@@ -349,7 +349,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         for (int i = 0; i < bids.size(); i++) {
             BidDVO bid = bids.get(i);
             RankInfoVO rankInfo = map.get(bid.getBid());
-            JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(bid.getUserCode()).build());
+            UserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(bid.getUserCode()).build());
             String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName() : bid.getUserCode();
             if (rankInfo == null) {
                 RankInfoVO newRankInfo = new RankInfoVO();
@@ -378,7 +378,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param index
      * @return
      */
-    private Map<String,Object> getBidPriceFinalRank(JbxtGoodsDO goods, List<String> allBidUserCodes, int index) {
+    private Map<String,Object> getBidPriceFinalRank(GoodsDO goods, List<String> allBidUserCodes, int index) {
         Map<String,Object> resultMap = new HashMap<>();
 
         List<String> res = new ArrayList<>();
@@ -415,14 +415,14 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         return  resultMap;
     }
 
-    public  List<String> getBidPriceDetail(String userCode, JbxtGoodsDO goods, String activityCode) {
+    public  List<String> getBidPriceDetail(String userCode, GoodsDO goods, String activityCode) {
         List<BidDVO> bids = biddingDao.getOneSupplierBidPriceDeatil(JbxtBiddingParam.builder()
                 .userCode(userCode).goodsId(goods.getGoodsId()).activityCode(activityCode).build());
         List<String> res = new ArrayList<>();
         res.add(goods.getCode());
         res.add(goods.getName());
 
-        JbxtUserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(userCode).build());
+        UserDO userDO = userDao.getJbxtUser(JbxtUserParam.builder().code(userCode).build());
         String userName = null != userDO && userDO.getSupplierName() != null ? userDO.getSupplierName()  : userCode;
         res.add((userName));
 
@@ -446,7 +446,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private int batchInsertOrUpdate(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) {
         List<JbxtUserParam> saveUserParamList = Lists.newArrayList();
         supplierAccountParamList.forEach(e -> {
-            List<JbxtUserDO> userDOList = null;
+            List<UserDO> userDOList = null;
             // 修改的的时候
             if (StringUtils.isNotEmpty(bidActivityCode)) {
                  userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
@@ -490,7 +490,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      */
     private int batchDeleteUser(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) throws  Exception {
         List<String> deleteUserList = Lists.newArrayList();
-        List<JbxtUserDO> currentUserDOList = null;
+        List<UserDO> currentUserDOList = null;
         currentUserDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
         currentUserDOList.stream().forEach(e->{
             int time = 0;
@@ -535,7 +535,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String  words = "abcdefghijklmnopqrstuvwxyz";
         String userName = RandomStringUtils.random(2,words) + getShortCode(3)
                 + RandomStringUtils.random(1,words) ;
-        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
+        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).build());
         while (CollectionUtils.isNotEmpty(userDOList)) {
             userName = RandomStringUtils.random(2,words) + getShortCode(3)
                     + RandomStringUtils.random(1,words) ;
@@ -554,7 +554,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String  words = "abcdefghijklmnopqrstuvwxyz";
         String password = RandomStringUtils.random(2,words) + getShortCode(3)
                 + RandomStringUtils.random(2,words) + getShortCode(1);
-        List<JbxtUserDO> userDOList = userDao.getUser(JbxtUserParam.builder().password(password).build());
+        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().password(password).build());
         while (CollectionUtils.isNotEmpty(userDOList)) {
             password =  RandomStringUtils.random(2,words) + getShortCode(3)
                     + RandomStringUtils.random(2,words) + getShortCode(1);

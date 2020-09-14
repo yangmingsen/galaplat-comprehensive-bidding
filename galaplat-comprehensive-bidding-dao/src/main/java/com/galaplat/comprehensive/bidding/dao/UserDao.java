@@ -2,8 +2,8 @@ package com.galaplat.comprehensive.bidding.dao;
 
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtUserDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.UserDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
 import com.github.pagehelper.PageInfo;
@@ -13,37 +13,37 @@ import com.github.pagehelper.PageInfo;
  * @author esr
  * @date: 2020年06月17日
  */
-public interface IJbxtUserDao{
+public interface UserDao {
 
 
 	/**
 	 * 添加用户表
 	 */
-	int insertJbxtUser(JbxtUserDO entity);
+	int insertJbxtUser(UserDO entity);
 
 	/**
 	 * 更新用户表信息
 	 */
-	int updateJbxtUser(JbxtUserDO entity);
+	int updateJbxtUser(UserDO entity);
 
 	/**
 	 * 分页获取用户表列表
 	 *
 	 */
-	public PageInfo<JbxtUserDVO> getJbxtUserPage(JbxtUserParam jbxtuserParam) throws BaseException;
+	public PageInfo<UserDVO> getJbxtUserPage(JbxtUserParam jbxtuserParam) throws BaseException;
 
 
-	JbxtUserDO getJbxtUser(JbxtUserParam jbxtuserParam);
+	UserDO getJbxtUser(JbxtUserParam jbxtuserParam);
 
 
-	JbxtUserDO getJbxtUserByUsername(String  username);
+	UserDO getJbxtUserByUsername(String  username);
 
 
-	JbxtUserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
+	UserDO selectByuserCodeAndActivityCode(String userCode, String activityCode);
 
-	JbxtUserDO selectByUsernameAndActivityCode(String username, String activityCode);
+	UserDO selectByUsernameAndActivityCode(String username, String activityCode);
 
-	List<JbxtUserDVO> findAllByActivityCode(String activityCode);
+	List<UserDVO> findAllByActivityCode(String activityCode);
 
 	/**
 	 *  批量新增或者更新供应商信息
@@ -57,7 +57,7 @@ public interface IJbxtUserDao{
 	 * @param userParam
 	 * @return
 	 */
-	List<JbxtUserDO> getUser(JbxtUserParam userParam);
+	List<UserDO> getUser(JbxtUserParam userParam);
 
 	/**
 	 * 获取供应商站账号

@@ -10,7 +10,7 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
-public class JbxtBiddingDO implements Serializable {
+public class BiddingDO implements Serializable {
     private static final long serialVersionUID = 1L;
 
      /*唯一编码*/

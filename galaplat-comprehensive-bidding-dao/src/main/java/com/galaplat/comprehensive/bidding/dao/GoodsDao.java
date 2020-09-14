@@ -2,8 +2,8 @@ package com.galaplat.comprehensive.bidding.dao;
 
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.github.pagehelper.PageInfo;
 
@@ -12,27 +12,27 @@ import com.github.pagehelper.PageInfo;
  * @author esr
  * @date: 2020年06月17日
  */
-public interface IJbxtGoodsDao{
+public interface GoodsDao {
 
 
 	/**
 	 * 添加竞品表
 	 */
-	int insertJbxtGoods(JbxtGoodsDO entity);
+	int insertJbxtGoods(GoodsDO entity);
 
 	/**
 	 * 更新竞品表信息
 	 */
-	int updateJbxtGoods(JbxtGoodsDO entity);
+	int updateJbxtGoods(GoodsDO entity);
 
 	/**
 	 * 分页获取竞品表列表
 	 *
 	 */
-	public PageInfo<JbxtGoodsDVO> getJbxtGoodsPage(JbxtGoodsParam jbxtgoodsParam) throws BaseException;
+	public PageInfo<GoodsDVO> getJbxtGoodsPage(JbxtGoodsParam jbxtgoodsParam) throws BaseException;
 
 
-	JbxtGoodsDO getJbxtGoods(JbxtGoodsParam jbxtgoodsParam);
+	GoodsDO getJbxtGoods(JbxtGoodsParam jbxtgoodsParam);
 
 
 	/**
@@ -40,9 +40,9 @@ public interface IJbxtGoodsDao{
 	 * @param activityCode
 	 * @return res => ASC（id）
 	 */
-	List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
+	List<GoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
-	public JbxtGoodsDO selectActiveGoods(String activityCode);
+	public GoodsDO selectActiveGoods(String activityCode);
 
 
 
@@ -52,7 +52,7 @@ public interface IJbxtGoodsDao{
 	 * @param goodsId
 	 * @return
 	 */
-	public JbxtGoodsDO selectByGoodsId(Integer goodsId);
+	public GoodsDO selectByGoodsId(Integer goodsId);
 
 
 	/**
@@ -67,7 +67,7 @@ public interface IJbxtGoodsDao{
 	 * @param jbxtgoodsParam
 	 * @return
 	 */
-	List<JbxtGoodsDO> listGoods(JbxtGoodsParam jbxtgoodsParam);
+	List<GoodsDO> listGoods(JbxtGoodsParam jbxtgoodsParam);
 
 	/**
 	 * 删除竞品

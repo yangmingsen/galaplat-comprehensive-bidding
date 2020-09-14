@@ -3,7 +3,7 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -84,7 +84,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
             map.put("goodsId", info.getGoodsId().toString());
             map.put("parataxis", parataxis.toString());
             if (needSendBidPercent) {
-                JbxtBiddingDO minBidRecord = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                BiddingDO minBidRecord = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
                 map.put("bidPercent", minBidRecord.getBidPercent().toString());
             }
 

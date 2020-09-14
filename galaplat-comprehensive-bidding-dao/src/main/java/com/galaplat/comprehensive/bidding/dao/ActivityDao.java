@@ -1,10 +1,10 @@
 package com.galaplat.comprehensive.bidding.dao;
 
 import java.util.List;
-import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.CompetitiveListDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.ActivityDVO;
 import com.galaplat.comprehensive.bidding.dao.params.CompetitiveListParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.github.pagehelper.PageInfo;
@@ -14,33 +14,29 @@ import com.github.pagehelper.PageInfo;
  * @author esr
  * @date: 2020年06月17日
  */
-public interface IJbxtActivityDao{
+public interface ActivityDao {
 
 
     /**
 	 * 添加活动表
 	 */
-	int insertJbxtActivity(JbxtActivityDO entity);
+	int insertJbxtActivity(ActivityDO entity);
 
-	 public List<JbxtActivityDVO> findAll();
+	 public List<ActivityDVO> findAll();
 
 	/**
 	 * 更新活动表信息
 	 */
-	int updateJbxtActivity(JbxtActivityDO entity);
+	int updateJbxtActivity(ActivityDO entity);
 
-	int updateByPrimaryKeySelective(JbxtActivityDO entity);
+	int updateByPrimaryKeySelective(ActivityDO entity);
 
-	 JbxtActivityDO findOneByCode(String code);
+	 ActivityDO findOneByCode(String code);
 
-	/**
-	 * 分页获取活动表列表
-	 *
-	 */
-	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException;
-	
-    
-    JbxtActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam);
+	List<ActivityDVO> findAllByStatus(Integer status);
+
+
+    ActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam);
 
 	 /**
 	  * 竞标单管理列表查询
@@ -61,11 +57,11 @@ public interface IJbxtActivityDao{
 	  * @param entity
 	  * @return
 	  */
-   int insertBidActivity(JbxtActivityDO entity);
+   int insertBidActivity(ActivityDO entity);
 
 	 /**
 	  * 更新竞标活动
 	  */
-	int updateBidActivity(JbxtActivityDO entity);
+	int updateBidActivity(ActivityDO entity);
 
 }

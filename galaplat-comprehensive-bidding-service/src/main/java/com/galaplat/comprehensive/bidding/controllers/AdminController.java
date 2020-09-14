@@ -6,12 +6,12 @@ import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
-import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
+import com.galaplat.comprehensive.bidding.service.BiddingService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.MyResult;
 import org.slf4j.Logger;
@@ -34,13 +34,13 @@ public class AdminController extends BaseController {
     private ActivityThreadManager activityThreadManager;
 
     @Autowired
-    private IJbxtGoodsService goodsService;
+    private GoodsService goodsService;
 
     @Autowired
-    private IJbxtActivityService activityService;
+    private ActivityService activityService;
 
     @Autowired
-    private IJbxtBiddingService biddingService;
+    private BiddingService biddingService;
 
     @Autowired
     private MessageQueue messageQueue;
@@ -79,7 +79,7 @@ public class AdminController extends BaseController {
         final MyResult checkNextRes = checkNextReq(activityCode);
         if (!checkNextRes.isSuccess()) return checkNextRes;
 
-        final JbxtGoodsDO jbxtGoodsDO = goodsService.selectActiveGoods(activityCode); //get 正在进行goods
+        final GoodsDO jbxtGoodsDO = goodsService.selectActiveGoods(activityCode); //get 正在进行goods
         if (jbxtGoodsDO != null) {
             final JbxtGoodsVO tj = new JbxtGoodsVO();
             tj.setGoodsId(jbxtGoodsDO.getGoodsId());
@@ -168,8 +168,8 @@ public class AdminController extends BaseController {
      * @return
      */
     private MyResult handlerTheAcitvityThreadNotExistCondition(String activityCode, Integer goodsId) {
-        final JbxtActivityDO activity = activityService.findOneByCode(activityCode);
-        final JbxtGoodsDO goods = goodsService.selectByGoodsId(goodsId);
+        final ActivityDO activity = activityService.findOneByCode(activityCode);
+        final GoodsDO goods = goodsService.selectByGoodsId(goodsId);
         if (activity != null && goods != null) {
             final Integer curActivityStatus = activity.getStatus();
             if (curActivityStatus == 3) { //如果为进行状态
@@ -197,7 +197,7 @@ public class AdminController extends BaseController {
             return new MyResult(false, "错误: activityCode不能为空哦(*￣︶￣)", null);
         }
 
-        final JbxtActivityDO activityEntity = activityService.findOneByCode(activityCode);
+        final ActivityDO activityEntity = activityService.findOneByCode(activityCode);
         if (activityEntity == null) {
             final String errorInfo = "错误: 当前活动" + activityCode + "不存在";
             LOGGER.info("next(msg): " + errorInfo);
@@ -208,9 +208,9 @@ public class AdminController extends BaseController {
     }
 
     private Object switchActivityGoods(String activityCode) {
-        final List<JbxtGoodsDVO> goodsList = goodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
+        final List<GoodsDVO> goodsList = goodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
         for (int i = 0; i < goodsList.size(); i++) {
-            final JbxtGoodsDVO currentGoods = goodsList.get(i);
+            final GoodsDVO currentGoods = goodsList.get(i);
             if ("0".equals(currentGoods.getStatus())) {
                 //更新当前竞品状态为 1
                 final JbxtGoodsVO newGoodsStatus = new JbxtGoodsVO();
@@ -220,7 +220,7 @@ public class AdminController extends BaseController {
                 try {
                     if (i == 0) {
                         //更新竞品单 当前竞品单状态为进行中
-                        final JbxtActivityDO tActivity = new JbxtActivityDO();
+                        final ActivityDO tActivity = new ActivityDO();
                         tActivity.setCode(activityCode);
                         tActivity.setStatus(3);
 
@@ -237,7 +237,7 @@ public class AdminController extends BaseController {
                     final int delayedCondition = currentGoods.getLastChangTime();
                     final int allowDelayedLength = currentGoods.getPerDelayTime();
                     final int allowDelayedTime = currentGoods.getDelayTimes();
-                    JbxtActivityDO activityInfoDO = activityService.findOneByCode(activityCode);
+                    ActivityDO activityInfoDO = activityService.findOneByCode(activityCode);
                     final int supplierNum = activityInfoDO.getSupplierNum();
                     final int bidType = activityInfoDO.getBidingType();
 
@@ -255,10 +255,10 @@ public class AdminController extends BaseController {
         }
 
         //处理手动切换最后一个的情况
-        final JbxtActivityDO activity = activityService.findOneByCode(activityCode);
+        final ActivityDO activity = activityService.findOneByCode(activityCode);
         if (activity != null) {
             if (activity.getStatus() == 3) {
-                final JbxtActivityDO tActivity = new JbxtActivityDO();
+                final ActivityDO tActivity = new ActivityDO();
                 tActivity.setCode(activityCode);
                 tActivity.setStatus(4);
                 boolean updateActivityStatus = false;

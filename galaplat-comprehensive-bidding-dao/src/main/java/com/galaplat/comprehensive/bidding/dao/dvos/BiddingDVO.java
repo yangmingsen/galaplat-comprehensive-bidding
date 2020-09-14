@@ -1,25 +1,28 @@
 package com.galaplat.comprehensive.bidding.dao.dvos;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 
 
  /**
- * 用户表DVO
+ * 竞价表DVO
  * @author esr
  * @date: 2020年06月17日
  */
-public class JbxtUserDVO implements Serializable {
+public class BiddingDVO implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/
     private String code;
-    /*用户名*/
-    private String username;
-    /*密码*/
-    private String password;
-    /*是否为admin(0，普通成员；1，管理员)*/
-    private String admin;
+    /*竞品id*/
+    private Integer goodsId;
+    /*用户code*/
+    private String userCode;
+    /*竞标活动code*/
+    private String activityCode;
+    /*用户出价(保留2位小数)*/
+    private BigDecimal bid;
     /*创建时间*/
     private Date createdTime;
     /*更新时间如果没有默认创建时间，修改数据必须更新*/
@@ -33,61 +36,69 @@ public class JbxtUserDVO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
-     private String activityCode;
-     private String supplierName;
-     private String codeName;
+     private String bidTime;
 
-     public String getActivityCode() {
-         return activityCode;
+     private Integer isdelay;
+
+     private BigDecimal bidPercent;
+
+     public void setBidPercent(BigDecimal bidPercent) {
+         this.bidPercent = bidPercent;
      }
 
-     public void setActivityCode(String activityCode) {
-         this.activityCode = activityCode;
+     public BigDecimal getBidPercent() {
+         return bidPercent;
      }
 
-     public String getSupplierName() {
-         return supplierName;
+     public Integer getIsdelay() {
+         return isdelay;
      }
 
-     public void setSupplierName(String supplierName) {
-         this.supplierName = supplierName;
+     public void setIsdelay(Integer isdelay) {
+         this.isdelay = isdelay;
      }
 
-     public String getCodeName() {
-         return codeName;
+     public String getBidTime() {
+         return bidTime;
      }
 
-     public void setCodeName(String codeName) {
-         this.codeName = codeName;
+     public void setBidTime(String bidTime) {
+         this.bidTime = bidTime;
      }
 
-
-    public String getCode() {
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {
         this.code = code;
     }
 
-    public String getUsername() {
-        return username;
+    public Integer getGoodsId() {
+        return goodsId;
     }
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
+    public void setGoodsId(Integer goodsId) {
+        this.goodsId = goodsId;
     }
 
-    public String getAdmin() {
-        return admin;
+    public String getUserCode() {
+        return userCode;
     }
-    public void setAdmin(String admin) {
-        this.admin = admin;
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
+    }
+
+    public String getActivityCode() {
+        return activityCode;
+    }
+    public void setActivityCode(String activityCode) {
+        this.activityCode = activityCode;
+    }
+
+    public BigDecimal getBid() {
+        return bid;
+    }
+    public void setBid(BigDecimal bid) {
+        this.bid = bid;
     }
 
     public Date getCreatedTime() {

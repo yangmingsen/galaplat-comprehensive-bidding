@@ -5,10 +5,9 @@ import com.galaplat.comprehensive.bidding.dao.params.CompetitiveListParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
+import com.galaplat.comprehensive.bidding.dao.ActivityDao;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.ActivityDVO;
 import com.galaplat.comprehensive.bidding.dao.mappers.custs.JbxtActivityCustMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.github.pagehelper.PageHelper;
@@ -22,44 +21,41 @@ import java.util.List;
  * @date: 2020年06月17日
  */
  @Repository
-public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
+public   class ActivityDaoImpl implements ActivityDao {
 
 	@Autowired
 	private JbxtActivityCustMapper mapper;
 
     @Override
-	public int insertJbxtActivity(JbxtActivityDO entity){
+	public int insertJbxtActivity(ActivityDO entity){
 	       return mapper.insert(entity);
 	}
 
 	@Override
-	public int updateJbxtActivity(JbxtActivityDO entity){
+	public int updateJbxtActivity(ActivityDO entity){
 	        return mapper.updateByPrimaryKey(entity);
 	}
 
-	public int updateByPrimaryKeySelective(JbxtActivityDO entity) {
+	public int updateByPrimaryKeySelective(ActivityDO entity) {
     	return mapper.updateByPrimaryKeySelective(entity);
 	}
 
-	public JbxtActivityDO findOneByCode(String code) {
+	public ActivityDO findOneByCode(String code) {
     	return mapper.selectByPrimaryKey(code);
 	}
 
-
 	@Override
-	public PageInfo<JbxtActivityDVO> getJbxtActivityPage(JbxtActivityParam jbxtactivityParam) throws BaseException{
-	       PageHelper.startPage(jbxtactivityParam.getPn(), jbxtactivityParam.getPs());
-		   return new PageInfo<JbxtActivityDVO>(mapper.getJbxtActivityList(jbxtactivityParam));
-
+	public List<ActivityDVO> findAllByStatus(Integer status) {
+		return mapper.selectAllByStatus(status);
 	}
 
 	@Override
-	public List<JbxtActivityDVO> findAll(){
+	public List<ActivityDVO> findAll(){
 		return mapper.selectAll();
 	}
 
     @Override
-    public JbxtActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam){
+    public ActivityDO getJbxtActivity(JbxtActivityParam jbxtactivityParam){
 		return mapper.selectByPrimaryKey(jbxtactivityParam.getCode());
     }
 
@@ -72,12 +68,12 @@ public   class JbxtActivityDaoImpl implements IJbxtActivityDao  {
 	}
 
 	@Override
-	public int insertBidActivity(JbxtActivityDO entity){
+	public int insertBidActivity(ActivityDO entity){
 		return mapper.insertSelective(entity);
 	}
 
 	@Override
-	public int updateBidActivity(JbxtActivityDO entity) {
+	public int updateBidActivity(ActivityDO entity) {
 		return mapper.updateByPrimaryKeySelective(entity);
 	}
 

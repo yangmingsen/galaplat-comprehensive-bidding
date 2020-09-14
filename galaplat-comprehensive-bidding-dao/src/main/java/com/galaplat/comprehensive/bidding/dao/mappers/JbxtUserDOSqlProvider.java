@@ -8,11 +8,11 @@ import static org.apache.ibatis.jdbc.SqlBuilder.UPDATE;
 import static org.apache.ibatis.jdbc.SqlBuilder.VALUES;
 import static org.apache.ibatis.jdbc.SqlBuilder.WHERE;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 
 public class JbxtUserDOSqlProvider {
 
-    public String insertSelective(JbxtUserDO record) {
+    public String insertSelective(UserDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_user");
 
@@ -95,7 +95,7 @@ public class JbxtUserDOSqlProvider {
         return SQL();
     }
 
-    public String updateByPrimaryKeySelective(JbxtUserDO record) {
+    public String updateByPrimaryKeySelective(UserDO record) {
         BEGIN();
         UPDATE("t_jbxt_user");
 

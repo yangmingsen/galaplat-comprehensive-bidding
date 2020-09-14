@@ -2,7 +2,7 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +50,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         // business start
         final Integer goodsId = Integer.parseInt(goodsIdStr);
         final BigDecimal bid = new BigDecimal(bidPriceStr);
-        final JbxtBiddingDO curBidInfo =
+        final BiddingDO curBidInfo =
                 biddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
         String percentStr = takeQueuemsg.getData().get("bidPercent");
-        Integer bidPercent = percentStr == null ? 0 : Integer.parseInt(percentStr);
+        BigDecimal bidPercent = percentStr == null ? new BigDecimal("0.00") : new BigDecimal(percentStr);
         if (curBidInfo != null) {
             if (bid.compareTo(curBidInfo.getBid()) < 0) { //如果1 < 2 => -1
                 //处理提交
@@ -67,7 +67,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
     }
 
 
-    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, Integer bidPercent) {
+    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, BigDecimal bidPercent) {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
 
@@ -97,7 +97,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
             if (status == 1) { //插入
                 biddingService.insertMinBidTableSelective(newBidVO);
             } else if (status == 2) { //更新
-                final JbxtBiddingDO minbidE = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                final BiddingDO minbidE = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
 
                 final JbxtBiddingVO updateBidVO = new JbxtBiddingVO();
                 updateBidVO.setCode(minbidE.getCode());
@@ -143,7 +143,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         messageQueue.offer(new QueueMessage(200,map200));
 
         //检查是否更新top提示
-        final List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
+        final List<BiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
         activityManager.get(activityCode).updateTopMinBid(theTopBids);*/
     }
 

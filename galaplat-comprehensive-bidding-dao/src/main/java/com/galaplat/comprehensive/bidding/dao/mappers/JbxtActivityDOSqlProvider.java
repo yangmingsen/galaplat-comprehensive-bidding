@@ -8,11 +8,11 @@ import static org.apache.ibatis.jdbc.SqlBuilder.UPDATE;
 import static org.apache.ibatis.jdbc.SqlBuilder.VALUES;
 import static org.apache.ibatis.jdbc.SqlBuilder.WHERE;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 
 public class JbxtActivityDOSqlProvider {
 
-    public String insertSelective(JbxtActivityDO record) {
+    public String insertSelective(ActivityDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_activity");
 
@@ -103,7 +103,7 @@ public class JbxtActivityDOSqlProvider {
         return SQL();
     }
 
-    public String updateByPrimaryKeySelective(JbxtActivityDO record) {
+    public String updateByPrimaryKeySelective(ActivityDO record) {
         BEGIN();
         UPDATE("t_jbxt_activity");
 

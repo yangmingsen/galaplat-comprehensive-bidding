@@ -3,10 +3,10 @@ package com.galaplat.comprehensive.bidding.netty;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.queue.QueueHandlerThreadSingleton;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtActivityDVO;
-import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.ActivityDVO;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +31,13 @@ public class MyApplicationRunner implements ApplicationRunner {
     private void runNetty(ApplicationArguments args) {
         websocketServer.start(); //the Netty start point
 
-        final IJbxtActivityService activityService = SpringUtil.getBean(IJbxtActivityService.class);
+        final ActivityService activityService = SpringUtil.getBean(ActivityService.class);
         final ActivityThreadManager activityMap = SpringUtil.getBean(ActivityThreadManager.class);
-        final List<JbxtActivityDVO> lists = activityService.findAll();
-        for (JbxtActivityDVO activityDO : lists) {
+        final List<ActivityDVO> lists = activityService.findAllByStatus(3);
+        for (ActivityDVO activityDO : lists) {
             if (activityDO.getStatus() == 3) {
-                final IJbxtGoodsService goodsService = SpringUtil.getBean(IJbxtGoodsService.class);
-                final JbxtGoodsDO activeGoods = goodsService.selectActiveGoods(activityDO.getCode());
+                final GoodsService goodsService = SpringUtil.getBean(GoodsService.class);
+                final GoodsDO activeGoods = goodsService.selectActiveGoods(activityDO.getCode());
                 if (activeGoods != null) {
                     final ActivityTask.Builder builder = new ActivityTask.Builder();
 
