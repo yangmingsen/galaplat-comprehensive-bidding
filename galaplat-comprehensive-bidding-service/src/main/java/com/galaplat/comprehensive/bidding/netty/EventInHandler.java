@@ -196,28 +196,23 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             return;
         }
 
-        final BigDecimal bidPercent;
+        final double subPercent;
         try {
-            bidPercent = new BigDecimal(tStr1);
+            subPercent =  Double.parseDouble(tStr1);
         } catch (NumberFormatException e) {
             LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
             return;
         }
 
         GoodsDO goods = goodsService.selectByGoodsId(goodsId);
-
-
-        BigDecimal firstPrice = goods.getFirstPrice();
-        BigDecimal one = new BigDecimal("1");
-        BigDecimal per100 = new BigDecimal("100");
-
-        BigDecimal divideRes = bidPercent.divide(per100,2,2);
-        BigDecimal subtractRes = one.subtract(divideRes);
-        BigDecimal bidPrice = firstPrice.multiply(subtractRes).setScale(3,  BigDecimal.ROUND_HALF_UP); //保留3为小数;
-
-        message.getData().put("bidPrice", bidPrice.toString());
-
+        double firstPrice = goods.getFirstPrice().doubleValue();
+        message.getData().put("bidPrice", computeSubPercent(firstPrice, subPercent).toString());
         handler213Problem(message, ctx);
+    }
+
+    private BigDecimal computeSubPercent(double firstPrice, double subPercent) {
+        double computePriceRes = firstPrice * (1d - subPercent/100d);
+        return new BigDecimal(computePriceRes).setScale(3,  BigDecimal.ROUND_HALF_UP);
     }
 
 
