@@ -199,6 +199,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         final double subPercent;
         try {
             subPercent =  Double.parseDouble(tStr1);
+            if (subPercent < 0.00D || subPercent > 100.00D) {
+                LOGGER.info("handler218Problem(Exception): 降幅数据异常,要求降幅区间在(0%,100%). 当前报价幅度="+subPercent+"%");
+                return;
+            }
         } catch (NumberFormatException e) {
             LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
             return;
