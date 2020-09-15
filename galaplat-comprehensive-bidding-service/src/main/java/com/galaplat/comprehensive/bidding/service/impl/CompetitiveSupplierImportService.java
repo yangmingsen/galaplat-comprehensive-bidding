@@ -35,10 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @
@@ -50,6 +47,9 @@ import java.util.Map;
 public class CompetitiveSupplierImportService implements IImportSubMethodWithParamService<JbxtSupplierExcelParam> {
 
     private static final Logger log = LoggerFactory.getLogger(CompetitiveSupplierImportService.class);
+
+    /* 当前导入供应商已使用的代号 */
+    private  Map<String, String> addingCodeNameMap = new HashMap<>();
 
     @Autowired
     private IdWorker worker;
@@ -89,23 +89,19 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
         // 如果竞标活动的状态是结束时，不允许导入
         if (activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
-            return Collections.emptyList();
+            return getErrorSupplierExcelParams(list, "竞标活动已结束，不允许导入供应商信息！");
         }
 
         //超过20个导入失败
         if ((CollectionUtils.isNotEmpty(list) && list.size() > 20) || CollectionUtils.isEmpty(list)) {
-            return Collections.emptyList();
+            return getErrorSupplierExcelParams(list, "供应商个数不允许超过20个！");
         }
 
         if (null != activityDO && CollectionUtils.isNotEmpty(list)) {
             for (Map<String, Object> userMap : list) {
-                JbxtSupplierExcelParam supplierExcelParam = new JbxtSupplierExcelParam();
-                StringBuilder errorMsg = new StringBuilder("");
-
-                Tuple<String, JbxtSupplierExcelParam> paramTuple = ImportExcelValidateMapUtil.validateField(supplierExcelParam, userMap);
-                errorMsg.append(paramTuple._1);
-                supplierExcelParam = paramTuple._2;
-                errorMsg.append(validateExcelParam(supplierExcelParam));
+                SupplierExcelParamValidateResult excelParamValidateResult = new SupplierExcelParamValidateResult(userMap).invoke();
+                JbxtSupplierExcelParam supplierExcelParam = excelParamValidateResult.getSupplierExcelParam();
+                StringBuilder errorMsg = excelParamValidateResult.getErrorMsg();
 
                 if (StringUtils.isNotEmpty(errorMsg.toString())) {
                     supplierExcelParam.setErrorMsg(errorMsg.toString());
@@ -239,7 +235,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 excelSupplier.setPassword(manageService.getPassword());
                 excelSupplier.setAdmin("0");// 表示普通成员
                 excelSupplier.setActivityCode(bidActivityCode);
-                excelSupplier.setCodeName(getCodeName(bidActivityCode));
+                excelSupplier.setCodeName(getCodeName(bidActivityCode,userName));
                 excelSupplier.setLoginStatus(0);
                 excelSupplier.setSendMail(0);
                 excelSupplier.setSendSms(0);
@@ -259,7 +255,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 excelSupplier.setPassword(manageService.getPassword());
                 excelSupplier.setAdmin("0");// 表示普通成员
                 excelSupplier.setActivityCode(bidActivityCode);
-                excelSupplier.setCodeName(getCodeName(bidActivityCode));
+                excelSupplier.setCodeName(getCodeName(bidActivityCode,userName));
                 excelSupplier.setLoginStatus(0);
                 excelSupplier.setSendMail(0);
                 excelSupplier.setSendSms(0);
@@ -330,7 +326,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
      * @param bidActivityCode
      * @return
      */
-    private String getCodeName(String bidActivityCode) {
+    private String getCodeName(String bidActivityCode, String userName) {
 
         String codeName = null;
         for (int i = 1; i <= 20; i++) {
@@ -340,12 +336,67 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 log.error("There is an error of getting CodeName【{}】,【{}】", e.getMessage(), e);
                 e.printStackTrace();
             }
-            List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).codeName(codeName).build());
-            if (CollectionUtils.isEmpty(userDOList)) {
+            List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).activityCode(bidActivityCode).codeName(codeName).build());
+            if (CollectionUtils.isEmpty(userDOList) && !addingCodeNameMap.containsKey(codeName)) {
+                addingCodeNameMap.put(codeName, codeName);
                 break;
             }
         }
         return codeName;
+    }
+
+    /**
+     * 校验导入的供应商信息
+     */
+    private class SupplierExcelParamValidateResult {
+        private Map<String, Object> userMap;
+        private JbxtSupplierExcelParam supplierExcelParam;
+        private StringBuilder errorMsg;
+
+        public SupplierExcelParamValidateResult(Map<String, Object> userMap) {
+            this.userMap = userMap;
+        }
+
+        public JbxtSupplierExcelParam getSupplierExcelParam() {
+            return supplierExcelParam;
+        }
+
+        public StringBuilder getErrorMsg() {
+            return errorMsg;
+        }
+
+        public SupplierExcelParamValidateResult invoke() {
+            supplierExcelParam = new JbxtSupplierExcelParam();
+            errorMsg = new StringBuilder("");
+
+            Tuple<String, JbxtSupplierExcelParam> paramTuple = ImportExcelValidateMapUtil.validateField(supplierExcelParam, userMap);
+            errorMsg.append(paramTuple._1);
+            supplierExcelParam = paramTuple._2;
+            errorMsg.append(validateExcelParam(supplierExcelParam));
+            return this;
+        }
+    }
+
+    /**
+     * 获取供应商errorList
+     * @param list
+     * @param commErrorMsg
+     * @return
+     */
+    private List<JbxtSupplierExcelParam> getErrorSupplierExcelParams(List<Map<String, Object>> list, String commErrorMsg) {
+        List<JbxtSupplierExcelParam> errorList = Lists.newArrayList();
+        for (Map<String, Object> userMap : list) {
+            SupplierExcelParamValidateResult SupplierExcelParamValidateResult = new SupplierExcelParamValidateResult(userMap).invoke();
+            JbxtSupplierExcelParam supplierExcelParam = SupplierExcelParamValidateResult.getSupplierExcelParam();
+            supplierExcelParam.setErrorMsg(commErrorMsg );
+            StringBuilder errorMsg = SupplierExcelParamValidateResult.getErrorMsg();
+
+            if (StringUtils.isNotEmpty(errorMsg.toString())) {
+                supplierExcelParam.setErrorMsg(errorMsg.toString());
+            }
+            errorList.add(supplierExcelParam);
+        }
+        return errorList;
     }
 }
 
