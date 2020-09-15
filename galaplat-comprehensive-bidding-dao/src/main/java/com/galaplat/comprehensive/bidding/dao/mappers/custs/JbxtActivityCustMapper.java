@@ -48,7 +48,7 @@ public interface JbxtActivityCustMapper extends JbxtActivityMapper {
             "DATE_FORMAT(act.created_time,'%Y-%m-%d') created_date," ,
             "GROUP_CONCAT(goods.`code`) as bid_product_code," ,
             "act.supplier_num join_supplier_num," ,
-            "concat(act.predict_bid_datetime) as predict_bid_datetime, " ,
+            "concat(DATE_FORMAT(act.predict_bid_datetime,'%Y-%m-%d %H:%m')) as predict_bid_datetime, " ,
             "act.biding_type " ,
             "from t_jbxt_activity act" ,
             "left join t_jbxt_goods goods ON act.`code` = goods.activity_code" ,
