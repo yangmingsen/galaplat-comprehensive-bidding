@@ -75,6 +75,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         }
         List<JbxtSupplierExcelParam> errorList = Lists.newArrayList();
         List<JbxtUserParam> saveList = Lists.newArrayList();
+        List<JbxtSupplierExcelParam> rightList = Lists.newArrayList();
 
         String creatorName = getCreatorName(importVO.getCreator());
         String paramJson = importVO.getParamJson();
@@ -104,7 +105,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 Tuple<String, JbxtSupplierExcelParam> paramTuple = ImportExcelValidateMapUtil.validateField(supplierExcelParam, userMap);
                 errorMsg.append(paramTuple._1);
                 supplierExcelParam = paramTuple._2;
-//                errorMsg.append(validateExcelParam(supplierExcelParam));
+                errorMsg.append(validateExcelParam(supplierExcelParam));
 
                 if (StringUtils.isNotEmpty(errorMsg.toString())) {
                     supplierExcelParam.setErrorMsg(errorMsg.toString());
@@ -121,6 +122,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                     supplierExcelParam.setCreator(creatorName);
                     JbxtUserParam userParam = new JbxtUserParam();
                     CopyUtil.copyPropertiesExceptEmpty(supplierExcelParam, userParam);
+                    rightList.add(supplierExcelParam);
                     saveList.add(userParam);
                 }
             }
@@ -146,10 +148,19 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                         userDao.btachInsertAndUpdate(addSuppliers);
                     }
                 }
+                if (manageService.checkActivityInfoComplete(activityCode)) {
+                    activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+                }
+
+                // 更新竞标活动供应商个数
+                List<UserDO> supplierList = userDao.listJbxtUser(JbxtUserParam.builder().activityCode(activityCode).build());
+                activityDao.updateByPrimaryKeySelective(ActivityDO.builder().code(activityCode).supplierNum(null == supplierList ? 0 : supplierList.size()).build());
             }
-            if (manageService.checkActivityInfoComplete(activityCode)) {
-                activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+
+            if (CollectionUtils.isNotEmpty(errorList) && CollectionUtils.isNotEmpty(rightList)) {
+                errorList.addAll(rightList);
             }
+
         }// if
         return errorList;
     }
@@ -194,10 +205,10 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         StringBuilder error = new StringBuilder("");
         String phone = excelParam.getPhone();
         String emailAddress = excelParam.getEmailAddress();
-        if (RegexUtils.isMobile(phone)) {
+        if (!RegexUtils.isMobile(phone)) {
             error.append("手机号格式格式错误！");
         }
-        if (RegexUtils.isEmail(emailAddress)) {
+        if (!RegexUtils.isEmail(emailAddress)) {
             error.append("邮箱地址格式错误！");
         }
         return error.toString();

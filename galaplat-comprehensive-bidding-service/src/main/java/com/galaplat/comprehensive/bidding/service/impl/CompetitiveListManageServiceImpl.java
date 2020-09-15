@@ -853,6 +853,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         if (StringUtils.isNotBlank(promiseTitle) && promiseTitle.length() > 20) {
             throw new BaseException("标题字数不能超过20个字！", "标题字数不能超过20个字！");
         }
+
+
+        if (StringUtils.isNotBlank(promiseText) && promiseText.length() > 3000) {
+            throw new BaseException("承诺函内容不能超过3000个字！", "标题字数不能超过3000个字！");
+        }
         JbxtActivityParam updateActivityParam = JbxtActivityParam.builder().code(bidActivityCode).promiseTitle(promiseTitle).promiseText(promiseText).build();
         JbxtActivityParam conditionActivityParam = JbxtActivityParam.builder().code(bidActivityCode).build();
         if (checkActivityInfoComplete(bidActivityCode)) {
