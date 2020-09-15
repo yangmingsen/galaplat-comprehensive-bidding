@@ -70,11 +70,12 @@ public class MyApplicationRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         //考虑在这里启动Netty
 
+        //run messageHandler
+        runQueueMessageHandler(args);
+
         //run Netty
         runNetty(args);
 
-        //run messageHandler
-        runQueueMessageHandler(args);
 
     }
 }
