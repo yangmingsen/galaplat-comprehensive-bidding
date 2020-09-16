@@ -376,8 +376,8 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         Integer bidingType = infoParam.getBidingType();
         String predictBidDateTime = infoParam.getPredictBidDateTime();
         String bidActivityInfo =  infoParam.getBidActivityInfo();
-        if (StringUtils.isAnyBlank(bidActivityCode, predictBidDateTime, bidActivityInfo) || null == bidingType) {
-            throw new BaseException("竞标单编号，出价方式，预计竞标日，竞标描述全部必填！","竞标单编号，出价方式，预计竞标日，竞标描述全部必填！");
+        if (StringUtils.isAnyBlank(bidActivityCode, predictBidDateTime) || null == bidingType) {
+            throw new BaseException("竞标单编号，出价方式，预计竞标日全部必填！","竞标单编号，出价方式，预计竞标日全部必填！");
         }
 
         if (bidActivityInfo.length() > 500) {
