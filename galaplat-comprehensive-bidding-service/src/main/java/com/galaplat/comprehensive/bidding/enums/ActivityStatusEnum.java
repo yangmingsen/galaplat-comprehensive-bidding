@@ -13,7 +13,7 @@ import lombok.Getter;
 public enum ActivityStatusEnum {
 
     UNEXPORT(1,"未导入数据"),
-    EXPORT_NO_SATRT(2,"已导入数据未开始"),
+    IMPORT_NO_SATRT(2,"已导入数据未开始"),
     BIDING(3,"竞标中"),
     FINISH(4,"已结束");
 
