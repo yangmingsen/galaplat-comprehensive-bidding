@@ -9,7 +9,6 @@ import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
 import com.galaplat.comprehensive.bidding.dao.ActivityDao;
 import com.galaplat.comprehensive.bidding.dao.GoodsDao;
 import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
@@ -118,11 +117,12 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                 goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
                 insertCount = goodsDao.batchInsert(saveList);
             }
-            List<GoodsDO> activityGoodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode).build());
-            if (activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())
-                    && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
-                activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+
+            // 检查竞标活动数据是否准备完整，完整则改变状态
+            if (manageService.checkActivityInfoComplete(activityCode)) {
+                activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.IMPORT_NO_SATRT.getCode()).build());
             }
+
             if (CollectionUtils.isNotEmpty(errorList)) {
 
                 rightList.stream().forEach(e ->{

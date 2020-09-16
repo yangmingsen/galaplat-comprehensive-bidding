@@ -90,8 +90,8 @@ public class CompetitiveListManageController extends BaseController {
 
     @PostMapping("/savePromiseText")
     @RestfulResult
-    public Object  savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws BaseException {
-        return  manageService.savePromiseTitle(bidActivityCode, promiseTitle, promiseText);
+    public Object  savePromiseText(String bidActivityCode, String promiseTitle, String promiseText) throws BaseException {
+        return  manageService.savePromiseText(bidActivityCode, promiseTitle, promiseText);
     }
 
     @PostMapping("/uploadFile")
