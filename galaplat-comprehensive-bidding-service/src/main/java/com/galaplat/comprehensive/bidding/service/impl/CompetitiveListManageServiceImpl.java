@@ -432,7 +432,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             }
 
             if (checkActivityInfoComplete(bidActivityCode)) {
-                activityDO.setStatus(ActivityStatusEnum.EXPORT_NO_SATRT.getCode());
+                activityDO.setStatus(ActivityStatusEnum.IMPORT_NO_SATRT.getCode());
             }
 
             // 如果竞标描述和竞标预计时间改变则将所有邮件和短信状态置为未发送
@@ -671,7 +671,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     @Override
-    public int  savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws  BaseException{
+    public int  savePromiseText(String bidActivityCode, String promiseTitle, String promiseText) throws  BaseException{
 
         ActivityDO ActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
         if (null == ActivityDO) {
@@ -693,7 +693,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         JbxtActivityParam updateActivityParam = JbxtActivityParam.builder().code(bidActivityCode).promiseTitle(promiseTitle).promiseText(promiseText).build();
         JbxtActivityParam conditionActivityParam = JbxtActivityParam.builder().code(bidActivityCode).build();
         if (checkActivityInfoComplete(bidActivityCode)) {
-            updateActivityParam.setStatus(ActivityStatusEnum.EXPORT_NO_SATRT.getCode());
+            updateActivityParam.setStatus(ActivityStatusEnum.IMPORT_NO_SATRT.getCode());
         }
         return activityDao.updateJbxtActivityBySomeParam(updateActivityParam, conditionActivityParam);
     }

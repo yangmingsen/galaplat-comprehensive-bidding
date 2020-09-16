@@ -145,7 +145,7 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                     }
                 }
                 if (manageService.checkActivityInfoComplete(activityCode)) {
-                    activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+                    activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.IMPORT_NO_SATRT.getCode()).build());
                 }
 
                 // 更新竞标活动供应商个数

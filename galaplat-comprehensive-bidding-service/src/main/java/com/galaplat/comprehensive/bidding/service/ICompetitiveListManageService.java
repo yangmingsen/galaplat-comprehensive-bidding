@@ -123,7 +123,7 @@ public interface ICompetitiveListManageService {
      * @param promiseText
      * @return
      */
-    int savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws BaseException;
+    int savePromiseText(String bidActivityCode, String promiseTitle, String promiseText) throws BaseException;
 
     /**
      * 上传附件
