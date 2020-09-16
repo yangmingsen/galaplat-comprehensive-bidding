@@ -30,17 +30,14 @@ public class JbxtSupplierExcelParam implements Serializable {
    private String supplierName;
 
    /*联系人*/
-   @NotNull(message =  "必填 联系人",  groups = InsertParam.class)
    @ImportExcelValidateMapUtil.AlisaField("联系人")
    private String contactPerson;
 
     /*手机*/
-    @NotNull(message =  "必填 手机",  groups = InsertParam.class)
     @ImportExcelValidateMapUtil.AlisaField("手机")
     private String  phone;
 
     /*邮箱*/
-    @NotNull(message =  "必填 邮箱",  groups = InsertParam.class)
     @ImportExcelValidateMapUtil.AlisaField("邮箱")
     private String  emailAddress;
 
