@@ -8,13 +8,10 @@ import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.*;
 import com.galaplat.comprehensive.bidding.dao.params.*;
-import com.galaplat.comprehensive.bidding.dao.params.validate.InsertParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
-import com.galaplat.comprehensive.bidding.enums.CodeNameEnum;
 import com.galaplat.comprehensive.bidding.enums.PhoneTempleteEnum;
 import com.galaplat.comprehensive.bidding.querys.CompetitiveListQuery;
 import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
-import com.galaplat.comprehensive.bidding.utils.BeanValidateUtils;
 import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import com.galaplat.comprehensive.bidding.utils.Tuple3;
 import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
@@ -600,7 +597,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     @Override
-     public  MessageAndEmialDVO sendMsgAndMail(String bidActivityCode, String phone, String emailAddress, String type) throws BaseException {
+     public  MessageAndEmialDVO sendMsgAndMail(String bidActivityCode, String phone, String emailAddress, String type, String supplierCode) throws BaseException {
         MessageAndEmialDVO messageAndEmialDVO = new MessageAndEmialDVO();
 
         if (StringUtils.isAnyBlank(bidActivityCode,type)) {
@@ -613,20 +610,28 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         }
 
         if (StringUtils.equals(type, "all")) {
+
+            if (StringUtils.isAnyBlank(bidActivityCode)) {
+                throw new BaseException("参数异常，竞标单编号必传！","参数异常，竞标单编号必传！");
+            }
+
             List<BidSupplierDVO> supplierDVOS = userDao.listSupplierInfo(bidActivityCode);
             List<String> allPhones = supplierDVOS.stream().map(e->e.getPhone()).collect(Collectors.toList());
             List<String> allEmailAddress = supplierDVOS.stream().map(e->e.getEmailAddress()).collect(Collectors.toList());
             Integer sendMailCount = 0;
             Integer sendMessageCount = 0;
-            if (CollectionUtils.isNotEmpty(allEmailAddress)) {
-                for (String email: allEmailAddress) {
-                    sendMailCount += sendEmail(bidActivityCode, email);
-                }
-            }
 
-            if (CollectionUtils.isNotEmpty(allPhones)) {
-                for (String phoneNumber: allPhones) {
-                    sendMessageCount += sendPhoneMsg(bidActivityCode, phoneNumber);
+            if (CollectionUtils.isNotEmpty(supplierDVOS)) {
+                for (BidSupplierDVO supplierDvo: supplierDVOS) {
+                    String email;
+                    String phoneNumber;
+                    String tempSupplierCode = supplierDvo.getCode();
+                    if ( StringUtils.isNotBlank(email = supplierDvo.getEmailAddress())) {
+                        sendMailCount += sendEmail(bidActivityCode, email,tempSupplierCode );
+                    }
+                    if ( StringUtils.isNotBlank(phoneNumber = supplierDvo.getPhone())) {
+                        sendMessageCount +=  sendPhoneMsg(bidActivityCode, phoneNumber, tempSupplierCode);
+                    }
                 }
             }
 
@@ -637,11 +642,19 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                     ? 1 :  (CollectionUtils.isNotEmpty(allPhones) && sendMessageCount == 0 ? 0 : 2));
 
         } else if (StringUtils.equals(type, "phone")) {
+
             // 只发送短信
-            messageAndEmialDVO.setMessageSendStatus(sendPhoneMsg(bidActivityCode,phone));
+            if (StringUtils.isAnyBlank(bidActivityCode, phone, supplierCode)) {
+                throw new BaseException("参数异常，竞标单编号，手机号，供应商编码必传！","参数异常，竞标单编号，手机号，供应商编码必传！");
+            }
+            messageAndEmialDVO.setMessageSendStatus(sendPhoneMsg(bidActivityCode,phone,supplierCode));
         } else if (StringUtils.equals(type, "email")) {
+
             // 只发送邮件
-            messageAndEmialDVO.setEmailSeandStatus(sendEmail(bidActivityCode, emailAddress));
+            if (StringUtils.isAnyBlank(bidActivityCode, emailAddress, supplierCode)) {
+                throw new BaseException("参数异常，竞标单编号，手机号，供应商编码必传！","参数异常，竞标单编号，手机号，供应商编码必传！");
+            }
+            messageAndEmialDVO.setEmailSeandStatus(sendEmail(bidActivityCode, emailAddress,supplierCode));
         } else {
             throw new BaseException("type 参数值异常！","type 参数值异常！");
         }
@@ -840,11 +853,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * @param emailAdress
      * @return
      */
-    private String getMailContent(String bidActivityCode, String emailAdress) throws  BaseException{
+    private String getMailContent(String bidActivityCode, String emailAdress, String supplierCode) throws  BaseException{
         ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
         String  bidActivityInfo = activityDO.getBidActivityInfo();
         String  predictBidDatetime = DateFormatUtils.format(activityDO.getPredictBidDatetime(), "yyyy-MM-dd HH:mm:ss");
-        UserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAdress).build());
+        UserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAdress).code(supplierCode).build());
         if (null == userDO) {
          throw  new BaseException("供应商信息获取错误！","供应商信息获取错误！");
         }
@@ -874,9 +887,10 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      *  发送邮件
      * @param bidActivityCode
      * @param emailAddress
+     * @param supplierCode
      * @return
      */
-    private  Integer sendEmail(String bidActivityCode, String emailAddress) throws BaseException {
+    private  Integer sendEmail(String bidActivityCode, String emailAddress, String supplierCode) throws BaseException {
         String cs2 = "\"1\"";
         ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
         if (null == activityDO) {
@@ -886,7 +900,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         Integer emailSeandStatus;
         String  mailSendResult = null;
         MultipartFile multipartFile = null;
-        String emailContent = getMailContent(bidActivityCode, emailAddress);
+        String emailContent = getMailContent(bidActivityCode, emailAddress, supplierCode);
 
         if (StringUtils.isNotBlank(filePath)) {
             multipartFile = getfile(bidActivityCode);
@@ -901,10 +915,10 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
         if (StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, cs2)) {
             userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(1).activityCode(bidActivityCode).build(),
-                    JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
+                    JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).code(supplierCode).build());
         } else {
             userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(2).activityCode(bidActivityCode).build(),
-                    JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).build());
+                    JbxtUserParam.builder().activityCode(bidActivityCode).emailAddress(emailAddress).code(supplierCode).build());
         }
 
         emailSeandStatus = StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, cs2) ? 1: 0;
@@ -917,10 +931,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
      * 发送短信
      * @param bidActivityCode
      * @param phoneNumber
+     * @param supplierCode
      * @return
      * @throws BaseException
      */
-    private  Integer sendPhoneMsg(String bidActivityCode, String phoneNumber) throws BaseException {
+    private  Integer sendPhoneMsg(String bidActivityCode, String phoneNumber, String supplierCode) throws BaseException {
 
         String supplierName = null;
         String bidActivityInfo = null;
@@ -935,7 +950,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             bidActivityDateTime = DateFormatUtils.format(activityDO.getPredictBidDatetime(), "yyyy-MM-dd HH:mm:ss");
         }
 
-        UserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+        UserDO userDO = userDao.getUserByParam(JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).code(supplierCode).build());
         if (null != userDO) {
             bidActivityAccount = userDO.getUsername();
             bidActivityPassword = userDO.getPassword();
@@ -948,16 +963,16 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                     bidActivityAccount, bidActivityPassword, tempcode);
             if (StringUtils.isNotBlank(result) && result.equals("\"1\"")) {
                 userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(1).activityCode(bidActivityCode).build(),
-                        JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+                        JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).code(supplierCode).build());
                 return 1;
             } else {
                 userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(2).activityCode(bidActivityCode).build(),
-                        JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+                        JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).code(supplierCode).build());
                 return 0;
             }
         } else {
             userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(2).activityCode(bidActivityCode).build(),
-                    JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).build());
+                    JbxtUserParam.builder().activityCode(bidActivityCode).phone(phoneNumber).code(supplierCode).build());
             return 0;
         }
     }
