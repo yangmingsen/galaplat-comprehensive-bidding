@@ -91,16 +91,17 @@ public interface ICompetitiveListManageService {
      * 发送短信与邮件
      *
      * 发送全部，传bidActivityCode，emailFile，type="all";
-     * 单个发送传短信：传bidActivityCode，phone，type="phone";
-     * 单个发送邮件：传bidActivityCode，emailAdrress，emailFile，type="email";
+     * 单个发送传短信：传bidActivityCode，phone，supplierCode, type="phone";
+     * 单个发送邮件：传bidActivityCode，emailAdrress，supplierCode，type="email";
      *
      * @param bidActivityCode
      * @param phone
      * @param emailAdrress
      * @param type
+     * @param supplierCode
      * @return
      */
-    MessageAndEmialDVO sendMsgAndMail(String bidActivityCode, String phone, String emailAdrress, String type) throws BaseException;
+    MessageAndEmialDVO sendMsgAndMail(String bidActivityCode, String phone, String emailAdrress, String type, String supplierCode) throws BaseException;
 
     /**
      * 查询供应商

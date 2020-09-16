@@ -51,6 +51,12 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
     /* 当前导入供应商已使用的代号 */
     private  Map<String, String> addingCodeNameMap = new HashMap<>();
 
+    /* 当前导入供应商已使用的号码 */
+    private  Map<String, String> addingPhoneMap = new HashMap<>();
+
+    /* 当前导入供应商已使用的邮箱 */
+    private  Map<String, String> addingEmailMap = new HashMap<>();
+
     @Autowired
     private IdWorker worker;
 
@@ -104,6 +110,10 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 StringBuilder errorMsg = excelParamValidateResult.getErrorMsg();
 
                 if (StringUtils.isNotEmpty(errorMsg.toString())) {
+                    String serialNuimber = (String)userMap.get("serialNumber");
+                    if (StringUtils.isNotBlank(serialNuimber)) {
+                        supplierExcelParam.setSerialNumber(Integer.parseInt(serialNuimber));
+                    }
                     supplierExcelParam.setErrorMsg(errorMsg.toString());
                     errorList.add(supplierExcelParam);
                 } else {
@@ -158,6 +168,9 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
             }
 
         }// if
+        addingCodeNameMap.clear();
+        addingEmailMap.clear();
+        addingPhoneMap.clear();
         return errorList;
     }
 
@@ -201,12 +214,31 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         StringBuilder error = new StringBuilder("");
         String phone = excelParam.getPhone();
         String emailAddress = excelParam.getEmailAddress();
-        if (!RegexUtils.isMobile(phone)) {
-            error.append("手机号格式格式错误！");
+
+        if (StringUtils.isNotBlank(phone)) {
+            if (!RegexUtils.isMobile(phone)) {
+                error.append("手机号格式格式错误！");
+            }else {
+                if (!addingPhoneMap.containsKey(phone)) {
+                    addingPhoneMap.put(phone, phone);
+                } else {
+                    error.append("手机号" + phone + "重复！");
+                }
+            }
         }
-        if (!RegexUtils.isEmail(emailAddress)) {
-            error.append("邮箱地址格式错误！");
+
+        if (StringUtils.isNotBlank(emailAddress)) {
+            if (!RegexUtils.isEmail(emailAddress)) {
+                error.append("邮箱地址格式错误！");
+            } else {
+                if (!addingEmailMap.containsKey(emailAddress)) {
+                    addingEmailMap.put(emailAddress, emailAddress);
+                } else {
+                    error.append("邮箱地址" + emailAddress + "重复！");
+                }
+            }
         }
+
         return error.toString();
     }
 
@@ -280,11 +312,21 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         List<JbxtUserParam> updateSupplierList = Lists.newArrayList();
         excelList.stream().forEach(excelSupplier -> {
             if (oldSupplierMap.containsKey(excelSupplier.getSupplierName())) {
+
                 UserDO userDO = oldSupplierMap.get(excelSupplier.getSupplierName());
+                String newPhone = excelSupplier.getPhone();
+                String oldPhone = userDO.getPhone();
+
+                String newEmailAddress = excelSupplier.getEmailAddress();
+                String oldEmailAddress = userDO.getEmailAddress();
+
+                String newContactPerson = excelSupplier.getContactPerson();
+                String oldContactPerson = userDO.getContactPerson();
+
                 if (userDO.getSupplierName().equals(excelSupplier.getSupplierName()) && (
-                        !userDO.getPhone().equals(excelSupplier.getPhone())
-                                || !userDO.getEmailAddress().equals(excelSupplier.getEmailAddress())
-                                || !userDO.getContactPerson().equals(excelSupplier.getContactPerson()))) {
+                        !StringUtils.equals(newPhone, oldPhone)
+                                || !StringUtils.equals(newEmailAddress, oldEmailAddress)
+                                || !StringUtils.equals(newContactPerson, oldContactPerson))) {
                     JbxtUserParam userParam = new JbxtUserParam();
                     CopyUtil.copyPropertiesExceptEmpty(userDO, userParam);
                     userParam.setPhone(excelSupplier.getPhone());
