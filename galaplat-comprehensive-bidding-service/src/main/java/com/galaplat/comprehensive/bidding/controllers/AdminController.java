@@ -110,7 +110,6 @@ public class AdminController extends BaseController {
     private boolean resetBidData(String activityCode, Integer goodsId) {
         boolean delOk = true;
         try {
-            activityThreadManager.get(activityCode).resetActivity();
             biddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
             biddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
         } catch (Exception e) {
@@ -139,6 +138,7 @@ public class AdminController extends BaseController {
                 final boolean delOk = this.resetBidData(activityCode, goodsId);
                 if (delOk) {
                     if (remainingTime < 0) {
+                        activityThread.setStatus(3);
                         final String gid = goodsId.toString();
                         final int initTime = activityThread.getInitTime() / 60;
                         final int delayedCondition = activityThread.getDelayedCondition();
