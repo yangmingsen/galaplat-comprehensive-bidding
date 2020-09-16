@@ -430,6 +430,7 @@ public interface JbxtUserCustMapper extends JbxtUserMapper {
             " code, username, password, admin, created_time, updated_time, updator, creator, company_code, sys_code, activity_code, supplier_name, code_name, contact_person, phone, email_address, login_status, send_sms, send_mail ",
             " from t_jbxt_user ",
             " where 1=1 ",
+            "<if test='param.code != null' > and code = #{param.code,jdbcType=VARCHAR}</if>",
             "<if test='param.username != null' > and username = #{param.username,jdbcType=VARCHAR}</if>",
             "<if test='param.password != null' > and password = #{param.password,jdbcType=VARCHAR}</if>",
             "<if test='param.admin != null' > and admin = #{param.admin,jdbcType=VARCHAR}</if>",
