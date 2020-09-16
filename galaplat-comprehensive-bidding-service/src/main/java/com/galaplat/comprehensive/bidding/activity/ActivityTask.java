@@ -631,7 +631,7 @@ public class ActivityTask implements Runnable {
     /**
      * 重置活动
      */
-    private void resetActivity() {
+    public void resetActivity() {
         //同步数据（管理端 N，供应商端 Y）
         final Map<String, String> map = new HashMap<>();
         map.put("activityCode", this.currentActivityCode);

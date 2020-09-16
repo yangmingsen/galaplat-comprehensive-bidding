@@ -208,6 +208,8 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             return;
         }
 
+        LOGGER.info("subPercent="+subPercent);
+
         GoodsDO goods = goodsService.selectByGoodsId(goodsId);
         double firstPrice = goods.getFirstPrice().doubleValue();
         message.getData().put("bidPrice", computeSubPercent(firstPrice, subPercent).toString());

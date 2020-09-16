@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @RestController
 @RequestMapping("/jbxt/admin")
@@ -44,6 +46,8 @@ public class AdminController extends BaseController {
 
     @Autowired
     private MessageQueue messageQueue;
+
+    private Lock lock = new ReentrantLock();
 
     @RequestMapping("/activity/goodsStatus")
     @RestfulResult
@@ -106,6 +110,7 @@ public class AdminController extends BaseController {
     private boolean resetBidData(String activityCode, Integer goodsId) {
         boolean delOk = true;
         try {
+            activityThreadManager.get(activityCode).resetActivity();
             biddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
             biddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
         } catch (Exception e) {
@@ -126,35 +131,43 @@ public class AdminController extends BaseController {
      */
     private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityThread) {
         if (status == 3) { //处理重置问题
-            final int remainingTime = activityThread.getRemainingTime();
-            //删除历史竞价数据
-            final boolean delOk = this.resetBidData(activityCode, goodsId);
-            if (delOk) {
-                if (remainingTime < 0) {
-                    final String gid = goodsId.toString();
-                    final int initTime = activityThread.getInitTime() / 60;
-                    final int delayedCondition = activityThread.getDelayedCondition();
-                    final int allowDelayedLength = activityThread.getAllowDelayedLength();
-                    final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
-                    final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
-                    final int bidType = activityThread.getBidType();
-                    final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum,
-                            bidType);
+            Lock lock = this.lock;
+            lock.lock();
+            try {
+                final int remainingTime = activityThread.getRemainingTime();
+                //删除历史竞价数据
+                final boolean delOk = this.resetBidData(activityCode, goodsId);
+                if (delOk) {
+                    if (remainingTime < 0) {
+                        final String gid = goodsId.toString();
+                        final int initTime = activityThread.getInitTime() / 60;
+                        final int delayedCondition = activityThread.getDelayedCondition();
+                        final int allowDelayedLength = activityThread.getAllowDelayedLength();
+                        final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
+                        final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
+                        final int bidType = activityThread.getBidType();
+                        final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
+                                allowDelayedLength,allowDelayedTime, supplierNum,
+                                bidType);
 
-                    if (!startOk) {
-                        String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
-                        LOGGER.info(info);
-                        return new MyResult(false, info);
+                        if (!startOk) {
+                            String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
+                            LOGGER.info(info);
+                            return new MyResult(false, info);
+                        }
+
+                        //activityThreadManager.get(activityCode).setStatus(3);
+                        return new MyResult(true, "更新成功");
                     }
-
-                    //activityThreadManager.get(activityCode).setStatus(3);
-                    return new MyResult(true, "更新成功");
+                } else {
+                    final String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
+                    LOGGER.info(info);
+                    return new MyResult(false, info);
                 }
-            } else {
-                final String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
-                LOGGER.info(info);
-                return new MyResult(false, info);
+            } catch (Exception e) {
+                LOGGER.info("handlerTheAcitvityThreadExistCondition(ERROR): "+e.getMessage());
+            } finally {
+                lock.unlock();
             }
         }
         activityThread.setStatus(status);
