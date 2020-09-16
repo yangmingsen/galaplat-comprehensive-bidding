@@ -19,7 +19,6 @@ import com.galaplat.comprehensive.bidding.utils.IdWorker;
 import com.galaplat.comprehensive.bidding.utils.Tuple3;
 import com.galaplat.comprehensive.bidding.vos.BidCodeVO;
 import com.galaplat.comprehensive.bidding.vos.RankInfoVO;
-import com.galaplat.comprehensive.bidding.vos.SupplierAccountVO;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
 import com.github.pagehelper.PageInfo;
 import feign.Response;
@@ -135,104 +134,6 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             param.setEndTime(endTime);
         }
         return activityDao.listCompetitiveListPage(param);
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED, rollbackFor = Exception.class)
-    public String addAndUpdate(JbxtActivityParam activityParam, String type, String bidActivityCode) throws Exception {
-        String activityCode = bidActivityCode;
-        List<SupplierAccountParam> supplierAccountParamList = activityParam.getSupplierAccountParams();
-        // 校验代号重复
-        Map<String, List<SupplierAccountParam>> supplierAccountParamMap = supplierAccountParamList.stream().collect(Collectors.groupingBy(o -> o.getCodeName()));
-        for (Map.Entry<String, List<SupplierAccountParam>> m : supplierAccountParamMap.entrySet()) {
-            List<SupplierAccountParam> paramList = m.getValue();
-            if (paramList.size() > 1) {
-                throw new BaseException("【" + m.getKey() + "】代号重复,请重新填写!", "【" + m.getKey() + "】代号重复,请重新填写!");
-            }
-        }
-
-        // 校验供应商重复
-        Map<String, List<SupplierAccountParam>> supplierNameMap = supplierAccountParamList.stream().collect(Collectors.groupingBy(o -> o.getSupplierName()));
-        for (Map.Entry<String, List<SupplierAccountParam>> m : supplierNameMap.entrySet()) {
-            List<SupplierAccountParam> paramList = m.getValue();
-            if (paramList.size() > 1) {
-                throw new BaseException("供应商【" + m.getKey() + "】重复,请重新填写!","供应商【" + m.getKey() + "】重复,请重新填写!");
-            }
-        }
-        // 校验为空
-        for (SupplierAccountParam accountParam : supplierAccountParamList) {
-            try {
-                BeanValidateUtils.validateErrorThenThrowException(accountParam, InsertParam.class);
-            } catch (BaseException baseException) {
-                log.error("操作异常{},{}", baseException.getMessage(), baseException);
-            }
-            if (accountParam.getSupplierName().length() > 30) {
-                throw new BaseException(accountParam.getSupplierName() + "太长已超过30个字符！", accountParam.getSupplierName() + "太长已超过30个字符！");
-            }
-        }
-
-        if (StringUtils.equals(type, OPRATETYPE_ADD) && StringUtils.isEmpty(bidActivityCode)) {
-            activityCode = worker.nextId();
-        } else if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
-            ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(bidActivityCode).build());
-            if (null != activityDO) {
-                activityParam.setStatus(activityDO.getStatus());
-                if (activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())) {
-                    throw new BaseException("该竞标活动已结束不允许编辑！", "该竞标活动已结束不允许编辑！");
-                }
-            }
-        }
-        ActivityDO activityDO = ActivityDO.builder()
-                .code(activityCode)
-                .companyCode(StringUtils.isEmpty(bidActivityCode) ? activityParam.getCompanyCode() : null)
-                .sysCode(StringUtils.isEmpty(bidActivityCode) ? activityParam.getSysCode() : null)
-                .createdTime(StringUtils.isEmpty(bidActivityCode) ? new Date() : null)
-                .updatedTime(new Date())
-                .updator(activityParam.getCreator())
-                .creator(StringUtils.isEmpty(bidActivityCode) ? activityParam.getCreator() : null)
-                .supplierNum(activityParam.getSupplierAccountParams().size())
-                .recordStatus(1)
-                .status(StringUtils.isEmpty(bidActivityCode) ? ActivityStatusEnum.UNEXPORT.getCode() : null)
-                .build();
-        if (StringUtils.isEmpty(bidActivityCode)) {
-            activityDao.insertBidActivity(activityDO);
-        } else {
-            activityDao.updateBidActivity(activityDO);
-        }
-        // 保存或更新
-        activityParam.setCode(activityCode);
-        batchInsertOrUpdate(activityParam, supplierAccountParamList, bidActivityCode);
-        if (StringUtils.equals(type, OPRATETYPE_UPDATE) && StringUtils.isNotEmpty(bidActivityCode)) {
-            // 删除多余的供应商
-            batchDeleteUser(activityParam, supplierAccountParamList, bidActivityCode);
-        }
-        return activityCode;
-    }
-
-    @Override
-    public Set<String> listReplaceCode(Integer num) throws BaseException {
-        num = null == num ? 20 : num;
-        if (num > 20) {
-            throw new BaseException("获取代号个数不能超过20个", "获取代号个数不能超过20个");
-        }
-        Set<String> numSet = new HashSet<>();
-        for (int i = 1; i <= num; i++) {
-            numSet.add(CodeNameEnum.findByCode(i) + LocalDate.now().toString().replace("-", ""));
-        }
-        return numSet;
-    }
-
-    @Override
-    public List<SupplierAccountVO> listSupplierAccount(String bidActivityCode) throws BaseException {
-        List<SupplierAccountVO> accountVOS = Lists.newArrayList();
-        List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
-        userDOList.stream().forEach(e -> {
-            SupplierAccountVO accountVO = new SupplierAccountVO();
-            CopyUtil.copyPropertiesExceptEmpty(e, accountVO);
-            accountVO.setSupplierAccount(e.getUsername());
-            accountVOS.add(accountVO);
-        });
-        return accountVOS;
     }
 
     @Override
@@ -465,95 +366,6 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
 
-    /**
-     * 批量现新增或删除供应商信息
-     *
-     * @param supplierAccountParamList
-     * @param bidActivityCode
-     * @return
-     */
-    private int batchInsertOrUpdate(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) {
-        List<JbxtUserParam> saveUserParamList = Lists.newArrayList();
-        supplierAccountParamList.forEach(e -> {
-            List<UserDO> userDOList = null;
-            // 修改的的时候
-            if (StringUtils.isNotEmpty(bidActivityCode)) {
-                 userDOList = userDao.getUser(JbxtUserParam.builder().codeName(e.getCodeName())
-                        .supplierName(e.getSupplierName()).activityCode(bidActivityCode).build());
-            }
-            // 新增时userDOList必为空，修改时 userDOList可能为空
-            if(CollectionUtils.isEmpty(userDOList)) {
-                JbxtUserParam userParam = JbxtUserParam.builder()
-                        .code(worker.nextId())
-                        .admin("0")
-                        .companyCode(activityParam.getCompanyCode())
-                        .sysCode(activityParam.getSysCode())
-                        .createdTime(new Date())
-                        .creator(activityParam.getCreator())
-                        .updatedTime(new Date())
-                        .updator(activityParam.getCreator())
-                        .username(getUserName())
-                        .password(getPassword())
-                        .supplierName(e.getSupplierName())
-                        .codeName(e.getCodeName())
-                        .activityCode(activityParam.getCode())
-                        .build();
-                saveUserParamList.add(userParam);
-            }
-        });
-
-        int insertCount = 0;
-        if (CollectionUtils.isNotEmpty(saveUserParamList)) {
-            insertCount = userDao.btachInsertAndUpdate(saveUserParamList);
-        }
-        return insertCount;
-    }
-
-    /**
-     * 批量删除供应商
-     * @param activityParam 竞标活动
-     * @param supplierAccountParamList 供应商信息
-     * @param bidActivityCode 竞标活动编码
-     * @return
-     * @throws Exception
-     */
-    private int batchDeleteUser(JbxtActivityParam activityParam, List<SupplierAccountParam> supplierAccountParamList, String bidActivityCode) throws  Exception {
-        List<String> deleteUserList = Lists.newArrayList();
-        List<UserDO> currentUserDOList = null;
-        currentUserDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).build());
-        currentUserDOList.stream().forEach(e->{
-            int time = 0;
-            boolean exists = false;
-            for (SupplierAccountParam accountParam : supplierAccountParamList) {
-                time ++ ;
-                if (StringUtils.equals(e.getSupplierName(), accountParam.getSupplierName())
-                        && StringUtils.equals(e.getCodeName(), accountParam.getCodeName())) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (time == supplierAccountParamList.size() && !exists) {
-                deleteUserList.add(e.getCode());
-            }
-        });
-
-        int deleteCount = 0;
-
-        if ( (activityParam.getStatus().equals(ActivityStatusEnum.BIDING.getCode())
-                || activityParam.getStatus().equals(ActivityStatusEnum.FINISH.getCode()))
-        && CollectionUtils.isNotEmpty(deleteUserList)) {
-            throw  new BaseException("竞标中或者竞标结束的活动不允许删减供应商！","竞标中或者竞标结束的活动不允许删减供应商！");
-        }
-
-        if (CollectionUtils.isNotEmpty(deleteUserList)) {
-            deleteCount = userDao.batchDeleteUser(deleteUserList, bidActivityCode);
-            // 删除竞价中的供应商的信息
-          /*   biddingDao.deleteBidding(JbxtBiddingParam.builder().activityCode(bidActivityCode).userCodeList(deleteUserList).build());
-             minbidDao.deleteBidding(JbxtMinbidParam.builder().activityCode(bidActivityCode).userCodeList(deleteUserList).build());*/
-        }
-        return deleteCount;
-    }
-
     @Override
     public BidCodeVO getBidcode(String userName) {
         return  BidCodeVO.builder().bidActivityCode(worker.nextId()).creator(userName).createdDate(DateFormatUtils.format(new Date(), "yyyy-MM-dd")).build();
@@ -564,6 +376,21 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         int count = 0;
 
         String bidActivityCode = infoParam.getBidActivityCode();
+        Integer bidingType = infoParam.getBidingType();
+        String predictBidDateTime = infoParam.getPredictBidDateTime();
+        String bidActivityInfo =  infoParam.getBidActivityInfo();
+        if (StringUtils.isAnyBlank(bidActivityCode, predictBidDateTime, bidActivityInfo) || null == bidingType) {
+            throw new BaseException("竞标单编号，出价方式，预计竞标日，竞标描述全部必填！","竞标单编号，出价方式，预计竞标日，竞标描述全部必填！");
+        }
+
+        if (bidActivityInfo.length() > 500) {
+            throw new BaseException("竞标描述不能超过500个字符！","竞标描述不能超过500个字符！");
+        }
+
+        if ( 1 != bidingType && 2 != bidingType) {
+            throw new BaseException("出价方式方式异常！","出价方式方式异常！");
+        }
+
         ActivityDO activityDO = new ActivityDO();
         activityDO.setCode(bidActivityCode);
         activityDO.setBidingType(infoParam.getBidingType());
@@ -572,6 +399,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         activityDO.setPredictBidDatetime(predictBidDate);
 
         if (StringUtils.isNotBlank(infoParam.getType()) && StringUtils.equals(infoParam.getType(), OPRATETYPE_ADD)) {
+            ActivityDO sourceActivity = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+            if (null != sourceActivity) {
+                throw  new BaseException("当前竞标单编号对应的竞标活动已存在，请重新新增竞标单！","当前竞标单编号对应的竞标活动已存在，请重新新增竞标单！");
+            }
+
             activityDO.setCreator(userName);
             activityDO.setCreatedTime(new Date());
             activityDO.setUpdatedTime(new Date());
@@ -600,7 +432,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
             }
 
             if (checkActivityInfoComplete(bidActivityCode)) {
-                activityDO.setStatus(ActivityStatusEnum.EXPORT_NO_SATRT.getCode());
+                activityDO.setStatus(ActivityStatusEnum.IMPORT_NO_SATRT.getCode());
             }
 
             // 如果竞标描述和竞标预计时间改变则将所有邮件和短信状态置为未发送
@@ -839,7 +671,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     }
 
     @Override
-    public int  savePromiseTitle(String bidActivityCode, String promiseTitle, String promiseText) throws  BaseException{
+    public int  savePromiseText(String bidActivityCode, String promiseTitle, String promiseText) throws  BaseException{
 
         ActivityDO ActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
         if (null == ActivityDO) {
@@ -861,7 +693,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         JbxtActivityParam updateActivityParam = JbxtActivityParam.builder().code(bidActivityCode).promiseTitle(promiseTitle).promiseText(promiseText).build();
         JbxtActivityParam conditionActivityParam = JbxtActivityParam.builder().code(bidActivityCode).build();
         if (checkActivityInfoComplete(bidActivityCode)) {
-            updateActivityParam.setStatus(ActivityStatusEnum.EXPORT_NO_SATRT.getCode());
+            updateActivityParam.setStatus(ActivityStatusEnum.IMPORT_NO_SATRT.getCode());
         }
         return activityDao.updateJbxtActivityBySomeParam(updateActivityParam, conditionActivityParam);
     }
