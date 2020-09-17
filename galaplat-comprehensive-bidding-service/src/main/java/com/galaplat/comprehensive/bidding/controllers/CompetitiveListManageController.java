@@ -72,7 +72,7 @@ public class CompetitiveListManageController extends BaseController {
     @RestfulResult
     public Object sendMsgAndMail(@RequestParam("bidActivityCode") String bidActivityCode,@RequestParam(value = "phone",required = false)String phone,
                                  @RequestParam(value = "emailAddress",required = false) String emailAddress,@RequestParam(value = "type") String type
-            ,@RequestParam(value = "supplierCode") String supplierCode) throws BaseException {
+            ,@RequestParam(value = "supplierCode",required = false) String supplierCode) throws BaseException {
         return manageService.sendMsgAndMail( bidActivityCode, phone, emailAddress, type, supplierCode);
     }
 
