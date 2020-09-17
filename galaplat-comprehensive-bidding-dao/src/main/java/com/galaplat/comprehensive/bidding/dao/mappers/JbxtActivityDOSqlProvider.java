@@ -16,6 +16,11 @@ public class JbxtActivityDOSqlProvider {
         BEGIN();
         INSERT_INTO("t_jbxt_activity");
 
+
+        if (record.getPracticalBidTime() != null) {
+            VALUES("practical_bid_time", "#{practicalBidTime,jdbcType=TIMESTAMP}");
+        }
+
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
         }
@@ -109,6 +114,11 @@ public class JbxtActivityDOSqlProvider {
 
         if (record.getName() != null) {
             SET("name = #{name,jdbcType=VARCHAR}");
+        }
+
+
+        if (record.getPracticalBidTime() != null) {
+            SET("practical_bid_time = #{practicalBidTime,jdbcType=TIMESTAMP}");
         }
 
         if (record.getStartTime() != null) {

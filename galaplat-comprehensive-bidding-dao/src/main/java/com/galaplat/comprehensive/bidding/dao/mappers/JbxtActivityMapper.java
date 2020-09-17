@@ -27,7 +27,7 @@ public interface JbxtActivityMapper {
             "deleter, biding_type, ",
             "predict_bid_datetime, bid_activity_info, ",
             "promise_title, file_path, ",
-            "promise_text)",
+            "promise_text, practical_bid_time)",
             "values (#{code,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
             "#{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, ",
             "#{createdTime,jdbcType=TIMESTAMP}, #{updatedTime,jdbcType=TIMESTAMP}, ",
@@ -38,7 +38,7 @@ public interface JbxtActivityMapper {
             "#{deleter,jdbcType=VARCHAR}, #{bidingType,jdbcType=INTEGER}, ",
             "#{predictBidDatetime,jdbcType=TIMESTAMP}, #{bidActivityInfo,jdbcType=VARCHAR}, ",
             "#{promiseTitle,jdbcType=VARCHAR}, #{filePath,jdbcType=VARCHAR}, ",
-            "#{promiseText,jdbcType=LONGVARCHAR})"
+            "#{promiseText,jdbcType=LONGVARCHAR}, #{practicalBidTime,jdbcType=TIMESTAMP})"
     })
     int insert(ActivityDO record);
 
@@ -50,7 +50,7 @@ public interface JbxtActivityMapper {
             "code, name, start_time, end_time, created_time, updated_time, updator, creator, ",
             "company_code, sys_code, supplier_num, status, record_status, delete_time, deleter, ",
             "biding_type, predict_bid_datetime, bid_activity_info, promise_title, file_path, ",
-            "promise_text",
+            "promise_text, practical_bid_time",
             "from t_jbxt_activity",
             "where code = #{code,jdbcType=VARCHAR}"
     })
@@ -75,7 +75,8 @@ public interface JbxtActivityMapper {
             @Result(column="bid_activity_info", property="bidActivityInfo", jdbcType=JdbcType.VARCHAR),
             @Result(column="promise_title", property="promiseTitle", jdbcType=JdbcType.VARCHAR),
             @Result(column="file_path", property="filePath", jdbcType=JdbcType.VARCHAR),
-            @Result(column="promise_text", property="promiseText", jdbcType=JdbcType.LONGVARCHAR)
+            @Result(column="promise_text", property="promiseText", jdbcType=JdbcType.LONGVARCHAR),
+            @Result(column="practical_bid_time", property="practicalBidTime", jdbcType=JdbcType.TIMESTAMP)
     })
     ActivityDO selectByPrimaryKey(String code);
 
@@ -104,6 +105,7 @@ public interface JbxtActivityMapper {
             "promise_title = #{promiseTitle,jdbcType=VARCHAR},",
             "file_path = #{filePath,jdbcType=VARCHAR},",
             "promise_text = #{promiseText,jdbcType=LONGVARCHAR}",
+            "practical_bid_time = #{practicalBidTime,jdbcType=TIMESTAMP }",
             "where code = #{code,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKeyWithBLOBs(ActivityDO record);
@@ -129,6 +131,7 @@ public interface JbxtActivityMapper {
             "bid_activity_info = #{bidActivityInfo,jdbcType=VARCHAR},",
             "promise_title = #{promiseTitle,jdbcType=VARCHAR},",
             "file_path = #{filePath,jdbcType=VARCHAR}",
+            "practical_bid_time = #{practicalBidTime,jdbcType=TIMESTAMP }",
             "where code = #{code,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKey(ActivityDO record);

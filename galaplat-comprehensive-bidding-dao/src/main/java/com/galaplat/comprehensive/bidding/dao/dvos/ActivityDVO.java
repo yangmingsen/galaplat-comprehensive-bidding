@@ -62,6 +62,17 @@ public class ActivityDVO implements Serializable {
      /*承诺函内容*/
      private String promiseText;
 
+     /*预计竞标日*/
+     private Date practicalBidTime;
+
+     public Date getPracticalBidTime() {
+         return practicalBidTime;
+     }
+
+     public void setPracticalBidTime(Date practicalBidTime) {
+         this.practicalBidTime = practicalBidTime;
+     }
+
 
      public String getCode() {
          return code;

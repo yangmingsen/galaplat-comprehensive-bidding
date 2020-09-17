@@ -93,7 +93,7 @@ public interface JbxtActivityCustMapper extends JbxtActivityMapper {
             "code, name, start_time, end_time, created_time, updated_time, updator, creator, ",
             "company_code, sys_code, supplier_num, status, record_status, delete_time, deleter, ",
             "biding_type, predict_bid_datetime, bid_activity_info, promise_title, file_path, ",
-            "promise_text",
+            "promise_text,practical_bid_time",
             "from t_jbxt_activity",
             "where status = #{status,jdbcType=INTEGER}"
     })
@@ -118,7 +118,8 @@ public interface JbxtActivityCustMapper extends JbxtActivityMapper {
             @Result(column="bid_activity_info", property="bidActivityInfo", jdbcType=JdbcType.VARCHAR),
             @Result(column="promise_title", property="promiseTitle", jdbcType=JdbcType.VARCHAR),
             @Result(column="file_path", property="filePath", jdbcType=JdbcType.VARCHAR),
-            @Result(column="promise_text", property="promiseText", jdbcType=JdbcType.LONGVARCHAR)
+            @Result(column="promise_text", property="promiseText", jdbcType=JdbcType.LONGVARCHAR),
+            @Result(column="practical_bid_time", property="practicalBidTime", jdbcType=JdbcType.TIMESTAMP)
     })
     List<ActivityDVO> selectAllByStatus(Integer status);
 
@@ -129,7 +130,7 @@ public interface JbxtActivityCustMapper extends JbxtActivityMapper {
             " select",
             " code, name, start_time, end_time, created_time, updated_time, updator, " ,
             " creator, company_code, sys_code, supplier_num, status, record_status, delete_time, " ,
-            " deleter, biding_type, predict_bid_datetime, bid_activity_info, promise_title, promise_text, file_path ",
+            " deleter, biding_type, predict_bid_datetime, bid_activity_info, promise_title, promise_text, file_path, practical_bid_time ",
             " from t_jbxt_activity ",
             " where 1=1 ",
             "<if test='param.code != null' > and code = #{param.code,jdbcType=VARCHAR}</if>",
@@ -167,6 +168,7 @@ public interface JbxtActivityCustMapper extends JbxtActivityMapper {
             @Result(column = "promise_title", property = "promiseTitle", jdbcType = JdbcType.VARCHAR),
             @Result(column = "promise_text", property = "promiseText", jdbcType = JdbcType.VARCHAR),
             @Result(column = "file_path", property = "filePath", jdbcType = JdbcType.VARCHAR),
+            @Result(column="practical_bid_time", property="practicalBidTime", jdbcType=JdbcType.TIMESTAMP)
     })
     ActivityDO getJbxtActivityByParam(@Param("param") JbxtActivityParam param);
 

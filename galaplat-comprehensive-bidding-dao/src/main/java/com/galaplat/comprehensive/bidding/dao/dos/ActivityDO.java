@@ -70,6 +70,10 @@ public class ActivityDO implements Serializable {
     /*承诺函内容*/
     private String promiseText;
 
+    /*预计竞标日*/
+    private Date practicalBidTime;
+
+
      public static long getSerialVersionUID() {
          return serialVersionUID;
      }
