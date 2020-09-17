@@ -472,6 +472,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<BidSupplierDVO> supplierDVOList = Lists.newArrayList();
         userDOList.stream().forEach(e->{
             BidSupplierDVO dvo = BidSupplierDVO.builder()
+                    .code(e.getCode())
                     .codeName(e.getCodeName())
                     .supplierName(e.getSupplierName())
                     .contactPerson(e.getContactPerson())
