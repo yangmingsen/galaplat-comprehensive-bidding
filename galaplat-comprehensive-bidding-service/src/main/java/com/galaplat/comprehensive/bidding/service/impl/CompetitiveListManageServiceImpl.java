@@ -706,10 +706,15 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         }
         JbxtActivityParam updateActivityParam = JbxtActivityParam.builder().code(bidActivityCode).promiseTitle(promiseTitle).promiseText(promiseText).build();
         JbxtActivityParam conditionActivityParam = JbxtActivityParam.builder().code(bidActivityCode).build();
-        if (checkActivityInfoComplete(bidActivityCode)) {
+        int updateCount = activityDao.updateJbxtActivityBySomeParam(updateActivityParam, conditionActivityParam);
+
+        if (updateCount > 0 && checkActivityInfoComplete(bidActivityCode)) {
             updateActivityParam.setStatus(ActivityStatusEnum.IMPORT_NO_SATRT.getCode());
+            updateActivityParam.setPromiseText(null);
+            updateActivityParam.setPromiseTitle(null);
+            activityDao.updateJbxtActivityBySomeParam(updateActivityParam, conditionActivityParam);
         }
-        return activityDao.updateJbxtActivityBySomeParam(updateActivityParam, conditionActivityParam);
+        return updateCount;
     }
 
     /***
@@ -724,10 +729,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
         Tuple3<String, String , String > stringTuple3 = getFileAllName(bidActivityCode);
         String fileName = stringTuple3._1; // 文件名
-        String originFileName = stringTuple3._2; // 原文件名
+        String oldOriginFileName = stringTuple3._2; // 原文件名
         String extendName =  stringTuple3._3; // 扩展名
+        String newOriginFileName = "";
 
-        if (StringUtils.isNotBlank(fileName) || StringUtils.isNotBlank(originFileName)|| StringUtils.isNotBlank(extendName)) {
+        if (StringUtils.isNotBlank(fileName) || StringUtils.isNotBlank(oldOriginFileName)|| StringUtils.isNotBlank(extendName)) {
             try {
                 fileFeignClient.delete(fileName);
             } catch (BaseException e) {
@@ -738,9 +744,9 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
         try {
             byte[]  bytes = rarFile.getBytes();
-            fileName = rarFile.getOriginalFilename();
+            newOriginFileName = rarFile.getOriginalFilename();
             MyMultipartFile myMultipartFile = new MyMultipartFile("file", "", "multipart/form-data", bytes);
-            imageVO = new ImageVO(bidActivityCode, fileName , "-", "-", myMultipartFile);
+            imageVO = new ImageVO(bidActivityCode, newOriginFileName , "-", "-", myMultipartFile);
         } catch (IOException e) {
             log.error(" There is an error of uploadinfg file. 【{}】,【{}】", e.getMessage(),e );
             e.printStackTrace();
@@ -748,9 +754,19 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         try {
             if (null != imageVO) {
                 String fileDir = fileFeignClient.addFile(imageVO);
-                fileDir = StringUtils.isNotBlank(fileName) ? fileDir + "/" + fileName : fileDir;
+                fileDir = StringUtils.isNotBlank(newOriginFileName) ? fileDir + "/" + newOriginFileName : fileDir;
                 activityDao.updateBidActivity(ActivityDO.builder().code(bidActivityCode).filePath(fileDir).build());
-                return fileName;
+
+                if (StringUtils.isNotBlank(oldOriginFileName)) {
+                    oldOriginFileName = oldOriginFileName.split("\\.")[0];
+                    if (StringUtils.isNotBlank(newOriginFileName) && StringUtils.isNotBlank(oldOriginFileName) &&
+                            !StringUtils.equals(newOriginFileName, oldOriginFileName)) {
+                        userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(0).activityCode(bidActivityCode).build(),
+                                JbxtUserParam.builder().activityCode(bidActivityCode).build());
+                    }
+                }
+
+                return newOriginFileName;
             }
         } catch (BaseException e) {
             log.error(" There is an error of uploadinfg file. 【{}】,【{}】", e.getMessage(),e );
