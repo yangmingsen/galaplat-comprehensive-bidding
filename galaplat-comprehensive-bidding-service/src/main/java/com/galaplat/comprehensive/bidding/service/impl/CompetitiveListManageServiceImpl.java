@@ -472,6 +472,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         List<BidSupplierDVO> supplierDVOList = Lists.newArrayList();
         userDOList.stream().forEach(e->{
             BidSupplierDVO dvo = BidSupplierDVO.builder()
+                    .code(e.getCode())
                     .codeName(e.getCodeName())
                     .supplierName(e.getSupplierName())
                     .contactPerson(e.getContactPerson())
@@ -866,11 +867,11 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String password =  userDO.getPassword();
 
         StringBuilder mailContent = new StringBuilder("");
-        if (!StringUtils.isAnyBlank(bidActivityInfo, predictBidDatetime, supplierName,username,password )) {
+        if (!StringUtils.isAnyBlank(predictBidDatetime, supplierName,username,password )) {
             mailContent.append("致<B>").append(supplierName).append("</B>:</br>").append("您好！");
             mailContent.append("<p>现邀请贵公司参与ESR举行的竞标活动，以下是本次竞标活动相关信息：").append("</br>");
             mailContent.append("竞标单编号：").append(bidActivityCode).append("</br></p>");
-            mailContent.append("<p>竞标描述：").append(bidActivityInfo).append("</p>");
+            mailContent.append("<p>竞标描述：").append(StringUtils.isNotBlank(bidActivityInfo) ? bidActivityInfo : "").append("</p>");
             mailContent.append("<p>预计竞标日：<B>").append(predictBidDatetime).append("</B></p>");
             mailContent.append("<p>账号：").append(username).append("</br>");
             mailContent.append("密码：").append(password).append("</p>");
@@ -958,7 +959,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         }
 
         if (!StringUtils.isAnyBlank(phoneNumber, supplierName, bidActivityCode,
-                bidActivityInfo, bidActivityDateTime, bidActivityAccount, bidActivityPassword, tempcode)) {
+                 bidActivityDateTime, bidActivityAccount, bidActivityPassword, tempcode)) {
             String result = fmi.sendBidMsg(phoneNumber, supplierName, bidActivityCode, bidActivityInfo, bidActivityDateTime,
                     bidActivityAccount, bidActivityPassword, tempcode);
             if (StringUtils.isNotBlank(result) && result.equals("\"1\"")) {
