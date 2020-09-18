@@ -99,7 +99,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     private IJbxtMinbidDao minbidDao;
 
     @Autowired
-    private  IFileFeignClient fileFeignClient;
+    private IFileFeignClient fileFeignClient;
 
     @Autowired
     private IFeiginMessageClient messageClient;
@@ -765,15 +765,12 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                 fileDir = StringUtils.isNotBlank(newOriginFileName) ? fileDir + "/" + newOriginFileName : fileDir;
                 activityDao.updateBidActivity(ActivityDO.builder().code(bidActivityCode).filePath(fileDir).build());
 
-                if (StringUtils.isNotBlank(oldOriginFileName)) {
-                    oldOriginFileName = oldOriginFileName.split("\\.")[0];
-                    if (StringUtils.isNotBlank(newOriginFileName) && StringUtils.isNotBlank(oldOriginFileName) &&
-                            !StringUtils.equals(newOriginFileName, oldOriginFileName)) {
-                        userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(0).activityCode(bidActivityCode).build(),
-                                JbxtUserParam.builder().activityCode(bidActivityCode).build());
-                    }
-                }
+                System.out.println("oldOriginFileName is" + (oldOriginFileName + "." + extendName) + ", newOriginFileName is  " + newOriginFileName);
 
+                if (!StringUtils.equals(newOriginFileName, oldOriginFileName + "." + extendName)) {
+                    userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(0).activityCode(bidActivityCode).build(),
+                            JbxtUserParam.builder().activityCode(bidActivityCode).build());
+                }
                 return newOriginFileName;
             }
         } catch (BaseException e) {
