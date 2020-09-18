@@ -22,7 +22,6 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,9 +34,9 @@ public class ActivityTask implements Runnable {
     private UserChannelMap userChannelMap;
     private AdminChannelMap adminChannel;
     private GoodsService goodsService;
-    private ReentrantLock lock = new ReentrantLock();
-
-    private Condition continueRun = this.lock.newCondition();
+    private BiddingService biddingService;
+    private ReentrantLock lock;
+    private Condition continueRun;
 
     private MessageQueue messageQueue;
     private String currentActivityCode;
@@ -46,32 +45,27 @@ public class ActivityTask implements Runnable {
     /**
      * 1 进行 2暂停  3//重置 4 结束
      */
-    private int status;
+    private volatile int status; //默认为进行中
     private int remainingTime;  //剩余时间 秒
     private Map<String, String> t_map;
-    private BigDecimal minBid;
-    private boolean haveMinBid;
-    private Map<String, BigDecimal> minSubmitMap;
+
 
     //-----------v2.1.1
-    private Integer supplierNum;
+    private int supplierNum;
     //排名Map
-    //private Map<String, Integer> lastRankInfoMap = new HashMap<>(); // supplier -> rank
-    private Map<String, Integer> lastRankInfoMap = new HashMap<>(); // supplier -> rank
-
-    private Map<String, Double> lastBidPrceMap = new HashMap<>(); // supplierCode -> BidPrice
+    private volatile Map<String, Integer> lastRankInfoMap ; // supplier -> rank
+    private volatile Map<String, Double> lastBidPriceMap; // supplierCode -> BidPrice
     //竞价并列表Map
-    private Map<Double, Map<String, RankInfo>> bidParaxtisInfoMap = new HashMap<>();
-    private BiddingService biddingService;
+
     private int disappearTime; //过去了多长时间 秒
     private int delayedCondition; //延时条件 秒
     private int allowDelayedLength; //单次延时长度 秒
-    private int allowDelayedTime; //允许延迟次数
-    private boolean thisGoodsAllowDelayed = true; //这个竞品是否允许延时 默认允许
+    private int allowDelayedTime; //允许延迟次数 初始化时默认与initAllowDelayedTime相等 之后的过程中如果发送延时会自动递减
+    private boolean thisGoodsAllowDelayed; //这个竞品是否允许延时 默认允许
     private int initAllowDelayedTime; //初始化允许的延迟次数
-    private boolean remainingTimeType = false; //现在是否是延时时间 默认为false标识不是延时时间
-    private int lastRemainingTime = 0;// 记录上一次发生延迟的时间
-    private int bidType = 1; //竞价方式 1为数值竞价 2为幅度竞价
+    private volatile boolean remainingTimeType; //现在是否是延时时间 默认为false标识不是延时时间
+    private volatile int lastRemainingTime;// 记录上一次发生延迟的时间
+    private int bidType; //竞价方式 1为数值竞价 2为幅度竞价
 
     public int getDelayedCondition() {
         return delayedCondition;
@@ -87,7 +81,7 @@ public class ActivityTask implements Runnable {
     }
 
     /**
-     * 允许延迟次数
+     * 获取目前还剩余延迟的次数
      *
      * @return
      */
@@ -197,36 +191,7 @@ public class ActivityTask implements Runnable {
         return status;
     }
 
-    /**
-     * 设置榜首信息
-     *
-     * @param theTopBids 处于第一名的竞价列表
-     */
-    public void updateTopMinBid(List<BiddingDVO> theTopBids) {
-        if (theTopBids.size() == 0) return;
 
-        if (haveMinBid) {
-            if (this.minBid.compareTo(theTopBids.get(0).getBid()) > 0) {
-                //处理第一名提交竞价后还是第一名的情况
-                for (BiddingDVO tbid : theTopBids) {
-                    BigDecimal ttbidPrice = minSubmitMap.get(tbid.getUserCode());
-                    if (ttbidPrice != null) {
-                        return;
-                    }
-                }
-                updateMinSubmitInfo(theTopBids);
-                return;
-            }
-            if (this.minSubmitMap.size() < theTopBids.size()) {
-                updateMinSubmitInfo(theTopBids);
-            }
-
-        } else {
-            //首次 top
-            updateMinSubmitInfo(theTopBids);
-            this.haveMinBid = true;
-        }
-    }
 
     /**
      * 设置 当前竞品活动状态
@@ -251,7 +216,6 @@ public class ActivityTask implements Runnable {
 
             if (this.status == 3) {
                 this.resetActivity();
-                //this.resetTopInfo();
             }
 
             //通知供应商端 继续
@@ -259,26 +223,14 @@ public class ActivityTask implements Runnable {
             map.put("activityCode", this.currentActivityCode);
             map.put("goodsId", this.currentGoodsId.toString());
             map.put("status", "1");
-
             final QueueMessage queueMessage = new QueueMessage(215, map);
             messageQueue.offer(queueMessage);
         }
     }
 
-    /**
-     * 获取剩余时间类型：
-     * true: 延迟时间
-     * false: 正常时间
-     *
-     * @return
-     */
-//    public Boolean getRemainingTimeType() {
-//
-//        return remainingTimeType;
-//    }
-
 
     /**
+     * 判断是否发生了延迟
      * 根据初始化延迟时间和已经消耗的次数来判断
      *
      * @return
@@ -304,21 +256,27 @@ public class ActivityTask implements Runnable {
     public static class Builder {
         private final ActivityTask activityTask = new ActivityTask();
 
+        /**
+         * 初始化所有活动线程数据
+         */
         public Builder() {
-            activityTask.status = 1;
             activityTask.LOGGER = LoggerFactory.getLogger(ActivityTask.class);
-            activityTask.remainingTimeMessage = new ResponseMessage(100, null);
             activityTask.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
             activityTask.adminChannel = SpringUtil.getBean(AdminChannelMap.class);
             activityTask.goodsService = SpringUtil.getBean(GoodsService.class);
             activityTask.messageQueue = SpringUtil.getBean(MessageQueue.class);
             activityTask.biddingService = SpringUtil.getBean(JbxtBiddingServiceImpl.class);
+            activityTask.remainingTimeMessage = new ResponseMessage(100, null);
             activityTask.t_map = new HashMap<>();
-            activityTask.minBid = new BigDecimal("0.0");
-            activityTask.haveMinBid = false;
-            activityTask.minSubmitMap = new HashMap<>();
             activityTask.disappearTime = 0;
             activityTask.bidType = 1;
+            activityTask.status = 1;
+            activityTask.lock = new ReentrantLock();
+            activityTask.continueRun = activityTask.lock.newCondition();
+            activityTask.lastBidPriceMap = new HashMap<>();
+            activityTask.lastRankInfoMap = new HashMap<>();
+            activityTask.remainingTimeType = false;
+            activityTask.lastRemainingTime = 0;
         }
 
         /**
@@ -395,6 +353,7 @@ public class ActivityTask implements Runnable {
                 this.activityTask.thisGoodsAllowDelayed = false;
             }
             this.activityTask.allowDelayedLength = allowDelayedLength;
+            this.activityTask.thisGoodsAllowDelayed = true;
             return this;
         }
 
@@ -465,7 +424,7 @@ public class ActivityTask implements Runnable {
                     needNotifyTopUpdate = true;
                 }
 
-                if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
+                if (bidPrice.compareTo(lastBidPriceMap.get(supplierCode)) < 0) {
                     //上一把自己和其他人是第一名 然后 想争第一 ， 当他变为新第一名，其他人的排名往后挪时。需要通知榜首更新
                     if (isParataxis(supplierCode)) {
                         if (lastRankInfoMap.get(supplierCode) == 1) {
@@ -483,15 +442,10 @@ public class ActivityTask implements Runnable {
                         //第一种可能是第一名自己重新提交了最低价；
                         //还有种可能是上次排名中当前供应商处于并列状态，那么此时如果提交了最新报价那么会使它进入新的排名
                         //这两种情况都是需要判断是否延时
-                        if (bidPrice.compareTo(lastBidPrceMap.get(supplierCode)) < 0) {
+                        if (bidPrice.compareTo(lastBidPriceMap.get(supplierCode)) < 0) {
                             if (newRankPostion < lastRankPosition) {
                                 needDeedDelayed = decideDelayed(needDeedDelayed);
                             }
-
-                            //上一把自己是第一名 然后无聊 想争第一
-//                            if (lastRankInfoMap2.get(supplierCode) == 1) {
-//                                needDeedDelayed = decideDelayed(needDeedDelayed);
-//                            }
 
                             if (isParataxis(supplierCode)) {
                                 needDeedDelayed = decideDelayed(needDeedDelayed);
@@ -508,7 +462,7 @@ public class ActivityTask implements Runnable {
 
             }
             tmpRankInfoMap.put(supplierCode, newRankPostion);
-            lastBidPrceMap.put(supplierCode, bidPrice);
+            lastBidPriceMap.put(supplierCode, bidPrice);
 
             //封装各个供应商排名信息
             if (rankInfoMap.get(bidPrice) != null) {
@@ -632,13 +586,6 @@ public class ActivityTask implements Runnable {
      * 重置活动
      */
     private void resetActivity() {
-        //同步数据（管理端 N，供应商端 Y）
-        final Map<String, String> map = new HashMap<>();
-        map.put("activityCode", this.currentActivityCode);
-        map.put("goodsId", this.currentGoodsId.toString());
-
-        final QueueMessage queueMessage = new QueueMessage(212, map);
-        messageQueue.offer(queueMessage);
 
         this.status = 1; //重置状态
         this.remainingTime = this.initTime; //重置剩余时间
@@ -649,12 +596,26 @@ public class ActivityTask implements Runnable {
         this.lastRemainingTime = 0;
         this.thisGoodsAllowDelayed = true;
 
+        final Integer goodsId = this.currentGoodsId;
+        final String activityCode = this.currentActivityCode;
+
         //重置db当前竞品的延迟过了次数
         JbxtGoodsVO newGoodsVO = new JbxtGoodsVO();
-        newGoodsVO.setGoodsId(this.currentGoodsId);
+        newGoodsVO.setGoodsId(goodsId);
         newGoodsVO.setAddDelayTimes(0);
         goodsService.updateJbxtGoods(newGoodsVO);
-        //this.resetTopInfo();
+
+        //删除所有用户的历史竞价数据(min_bid表和bidding表)
+        biddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
+        biddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
+
+        //向所有供应商端发送重置通知
+        //同步数据（管理端 N，供应商端 Y）
+        final Map<String, String> map = new HashMap<>();
+        map.put("activityCode", activityCode);
+        map.put("goodsId", goodsId.toString());
+        final QueueMessage queueMessage = new QueueMessage(212, map);
+        messageQueue.offer(queueMessage);
     }
 
     /**
@@ -851,36 +812,6 @@ public class ActivityTask implements Runnable {
         this.sendRemainingTimeToAll();
     }
 
-    /**
-     * 清除榜首信息
-     */
-    private void resetTopInfo() {
-        minBid = new BigDecimal("0.0");
-        haveMinBid = false;
-        minSubmitMap.clear();
-    }
-
-    /**
-     * 更新榜首 提示
-     *
-     * @param theTopBids
-     */
-    private void updateMinSubmitInfo(List<BiddingDVO> theTopBids) {
-        this.minSubmitMap.clear();
-        for (int i = 0; i < theTopBids.size(); i++) {
-            final BiddingDVO ttBid = theTopBids.get(i);
-            this.minSubmitMap.put(ttBid.getUserCode(), ttBid.getBid());
-        }
-        this.minBid = theTopBids.get(0).getBid();
-
-        //notity all supplier the top updated
-        final Map<String, String> map = new HashMap<>();
-        map.put("activityCode", this.currentActivityCode);
-        map.put("goodsId", this.currentGoodsId.toString());
-
-        final QueueMessage queueMessage = new QueueMessage(111, map);
-        messageQueue.offer(queueMessage);
-    }
 
     /**
      * 决策是否延迟

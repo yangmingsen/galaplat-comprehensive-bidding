@@ -35,9 +35,6 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         switch (type) {
             case 300: //当某个管理端中途加入（或掉线从新加入） 同步数据  //同步
                 handler300Problem(queuemsg);
-                //同步延迟时间
-                //doDeta...
-                //handlerDelayed(queuemsg);
                 break;
 
             case 301: //推数据给管理端（同步一些数据给管理端）
@@ -50,30 +47,9 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         }
     }
 
-    private void handlerDelayed(QueueMessage queuemsg) {
-        final String activityCode = queuemsg.getData().get("activityCode");
-        final ActivityTask activityTask = this.activityManager.get(activityCode);
-        if (activityTask == null) return; //如果当前活动不存在返回
-
-        final int initAllowDelayedTime = activityTask.getInitAllowDelayedTime();
-        final int allowDelayedTime = activityTask.getAllowDelayedTime();
-        if (allowDelayedTime < initAllowDelayedTime) {
-            final int delayedLength = activityTask.getAllowDelayedLength();
-            final int expendTime = initAllowDelayedTime - allowDelayedTime; //发生延迟的次数
-            ResponseMessage responseMessage = new ResponseMessage(305, new HashMap<String, Object>() {{
-                put("delayedLength", delayedLength);
-                put("delayedTime", expendTime);
-            }});
-            final String adminCode = queuemsg.getData().get("adminCode");
-            notifyOptionAdmin(responseMessage, activityCode, adminCode);
-        }
-
-    }
-
     private void handler302Problem(QueueMessage queuemsg) {
         this.handler300Problem(queuemsg);
     }
-
 
     /**
      * 这里会处理300和302问题
@@ -147,7 +123,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
             //从bidding表查找当前供应商的所有竞价记录
             final List<BiddingDVO> currentSupplierBidHistory = biddingService.findAllByUserCodeAndGooodsIdAndActivityCode(supplier.getCode(), goodsId, activityCode);
-            final List<Res300t2> t2s = new ArrayList<>();
+            final List<Res300t2> supplierBids = new ArrayList<>();
             if (currentSupplierBidHistory.size() > 0) {
 
                 //遍历当前供应商所有的历史竞价记录 添加的返回对象中
@@ -161,10 +137,10 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                     supplierBidRecord.setBidTime(bidRecord.getBidTime());
                     supplierBidRecord.setIsDelay(bidRecord.getIsdelay());
 
-                    t2s.add(supplierBidRecord);
+                    supplierBids.add(supplierBidRecord);
                 }
             }
-            res300t1.setBids(t2s);
+            res300t1.setBids(supplierBids);
 
             supplierBidInfos.add(res300t1);
         }

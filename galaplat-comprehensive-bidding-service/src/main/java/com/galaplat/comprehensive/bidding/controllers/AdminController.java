@@ -102,7 +102,7 @@ public class AdminController extends BaseController {
     }
 
 
-    /***
+    /**
      * 删除竞品历史竞价数据
      * @param activityCode
      * @param goodsId
@@ -121,61 +121,82 @@ public class AdminController extends BaseController {
         return delOk;
     }
 
-    /***
+    /**
      * 处理存在活动线程情况
      * @param activityCode
      * @param goodsId
      * @param status
-     * @param activityThread 当前活动线程
+     * @param activityTask 当前活动线程
      * @return
      */
-    private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityThread) {
+    private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityTask) {
+        MyResult result = new MyResult(true,"更新成功");
         if (status == 3) { //处理重置问题
             Lock lock = this.lock;
             lock.lock();
             try {
-                final int remainingTime = activityThread.getRemainingTime();
+                final int remainingTime = activityTask.getRemainingTime();
                 //删除历史竞价数据
-                final boolean delOk = this.resetBidData(activityCode, goodsId);
-                if (delOk) {
-                    if (remainingTime < 0) {
-                        activityThread.setStatus(3);
-                        final String gid = goodsId.toString();
-                        final int initTime = activityThread.getInitTime() / 60;
-                        final int delayedCondition = activityThread.getDelayedCondition();
-                        final int allowDelayedLength = activityThread.getAllowDelayedLength();
-                        final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
-                        final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
-                        final int bidType = activityThread.getBidType();
-                        final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
-                                allowDelayedLength,allowDelayedTime, supplierNum,
-                                bidType);
+//                final boolean delOk = this.resetBidData(activityCode, goodsId);
+//                if (delOk) {
+//                    if (remainingTime < 0) {
+//                        activityThread.setStatus(3);
+//                        final String gid = goodsId.toString();
+//                        final int initTime = activityThread.getInitTime() / 60;
+//                        final int delayedCondition = activityThread.getDelayedCondition();
+//                        final int allowDelayedLength = activityThread.getAllowDelayedLength();
+//                        final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
+//                        final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
+//                        final int bidType = activityThread.getBidType();
+//                        final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
+//                                allowDelayedLength,allowDelayedTime, supplierNum,
+//                                bidType);
+//
+//                        if (!startOk) {
+//                            String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
+//                            LOGGER.info(info);
+//                            return new MyResult(false, info);
+//                        }
+//
+//                        return new MyResult(true, "更新成功");
+//                    }
+//                } else {
+//                    final String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
+//                    LOGGER.info(info);
+//                    return new MyResult(false, info);
+//                }
+                activityTask.setStatus(status);
+                if (remainingTime < 0) {
+                    activityTask.setStatus(3);
+                    String gid = goodsId.toString();
+                    int initTime = activityTask.getInitTime() / 60;
+                    int delayedCondition = activityTask.getDelayedCondition();
+                    int allowDelayedLength = activityTask.getAllowDelayedLength();
+                    int allowDelayedTime = activityTask.getInitAllowDelayedTime();
+                    int supplierNum = activityTask.getSupplierNum();
+                    int bidType = activityTask.getBidType();
+                    boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
+                            allowDelayedLength,allowDelayedTime, supplierNum,
+                            bidType);
 
-                        if (!startOk) {
-                            String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
-                            LOGGER.info(info);
-                            return new MyResult(false, info);
-                        }
-
-                        //activityThreadManager.get(activityCode).setStatus(3);
-                        return new MyResult(true, "更新成功");
+                    if (!startOk) {
+                        String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
+                        LOGGER.info(info);
+                        result.setInfo(false, info);
                     }
-                } else {
-                    final String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
-                    LOGGER.info(info);
-                    return new MyResult(false, info);
                 }
             } catch (Exception e) {
                 LOGGER.info("handlerTheAcitvityThreadExistCondition(ERROR): "+e.getMessage());
+                result.setInfo(false, "更新失败："+e.getMessage());
             } finally {
                 lock.unlock();
             }
         }
-        activityThread.setStatus(status);
-        return new MyResult(true, "更新成功");
+
+        return result;
     }
 
-    /***
+    /**
      * 处理不存在活动线程情况
      * @param activityCode
      * @param goodsId
@@ -298,13 +319,17 @@ public class AdminController extends BaseController {
         return new MyResult(false, "所有竞品已结束", map);
     }
 
+    /**
+     * 消息事件：通知所有供应商端 退出登录
+     * @param activityCode
+     */
     private void notify216Event(String activityCode) {
         final Map<String, String> map216 = new HashMap();
         map216.put("activityCode", activityCode);
         messageQueue.offer(new QueueMessage(216, map216));
     }
 
-    /***
+    /**
      * 通知所有供应商端 更新下一个竞品活动
      * @param activityCode
      * @param goodsId
@@ -317,6 +342,10 @@ public class AdminController extends BaseController {
         messageQueue.offer(new QueueMessage(214, map214));
     }
 
+    /**
+     * 关闭上一个活动线程
+     * @param activityCode
+     */
     private void closeLastActivityThread(String activityCode) {
         final ActivityTask lastActivityThread = activityThreadManager.get(activityCode);
         if (lastActivityThread != null) { //停止上一个goods的活动
@@ -327,7 +356,18 @@ public class AdminController extends BaseController {
     }
 
 
-
+    /**
+     * 启动一个活动线程
+     * @param activityCode
+     * @param goodsId
+     * @param initTime
+     * @param delayedCondition
+     * @param allowDelayedLength
+     * @param allowDelayedTime
+     * @param supplierNum
+     * @param bidType
+     * @return
+     */
     private boolean startActivityTask(String activityCode, String goodsId, int initTime, int delayedCondition,
                                       int allowDelayedLength,  int allowDelayedTime, int supplierNum, int bidType) {
         boolean startOK = true;
