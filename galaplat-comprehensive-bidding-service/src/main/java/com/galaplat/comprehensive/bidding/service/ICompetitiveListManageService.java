@@ -148,4 +148,12 @@ public interface ICompetitiveListManageService {
      * @return
      */
     Tuple3<String, String, String> getFileAllName(String bidActivityCode);
+
+    /**
+     *  获取短信日志
+     * @param type
+     * @param msgCode
+     * @return
+     */
+    String getMsgLog(String type, String msgCode);
 }
