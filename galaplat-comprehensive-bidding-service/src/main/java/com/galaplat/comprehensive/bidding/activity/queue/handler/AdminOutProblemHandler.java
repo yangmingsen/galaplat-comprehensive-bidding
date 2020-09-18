@@ -87,6 +87,13 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         final Integer goodsId ;
+        final ActivityDO activityDO = activityService.findOneByCode(activityCode);
+        final Integer bidType = activityDO.getBidingType();
+        if (bidType == null) {
+            LOGGER.info("handler300Problem(ERROR): bidType数据为null，请检查数据activity表的bidType字段");
+            return;
+        }
+
         if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
             ActivityTask currentActivity = activityManager.get(activityCode); //#issue 如果存在未开始情况如何处理
             if ( currentActivity == null) {
@@ -96,7 +103,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                     goodsId = tmpGoodsDVO.getGoodsId();
                 } else {
                     LOGGER.info("handler300Problem(ERROR): 当前活动"+activityCode+"不存在竞品列表");
-                    goodsId = -1;
+                    return;
                 }
 
             } else {
@@ -111,6 +118,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             }
 
         }
+
         final List<UserDVO> userLists = userService.findAllByActivityCode(activityCode);
         final List<Res300t1> t1s = new ArrayList<>();
         for (final UserDVO user1 : userLists) {
@@ -126,16 +134,20 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                 res300t1.setMinBid(new BigDecimal("0.000"));
             }
 
-            LOGGER.info("userCode="+user1.getCode()+"  goodsId="+goodsId+"  activityCode="+activityCode);
+
             final List<BiddingDVO> cUserBidHistory = biddingService.findAllByUserCodeAndGooodsIdAndActivityCode(user1.getCode(), goodsId, activityCode);
             final List<Res300t2> t2s = new ArrayList<>();
             if (cUserBidHistory.size() > 0) {
 
-                for (final BiddingDVO ubid1 : cUserBidHistory) {
+                for (final BiddingDVO bidRecord : cUserBidHistory) {
                     final Res300t2 res300t2 = new Res300t2();
-                    res300t2.setBid(ubid1.getBid());
-                    res300t2.setBidTime(ubid1.getBidTime());
-                    res300t2.setIsDelay(ubid1.getIsdelay());
+                    if (bidType == 1) {
+                        res300t2.setBid(bidRecord.getBid());
+                    } else if (bidType == 2) {
+                        res300t2.setBidPercent(bidRecord.getBidPercent());
+                    }
+                    res300t2.setBidTime(bidRecord.getBidTime());
+                    res300t2.setIsDelay(bidRecord.getIsdelay());
 
                     t2s.add(res300t2);
                 }
@@ -168,13 +180,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         }
         res300.setMinPrice(minPrice);
         res300.setList(t1sCollect);
-
-        res300.setBidingType(1); //默认为数值竞价
-        ActivityDO activityDO = activityService.findOneByCode(activityCode);
-        if (activityDO != null && activityDO.getBidingType()!=null) {
-            res300.setBidingType(activityDO.getBidingType());
-        }
-
+        res300.setBidingType(bidType); //默认为数值竞价
 
         //处理返回数据
         final ResponseMessage tmsg = new ResponseMessage(300, res300);
