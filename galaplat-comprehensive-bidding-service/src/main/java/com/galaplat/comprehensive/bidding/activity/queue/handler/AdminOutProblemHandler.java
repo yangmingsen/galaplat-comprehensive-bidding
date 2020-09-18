@@ -3,16 +3,19 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 import com.alibaba.fastjson.JSON;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
 import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.BiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.dvos.UserDVO;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminInfo;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t1;
 import com.galaplat.comprehensive.bidding.netty.pojo.res.Res300t2;
+import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.slf4j.Logger;
@@ -85,8 +88,20 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         final Integer goodsId ;
         if (goodsIdStr == null) { //如果传入的goodsId为 null 意味着是300问题
-            ActivityTask currentActivity = activityManager.get(activityCode);
-            goodsId = currentActivity.getCurrentGoodsId();
+            ActivityTask currentActivity = activityManager.get(activityCode); //#issue 如果存在未开始情况如何处理
+            if ( currentActivity == null) {
+                List<GoodsDVO> tmpGoodsList = goodsService.findAllByActivityCode(activityCode);
+                if (tmpGoodsList.size() > 0) {
+                    GoodsDVO tmpGoodsDVO = tmpGoodsList.get(0);
+                    goodsId = tmpGoodsDVO.getGoodsId();
+                } else {
+                    LOGGER.info("handler300Problem(ERROR): 当前活动"+activityCode+"不存在竞品列表");
+                    goodsId = -1;
+                }
+
+            } else {
+                goodsId = currentActivity.getCurrentGoodsId();
+            }
         } else { //不为null 意味着302问题
             try {
                 goodsId = Integer.parseInt(goodsIdStr);
@@ -153,6 +168,12 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         }
         res300.setMinPrice(minPrice);
         res300.setList(t1sCollect);
+
+        res300.setBidingType(1); //默认为数值竞价
+        ActivityDO activityDO = activityService.findOneByCode(activityCode);
+        if (activityDO != null && activityDO.getBidingType()!=null) {
+            res300.setBidingType(activityDO.getBidingType());
+        }
 
 
         //处理返回数据

@@ -22,8 +22,16 @@ public interface GoodsService {
 	  * @param activityCode
 	  * @return List SimpleGoodsVO
 	  */
-	 public List<SimpleGoodsVO> findAll(String activityCode);
+	  List<SimpleGoodsVO> findAll(String activityCode);
 
+
+	/**
+	 * 根据activityCode查找所有所有竞品
+	 * <p>Note: 注意这个方法与findAll方法区别是，findAll返回的类型是自定义的</p>
+	 * @param activityCode
+	 * @return
+	 */
+	List<GoodsDVO> findAllByActivityCode(String activityCode);
 
 
 

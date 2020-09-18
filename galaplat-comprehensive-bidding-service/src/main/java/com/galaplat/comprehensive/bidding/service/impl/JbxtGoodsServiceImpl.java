@@ -38,18 +38,23 @@ public class JbxtGoodsServiceImpl implements GoodsService {
     Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsServiceImpl.class);
 
     @Autowired
-	private GoodsDao jbxtgoodsDao;
+	private GoodsDao goodsDao;
 
     @Autowired
-	private BiddingDao jbxtBiddingDao;
+	private BiddingDao biddingDao;
 
 	@Autowired
 	private ActivityThreadManager activityManager;
 
+	public List<GoodsDVO> findAllByActivityCode(String activityCode) {
+		return goodsDao.getListJbxtGoodsByActivityCode(activityCode);
+	}
+
+
     public List<SimpleGoodsVO> findAll(String activityCode) {
 		LOGGER.info("findAll(msg); activityCode="+activityCode);
 
-        List<GoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+        List<GoodsDVO> jgdList = goodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
 		ActivityTask currentActivity = activityManager.get(activityCode);
 		jgdList.stream().forEach(goods -> {
@@ -86,6 +91,8 @@ public class JbxtGoodsServiceImpl implements GoodsService {
     }
 
 
+
+
 	static class ComputedRes{
     	private BigDecimal bid;
     	private Integer rank;
@@ -110,7 +117,7 @@ public class JbxtGoodsServiceImpl implements GoodsService {
 	 * @return
 	 */
 	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(String userCode, Integer goodsId, String activityCode) {
-		List<BiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId,activityCode);
+		List<BiddingDVO> bidList = biddingDao.selectMinBidTableBy(goodsId,activityCode);
 
 		Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
 		BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
@@ -154,23 +161,23 @@ public class JbxtGoodsServiceImpl implements GoodsService {
 
 
     public GoodsDO selectActiveGoods(String activityCode) {
-        return jbxtgoodsDao.selectActiveGoods(activityCode);
+        return goodsDao.selectActiveGoods(activityCode);
     }
 
 
 	public GoodsDO selectByGoodsId(Integer goodsId) {
-		return jbxtgoodsDao.selectByGoodsId(goodsId);
+		return goodsDao.selectByGoodsId(goodsId);
 	}
 
     public List<GoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
-        return jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+        return goodsDao.getListJbxtGoodsByActivityCode(activityCode);
     }
 
 
     @Override
     public int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
         GoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(GoodsDO.class, jbxtgoodsVO);
-        return jbxtgoodsDao.insertJbxtGoods(jbxtgoodsDO);
+        return goodsDao.insertJbxtGoods(jbxtgoodsDO);
     }
 
     @Override
@@ -178,7 +185,7 @@ public class JbxtGoodsServiceImpl implements GoodsService {
     public int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
         GoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(GoodsDO.class, jbxtgoodsVO);
         jbxtgoodsDO.setUpdatedTime(new Date());
-        return jbxtgoodsDao.updateJbxtGoods(jbxtgoodsDO);
+        return goodsDao.updateJbxtGoods(jbxtgoodsDO);
     }
 
 }

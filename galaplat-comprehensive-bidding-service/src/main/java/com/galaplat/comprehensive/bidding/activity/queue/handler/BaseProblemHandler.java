@@ -8,6 +8,7 @@ import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
 import com.galaplat.comprehensive.bidding.service.BiddingService;
 import com.galaplat.comprehensive.bidding.service.GoodsService;
 import com.galaplat.comprehensive.bidding.service.UserService;
@@ -29,6 +30,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     protected final AdminChannelMap adminChannel;
     protected final MessageQueue messageQueue;
     protected final GoodsService goodsService; //竞品服务
+    protected final ActivityService activityService;
     protected final ActivityThreadManager activityManager;
     protected final UserService userService;
     protected final BiddingService biddingService;
@@ -41,6 +43,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
         this.activityManager = SpringUtil.getBean(ActivityThreadManager.class);
         this.userService = SpringUtil.getBean(UserService.class);
         this.biddingService = SpringUtil.getBean(BiddingService.class);
+        this.activityService = SpringUtil.getBean(ActivityService.class);
     }
 
     @Override

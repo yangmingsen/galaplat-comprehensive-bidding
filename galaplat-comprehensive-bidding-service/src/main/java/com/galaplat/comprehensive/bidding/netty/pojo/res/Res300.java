@@ -10,6 +10,16 @@ public class Res300 {
     private Boolean isDelay;
     private Integer delayedTime; //已经延迟次数
     private Integer delayedLength; //每次延时时长 秒
+    private Integer bidingType;
+
+
+    public Integer getBidingType() {
+        return bidingType;
+    }
+
+    public void setBidingType(Integer bidingType) {
+        this.bidingType = bidingType;
+    }
 
     public Boolean getDelay() {
         return isDelay;
