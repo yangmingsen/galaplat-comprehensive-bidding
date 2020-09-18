@@ -49,13 +49,13 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
     private static final Logger log = LoggerFactory.getLogger(CompetitiveSupplierImportService.class);
 
     /* 当前导入供应商已使用的代号 */
-    private  Map<String, String> addingCodeNameMap = new HashMap<>();
+    private  Map<String, String> addingCodeNameMap = Maps.newConcurrentMap();
 
     /* 当前导入供应商已使用的号码 */
-    private  Map<String, String> addingPhoneMap = new HashMap<>();
+    private  Map<String, String> addingPhoneMap = Maps.newConcurrentMap();
 
     /* 当前导入供应商已使用的邮箱 */
-    private  Map<String, String> addingEmailMap = new HashMap<>();
+    private  Map<String, String> addingEmailMap = Maps.newConcurrentMap();
 
     @Autowired
     private IdWorker worker;
@@ -79,6 +79,11 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         if (CollectionUtils.isEmpty(list)) {
             return Collections.emptyList();
         }
+        // 清除map里的值
+        addingCodeNameMap.clear();
+        addingEmailMap.clear();
+        addingPhoneMap.clear();
+
         List<JbxtSupplierExcelParam> errorList = Lists.newArrayList();
         List<JbxtUserParam> saveList = Lists.newArrayList();
         List<JbxtSupplierExcelParam> rightList = Lists.newArrayList();
@@ -168,9 +173,6 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
             }
 
         }// if
-        addingCodeNameMap.clear();
-        addingEmailMap.clear();
-        addingPhoneMap.clear();
         return errorList;
     }
 
