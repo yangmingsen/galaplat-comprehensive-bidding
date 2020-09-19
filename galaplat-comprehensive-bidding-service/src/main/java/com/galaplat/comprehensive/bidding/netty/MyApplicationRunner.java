@@ -64,18 +64,18 @@ public class MyApplicationRunner implements ApplicationRunner {
         //启动事件处理者
         QueueHandlerThreadSingleton queueHandlerThreadSingleton = QueueHandlerThreadSingleton.getInstance();
         queueHandlerThreadSingleton.start();
+        LOGGER.info("runQueueMessageHandler(INFO): 问题处理者线程启动成功");
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        //考虑在这里启动Netty
-
         //run messageHandler
         runQueueMessageHandler(args);
 
         //run Netty
         runNetty(args);
 
+        // do what you want run？ ....
 
     }
 }
