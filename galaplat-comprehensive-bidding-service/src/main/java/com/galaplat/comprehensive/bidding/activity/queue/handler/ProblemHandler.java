@@ -9,6 +9,10 @@ import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
  */
 public interface ProblemHandler {
 
-
+    /**
+     * 抽象问题处理接口， 请把所有问题丢给他
+     * @param type
+     * @param queuemsg
+     */
     void problem(int type, QueueMessage queuemsg);
 }
