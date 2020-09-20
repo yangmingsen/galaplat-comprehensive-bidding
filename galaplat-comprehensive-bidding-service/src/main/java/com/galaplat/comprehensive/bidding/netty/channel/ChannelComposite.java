@@ -11,14 +11,14 @@ import java.util.List;
 
 @Component
 public class ChannelComposite {
-    private final List<ChannelMap> channelMapList = new ArrayList<>();
+    protected final List<ChannelMap> channelMapList = new ArrayList<>();
 
     @Autowired
-    private AdminChannelMap adminChannelMap;
+    protected AdminChannelMap adminChannelMap;
     private volatile boolean adminChannelFlag = false;
 
     @Autowired
-    private SupplierChannelAdapter supplierChannelAdapter;
+    protected SupplierChannelAdapter supplierChannelAdapter;
     private volatile boolean supplierChannelFlag = false;
 
 

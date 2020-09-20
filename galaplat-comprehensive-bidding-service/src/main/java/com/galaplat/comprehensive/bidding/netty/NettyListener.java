@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * 不再使用该类进行Netty启动, 从2.1.1后使用{@link MyApplicationRunner}启动
- *
+ *  不使用的原因: 使用ApplicationListener启动容易发生多次启动的情况
  * @since 2.1.1
  */
 //@Component

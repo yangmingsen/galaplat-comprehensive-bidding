@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * @Description: 提供手动获取被spring管理的bean对象
+ *
+ * Note: 用这个工具获取Bean时必须确保Spring容器已经初始化完毕，否则会发生NPE
+ *
  */
 @Component
 public class SpringUtil implements ApplicationContextAware {

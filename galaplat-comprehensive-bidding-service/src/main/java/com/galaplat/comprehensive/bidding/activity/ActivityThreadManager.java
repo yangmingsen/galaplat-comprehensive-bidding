@@ -1,13 +1,14 @@
 package com.galaplat.comprehensive.bidding.activity;
 
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-
+/**
+ * the class 用于管理所有的ActivityTask线程
+ */
 public class ActivityThreadManager {
     private final Executor executor = Executors.newCachedThreadPool();
     private final Map<String, ActivityTask> activityTaskMap =new HashMap<>();
@@ -20,6 +21,10 @@ public class ActivityThreadManager {
         this.executor.execute(activityTask);
     }
 
+    /**
+     *need call this method after you created a ActivityTask
+     * @param task
+     */
     public void doTask(Runnable task) {
         this.executor.execute(task);
     }
