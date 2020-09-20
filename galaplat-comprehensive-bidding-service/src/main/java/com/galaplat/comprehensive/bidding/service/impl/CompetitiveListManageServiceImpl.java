@@ -80,13 +80,13 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
     /* 修改操作类型*/
     private static final String OPRATETYPE_UPDATE = "update";
 
-    @Value("${bid.email.host}")
+    @Value("${spring.mail.host}")
     private String bidEmailHost;
 
-    @Value("${bid.email.from}")
-    private String bidEmailfrom;
+    @Value("${spring.mail.username}")
+    private String bidEmailAddress;
 
-    @Value("${bid.email.password}")
+    @Value("${spring.mail.password}")
     private String bidEmailPassword;
 
     @Autowired
@@ -941,7 +941,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         if (StringUtils.isNotBlank(emailAddress)) {
             // 发送邮件
             mailSendResult = messageClient.sendfileWithCustomizeAddresser(emailAddress, "竞标活动通知", emailContent,
-                    bidEmailHost,bidEmailfrom,bidEmailPassword , multipartFile);
+                    bidEmailHost, bidEmailAddress, bidEmailPassword , multipartFile);
         }
 
         if (StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, cs2)) {
