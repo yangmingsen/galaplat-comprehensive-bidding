@@ -48,30 +48,30 @@ public class HandlerFacade implements ProblemHandler{
     }
 
     @Override
-    public void problem(int type, QueueMessage queuemsg) {
+    public void problem(int type, QueueMessage queueMessage) {
         switch (handlerRecords.get(type)) { //匹配相应的策略算法
             case SUPPLIER_IN: {
-                supplierInHandler(queuemsg);
+                supplierInHandler(queueMessage);
             }
             break;
 
             case SUPPLER_OUT: {
-                supplierOutHandler(queuemsg);
+                supplierOutHandler(queueMessage);
             }
             break;
 
             case ADMIN_IN: {
-                adminInHandler(queuemsg);
+                adminInHandler(queueMessage);
             }
             break;
 
             case ADMIN_OUT: {
-                adminOutHandler(queuemsg);
+                adminOutHandler(queueMessage);
             }
             break;
 
             case OTHER: {
-                LOGGER.info("handler(msg): 错误消息" + queuemsg.toString());
+                LOGGER.info("handler(msg): 错误消息" + queueMessage.toString());
             }
         }
     }

@@ -50,16 +50,36 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     }
 
     @Override
-    public final void problem(int type, QueueMessage queueMsg) {
-        this.handlerProblem(type,queueMsg);
+    public final void problem(int type, QueueMessage queueMessage) {
+        beforeDealWith(type, queueMessage);
+        this.handlerProblem(type, queueMessage);
+        afterDealWith(type, queueMessage);
     }
 
     /***
      * 由子类去实现如何处理
      * @param type
-     * @param queuemsg
+     * @param queueMessage
      */
-    public abstract void handlerProblem(int type, QueueMessage queuemsg);
+    public abstract void handlerProblem(int type, QueueMessage queueMessage);
+
+    /**
+     * 你可以提前做一些事情
+     * @param type
+     * @param queueMessage
+     */
+    protected void beforeDealWith(int type, QueueMessage queueMessage) {
+        //Let's hand it over to the subclass
+    }
+
+    /**
+     * 你可以之后做一些事情
+     * @param type
+     * @param queueMessage
+     */
+    protected void afterDealWith(int type, QueueMessage queueMessage) {
+        //Let's hand it over to the subclass
+    }
 
 
     /***

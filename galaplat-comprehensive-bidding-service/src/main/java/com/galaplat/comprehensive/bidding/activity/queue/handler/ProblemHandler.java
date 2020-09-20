@@ -12,7 +12,7 @@ public interface ProblemHandler {
     /**
      * 抽象问题处理接口， 请把所有问题丢给他
      * @param type
-     * @param queuemsg
+     * @param queueMessage
      */
-    void problem(int type, QueueMessage queuemsg);
+    void problem(int type, QueueMessage queueMessage);
 }

@@ -31,18 +31,18 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
     private final Logger LOGGER = LoggerFactory.getLogger(AdminOutProblemHandler.class);
 
     @Override
-    public void handlerProblem(int type, QueueMessage queuemsg) {
+    public void handlerProblem(int type, QueueMessage queueMessage) {
         switch (type) {
             case 300: //当某个管理端中途加入（或掉线从新加入） 同步数据  //同步
-                handler300Problem(queuemsg);
+                handler300Problem(queueMessage);
                 break;
 
             case 301: //推数据给管理端（同步一些数据给管理端）
-                handler301Problem(queuemsg);
+                handler301Problem(queueMessage);
                 break;
 
             case 302: //处理管理端主动请求获取某个竞品数据时
-                handler302Problem(queuemsg);
+                handler302Problem(queueMessage);
                 break;
         }
     }

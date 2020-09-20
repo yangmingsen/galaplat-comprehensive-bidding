@@ -54,10 +54,10 @@ public class QueueHandlerThreadSingleton extends Thread {
             //{type: 300, data: {adminCode: "235235345", activityCode: "s34534534"}}
             //{type: 301, data: { activityCode: 23423345, goodsId: 234235, userCode: 234325 }}
             //{type: 302, data: {activityCode: "s34534534", goodsId: 234235, adminCode: 345dfg}}
-            QueueMessage takeQueuemsg = messageQueue.take();
+            QueueMessage queueMessage = messageQueue.take();
             try {
-                LOGGER.info("队列线程收到消息：" + takeQueuemsg.toString());
-                handler(takeQueuemsg);
+                LOGGER.info("队列线程收到消息：" + queueMessage.toString());
+                handler(queueMessage);
             } catch (Exception e) {
                 LOGGER.info("run(ERROR): 队列处理器发生异常。 " + e.getMessage());
             }
