@@ -10,8 +10,8 @@ server:
     context-path: /
 http:
   mappers:
-    json-pretty-print: false  # pretty print JSON  
-    json-sort-keys: false  # sort keys  
+    json-pretty-print: false  # pretty print JSON
+    json-sort-keys: false  # sort keys
 endpoints:
   health:
     sensitive: false
@@ -27,7 +27,7 @@ spring:
       enabled: true
       max-file-size: 5MB # MULTIPART (MultipartProperties)
       max-request-size: 5MB  # Max request size. Values can use the suffixed "MB" or "KB" to indicate a Megabyte or Kilobyte size.
-  application: 
+  application:
     name: galaplat-comprehensive-bidding
   redis:
     host: ser03.dev.esr.local
@@ -38,9 +38,9 @@ spring:
     redis:
       flush-mode: on_save
   mail:
-    host: smtp.yeqee.com
-    username: usercentre@yeqee.com
-    password: y72aNjEGC8LkfDkh
+    host: smtp.qiye.aliyun.com
+    username: bid@esrgear.com
+    password: Esr886688
     properties:
       mail:
         smtp:
@@ -57,15 +57,15 @@ management:
     enabled: false
     context-path: /manage
 #    role: SUPERUSER
- 
+
 #security:
 #  user:
 #    name: admin
 #    password: 123456
 
 datasource:
-    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-    #url: jdbc:mysql://ser04.test.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+#    url: jdbc:mysql://ser03.dev.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://ser04.test.esr.local:3336/comprehensive_bidding?useUnicode=true&allowMultiQueries=true&rewriteBatchedStatements=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: Esr16888
     driver-class-name: com.mysql.jdbc.Driver
@@ -78,6 +78,7 @@ datasource:
       transaction-query-timeout: 6000
       remove-abandoned-timeout: 1800
       filters: stat,config
+
 
 my:
   activityCode: 1

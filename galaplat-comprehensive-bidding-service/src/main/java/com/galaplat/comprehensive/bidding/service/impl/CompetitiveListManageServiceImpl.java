@@ -42,6 +42,7 @@ import org.galaplat.baseplatform.file.upload.untils.MyMultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,6 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 
@@ -79,6 +79,15 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
     /* 修改操作类型*/
     private static final String OPRATETYPE_UPDATE = "update";
+
+    @Value("${spring.mail.host}")
+    private String bidEmailHost;
+
+    @Value("${spring.mail.username}")
+    private String bidEmailAddress;
+
+    @Value("${spring.mail.password}")
+    private String bidEmailPassword;
 
     @Autowired
     private ActivityDao activityDao;
@@ -922,19 +931,18 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         String filePath = activityDO.getFilePath();
         Integer emailSeandStatus;
         String mailSendResult = null;
-        MultipartFile multipartFile = null;
+        MultipartFile multipartFile = new MyMultipartFile("","","UTF-8", new byte[]{});
         String emailContent = getMailContent(bidActivityCode, emailAddress, supplierCode);
 
         if (StringUtils.isNotBlank(filePath)) {
             multipartFile = getfile(bidActivityCode);
         }
-        if (null != multipartFile && StringUtils.isNotBlank(emailAddress)) {
-            // 发送邮件
-            mailSendResult = messageClient.sendfile(emailAddress, "竞标活动通知", emailContent, multipartFile);
-        } else if (StringUtils.isBlank(filePath) && StringUtils.isNotBlank(emailAddress)) {
-            mailSendResult = messageClient.sendemail(emailAddress, "竞标活动通知", emailContent);
-        }
 
+        if (StringUtils.isNotBlank(emailAddress)) {
+            // 发送邮件
+            mailSendResult = messageClient.sendfileWithCustomizeAddresser(emailAddress, "竞标活动通知", emailContent,
+                    bidEmailHost, bidEmailAddress, bidEmailPassword , multipartFile);
+        }
 
         if (StringUtils.isNotBlank(mailSendResult) && StringUtils.equals(mailSendResult, cs2)) {
             userDao.updateBySomeParam(JbxtUserParam.builder().sendMail(1).activityCode(bidActivityCode).build(),
