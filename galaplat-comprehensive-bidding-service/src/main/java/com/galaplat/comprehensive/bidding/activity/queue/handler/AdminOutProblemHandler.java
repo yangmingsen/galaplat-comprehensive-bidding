@@ -157,9 +157,9 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
 
         //根据每个供应商的最小竞价 排序
         List<Res300t1> newSortSupplierBidInfos = null;
-        if (bidType == 1) {
+        if (bidType == 1) {// ASC
             newSortSupplierBidInfos =  supplierBidInfos.stream().sorted(Comparator.comparing(Res300t1::getMinBid)).collect(Collectors.toList());
-        } else  if (bidType == 2) {
+        } else  if (bidType == 2) {//DESC
             newSortSupplierBidInfos =  supplierBidInfos.stream().sorted(Comparator.comparing(Res300t1::getMinBid).reversed()).collect(Collectors.toList());
         }
 
@@ -177,7 +177,6 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             res300.setDelay(false);
         }
 
-
         BigDecimal minPrice = null;
 
         if (newSortSupplierBidInfos.size() > 0) {
@@ -189,23 +188,6 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                 minPrice = new BigDecimal("0.00");
             }
         }
-
-//        if (bidType == 1) {
-
-//            for (Res300t1 supplierBidInfosRes : newSortSupplierBidInfos) {
-//                if (supplierBidInfosRes.getMinBid().compareTo(minPrice) > 0) { //如果当前 > minPrice
-//                    minPrice = supplierBidInfosRes.getMinBid();
-//                }
-//            }
-//        } else if (bidType ==2 ) {
-//
-//            for (Res300t1 supplierBidInfosRes : newSortSupplierBidInfos) {
-//                if (supplierBidInfosRes.getMinBid().compareTo(minPrice) < 0) { //如果当前 < minPrice
-//                    minPrice = supplierBidInfosRes.getMinBid();
-//                }
-//            }
-//        }
-
 
         res300.setMinPrice(minPrice);
         res300.setList(newSortSupplierBidInfos);
@@ -235,7 +217,8 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String userCode = takeQueuemsg.getData().get("userCode");
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
-        String bidPercent = takeQueuemsg.getData().get("bidPercent");
+        String bidTypeStr = takeQueuemsg.getData().get("bidType");
+        int bidType = Integer.parseInt(bidTypeStr);
         final Integer goodsId = Integer.parseInt(goodsIdStr);
         final BiddingDO minbidInfo = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
         final UserDO userInfo = userService.selectByuserCodeAndActivityCode(userCode, activityCode);
@@ -243,14 +226,18 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final Map<String, String> res301 = new HashMap<>();
         if (minbidInfo != null && userInfo != null) {
             res301.put("bidTime", minbidInfo.getBidTime());
-            res301.put("bid", minbidInfo.getBid().toString());
+            if (bidType == 1) {
+                res301.put("bid", minbidInfo.getBid().toString());
+            } else if( bidType == 2) {
+                res301.put("bid", minbidInfo.getBidPercent().toString());
+            }
             res301.put("activityCode", activityCode);
             res301.put("supplierCode", userInfo.getCode());
             res301.put("CodeName", userInfo.getCodeName());
-            res301.put("supplierName", userInfo.getSupplierName());
-            if (bidPercent != null) {
-                res301.put("bidPercent", bidPercent);
-            }
+//            res301.put("supplierName", userInfo.getSupplierName());
+//            if (bidPercent != null) {
+//                res301.put("bidPercent", bidPercent);
+//            }
 
             final ActivityTask activityTask = this.activityManager.get(activityCode);
             if (activityTask != null) {

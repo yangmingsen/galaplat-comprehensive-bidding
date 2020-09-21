@@ -76,6 +76,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         //获取剩余时间类型
         final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
         final boolean turnToDelayTime = currentActivity.isDelayedTime();
+        final int bidType = currentActivity.getBidType();
 
         final JbxtBiddingVO newBidVO = new JbxtBiddingVO();
         newBidVO.setBid(bid);
@@ -121,7 +122,8 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("activityCode", activityCode);
         map301.put("userCode", userCode);
         map301.put("goodsId", goodsId.toString());
-        map301.put("bidPercent", bidPercent.toString());
+        map301.put("bidType", bidType+"");
+//        map301.put("bidPercent", bidPercent.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
 //        final Map<String, Object> map200 = new HashMap();
