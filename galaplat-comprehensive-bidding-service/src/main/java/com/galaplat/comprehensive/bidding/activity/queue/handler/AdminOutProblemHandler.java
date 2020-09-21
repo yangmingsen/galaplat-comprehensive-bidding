@@ -198,6 +198,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final String userCode = takeQueuemsg.getData().get("userCode");
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
+        String bidPercent = takeQueuemsg.getData().get("bidPercent");
         final Integer goodsId = Integer.parseInt(goodsIdStr);
         final BiddingDO minbidInfo = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
         final UserDO userInfo = userService.selectByuserCodeAndActivityCode(userCode, activityCode);
@@ -210,6 +211,9 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             res301.put("supplierCode", userInfo.getCode());
             res301.put("CodeName", userInfo.getCodeName());
             res301.put("supplierName", userInfo.getSupplierName());
+            if (bidPercent != null) {
+                res301.put("bidPercent", bidPercent);
+            }
 
             final ActivityTask activityTask = this.activityManager.get(activityCode);
             if (activityTask != null) {

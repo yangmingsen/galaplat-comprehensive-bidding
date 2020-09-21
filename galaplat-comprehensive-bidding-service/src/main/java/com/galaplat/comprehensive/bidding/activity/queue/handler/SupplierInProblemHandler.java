@@ -121,6 +121,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("activityCode", activityCode);
         map301.put("userCode", userCode);
         map301.put("goodsId", goodsId.toString());
+        map301.put("bidPercent", bidPercent.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
 //        final Map<String, Object> map200 = new HashMap();
