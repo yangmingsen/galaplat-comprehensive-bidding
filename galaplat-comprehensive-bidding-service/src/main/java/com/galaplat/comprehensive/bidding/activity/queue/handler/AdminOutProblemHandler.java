@@ -122,7 +122,8 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             }
 
             //从bidding表查找当前供应商的所有竞价记录
-            final List<BiddingDVO> currentSupplierBidHistory = biddingService.findAllByUserCodeAndGooodsIdAndActivityCode(supplier.getCode(), goodsId, activityCode);
+            final List<BiddingDVO> currentSupplierBidHistory = biddingService.
+                    findAllByUserCodeAndGooodsIdAndActivityCode(supplier.getCode(), goodsId, activityCode);
             final List<Res300t2> supplierBids = new ArrayList<>();
             if (currentSupplierBidHistory.size() > 0) {
 

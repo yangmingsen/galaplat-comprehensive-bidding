@@ -283,12 +283,15 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         map.put("adminCode", adminCode);
 
 
-        final ActivityTask currentActivity = activityManager.get(activityCode);
-        if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
-            //同步数据
-            QueueMessage queueMessage = new QueueMessage(300, map);
-            messageQueue.offer(queueMessage);
-        }
+        QueueMessage queueMessage = new QueueMessage(300, map);
+        messageQueue.offer(queueMessage);
+
+//        final ActivityTask currentActivity = activityManager.get(activityCode);
+//        if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
+//            //同步数据
+//            QueueMessage queueMessage = new QueueMessage(300, map);
+//            messageQueue.offer(queueMessage);
+//        }
 
     }
 
