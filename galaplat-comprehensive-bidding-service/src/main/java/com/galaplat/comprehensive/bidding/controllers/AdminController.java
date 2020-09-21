@@ -136,38 +136,8 @@ public class AdminController extends BaseController {
             lock.lock();
             try {
                 final int remainingTime = activityTask.getRemainingTime();
-                //删除历史竞价数据
-//                final boolean delOk = this.resetBidData(activityCode, goodsId);
-//                if (delOk) {
-//                    if (remainingTime < 0) {
-//                        activityThread.setStatus(3);
-//                        final String gid = goodsId.toString();
-//                        final int initTime = activityThread.getInitTime() / 60;
-//                        final int delayedCondition = activityThread.getDelayedCondition();
-//                        final int allowDelayedLength = activityThread.getAllowDelayedLength();
-//                        final int allowDelayedTime = activityThread.getInitAllowDelayedTime();
-//                        final int supplierNum = activityThread.getSupplierNum(); //#issue 当剩余时间为0时，重置这里会报nullPointerExcetion
-//                        final int bidType = activityThread.getBidType();
-//                        final boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
-//                                allowDelayedLength,allowDelayedTime, supplierNum,
-//                                bidType);
-//
-//                        if (!startOk) {
-//                            String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 启动活动线程失败!";
-//                            LOGGER.info(info);
-//                            return new MyResult(false, info);
-//                        }
-//
-//                        return new MyResult(true, "更新成功");
-//                    }
-//                } else {
-//                    final String info = "handlerTheAcitvityThreadExistCondition(msg): 更新失败: 历史数据删除失败!";
-//                    LOGGER.info(info);
-//                    return new MyResult(false, info);
-//                }
                 activityTask.setStatus(status);
                 if (remainingTime < 0) {
-                    activityTask.setStatus(3);
                     String gid = goodsId.toString();
                     int initTime = activityTask.getInitTime() / 60;
                     int delayedCondition = activityTask.getDelayedCondition();
