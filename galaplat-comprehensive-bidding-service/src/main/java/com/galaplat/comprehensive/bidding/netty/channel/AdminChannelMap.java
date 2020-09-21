@@ -1,5 +1,6 @@
 package com.galaplat.comprehensive.bidding.netty.channel;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AdminChannelMap {
+public class AdminChannelMap implements ChannelMap{
 
     private final Map<String, AdminInfo> map; //adminCode => AdminInfo
     private final Map<ChannelId,String> channelRelevanceAdminIdMap; //channelId => adminCode
@@ -18,6 +19,56 @@ public class AdminChannelMap {
     }
 
 
+    @Override
+    public List<Channel> getAllSpecifixChannel(String activityCode) {
+        List<Channel> channels = new ArrayList<>();
+        for(Map.Entry<String, AdminInfo> entry : map.entrySet()) {
+            AdminInfo adminInfo = entry.getValue();
+            if (adminInfo.getFocusActivity().equals(activityCode)) {
+                channels.add(adminInfo.getChannel());
+            }
+        }
+        return channels;
+    }
+
+    @Override
+    public List<String> getAllCodeSpecifixCode(String activityCode) {
+        List<String> adminCodes = new ArrayList<>();
+        for(Map.Entry<String, AdminInfo> entry : map.entrySet()) {
+            String adminCode = entry.getKey();
+            AdminInfo adminInfo = entry.getValue();
+            if (adminInfo.getFocusActivity().equals(activityCode)) {
+                adminCodes.add(adminCode);
+            }
+        }
+        return adminCodes;
+    }
+
+    @Override
+    public Channel getChannel(String code) {
+        return map.get(code) == null ? null : map.get(code).getChannel();
+    }
+
+    @Override
+    public Object getDetailInfo(String code) {
+        return map.get(code);
+    }
+
+
+    @Override
+    public List<Channel> getAllChannel() {
+
+        List<Channel> list = new ArrayList<>();
+        for(Map.Entry<String, AdminInfo> infoMap : map.entrySet()) {
+            list.add(infoMap.getValue().getChannel());
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getAllCode() {
+        return getAllAdmin();
+    }
 
     /***
      * 获取通道的所有管理员

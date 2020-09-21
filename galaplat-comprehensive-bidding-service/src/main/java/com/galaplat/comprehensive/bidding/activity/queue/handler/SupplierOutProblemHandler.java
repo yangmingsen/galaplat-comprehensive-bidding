@@ -14,28 +14,28 @@ import java.util.Map;
 
 public class SupplierOutProblemHandler extends BaseProblemHandler {
     @Override
-    public void handlerProblem(final int type, final QueueMessage queuemsg) {
+    public void handlerProblem(final int type, final QueueMessage queueMessage) {
         switch (type) {
             case 111: //处理第一名发生变化时
-                handler111Problem(queuemsg);
+                handler111Problem(queueMessage);
                 break;
             case 200: //处理供应商端提交数据问题（同步数据给所有供应商端）
-                handler200Problem(queuemsg);
+                handler200Problem(queueMessage);
                 break;
             case 211: //当某个供应商端中途加入（或掉线从新加入） 同步数据
-                handler211Problem(queuemsg);
+                handler211Problem(queueMessage);
                 break;
             case 212: //当管理端数据重置时，通知供应商端清理排名数据
-                handler212Problem(queuemsg);
+                handler212Problem(queueMessage);
                 break;
             case 214:  //处理当管理端切换下一个竞品时，提示所有供应商端更新
-                handler214Problem(queuemsg);
+                handler214Problem(queueMessage);
                 break;
             case 215: ////处理当管理端点击暂停或者继续后，通知供应商端暂停某个正在进行的竞品
-                handler215Problem(queuemsg);
+                handler215Problem(queueMessage);
                 break;
             case 216: //处理当本场活动结束，通知供应商端退出登录
-                handler216Problem(queuemsg);
+                handler216Problem(queueMessage);
                 break;
         }
     }

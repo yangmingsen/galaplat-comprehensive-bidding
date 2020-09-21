@@ -160,8 +160,6 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         }
     }
 
-
-
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
         // 当接收到数据后会自动调用
@@ -221,8 +219,6 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         return new BigDecimal(computePriceRes).setScale(3,  BigDecimal.ROUND_HALF_UP);
     }
 
-
-
     private void handler213Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String tStr1 = message.getData().get("bidPrice");
         if (tStr1 == null || "".equals(tStr1)) {
@@ -274,7 +270,6 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         final QueueMessage queueMessage = new QueueMessage(213, message.getData());
         messageQueue.offer(queueMessage);
     }
-
 
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String activityCode = message.getData().get("activityCode");

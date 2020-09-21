@@ -16,10 +16,10 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
     protected Logger LOGGER = LoggerFactory.getLogger(SupplierInProblemHandler.class);
 
     @Override
-    public void handlerProblem(int type, QueueMessage queuemsg) {
+    public void handlerProblem(int type, QueueMessage queueMessage) {
         switch (type) {
             case 213: {
-                handler213Problem(queuemsg);
+                handler213Problem(queueMessage);
             }
             break;
         }

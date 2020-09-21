@@ -6,6 +6,7 @@ import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminInfo;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
+import com.galaplat.comprehensive.bidding.netty.channel.ChannelComposite;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.service.ActivityService;
@@ -34,6 +35,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
     protected final ActivityThreadManager activityManager;
     protected final UserService userService;
     protected final BiddingService biddingService;
+    protected final ChannelComposite channelComposite;
 
     public BaseProblemHandler() {
         this.userChannelMap = SpringUtil.getBean(UserChannelMap.class);
@@ -44,19 +46,40 @@ public abstract class BaseProblemHandler implements ProblemHandler {
         this.userService = SpringUtil.getBean(UserService.class);
         this.biddingService = SpringUtil.getBean(BiddingService.class);
         this.activityService = SpringUtil.getBean(ActivityService.class);
+        this.channelComposite = SpringUtil.getBean(ChannelComposite.class);
     }
 
     @Override
-    public final void problem(int type, QueueMessage queueMsg) {
-        this.handlerProblem(type,queueMsg);
+    public final void problem(int type, QueueMessage queueMessage) {
+        beforeDealWith(type, queueMessage);
+        this.handlerProblem(type, queueMessage);
+        afterDealWith(type, queueMessage);
     }
 
     /***
      * 由子类去实现如何处理
      * @param type
-     * @param queuemsg
+     * @param queueMessage
      */
-    public abstract void handlerProblem(int type, QueueMessage queuemsg);
+    public abstract void handlerProblem(int type, QueueMessage queueMessage);
+
+    /**
+     * 你可以提前做一些事情
+     * @param type
+     * @param queueMessage
+     */
+    protected void beforeDealWith(int type, QueueMessage queueMessage) {
+        //Let's hand it over to the subclass
+    }
+
+    /**
+     * 你可以之后做一些事情
+     * @param type
+     * @param queueMessage
+     */
+    protected void afterDealWith(int type, QueueMessage queueMessage) {
+        //Let's hand it over to the subclass
+    }
 
 
     /***
@@ -65,7 +88,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param activityCode
      */
     protected void notifyAllAdmin(ResponseMessage message, String activityCode) {
-        adminChannel.getAllAdmin().forEach(adminCode -> notifyOptionAdmin(message, activityCode, adminCode));
+        channelComposite.notifyAllAdmin(message,activityCode);
     }
 
     /***
@@ -75,12 +98,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param adminCode
      */
     protected void notifyOptionAdmin(ResponseMessage message, String activityCode, String adminCode) {
-        LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" adminCode="+adminCode+" message="+message);
-        AdminInfo adminInfo = adminChannel.get(adminCode);
-        if (adminInfo.getFocusActivity().equals(activityCode)) {
-            //推数据到管理端
-            adminInfo.getChannel().writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-        }
+        channelComposite.notifyOptionAdmin(message,adminCode);
     }
 
 
@@ -90,7 +108,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param activityCode
      */
     protected void notifyAllSupplier(ResponseMessage message, String activityCode) {
-        userChannelMap.getAllUser().forEach(supplier -> notifyOptionSupplier(message, activityCode, supplier));
+        channelComposite.notifyAllSupplier(message,activityCode);
     }
 
     /***
@@ -100,10 +118,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param userCode
      */
     protected void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
-        LOGGER.info("notifyOptionAdmin(msg): activityCode="+activityCode+" userCode="+userCode+" message="+message);
-        if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
-        }
+       channelComposite.notifyAllSupplier(message,userCode);
     }
 
 }
