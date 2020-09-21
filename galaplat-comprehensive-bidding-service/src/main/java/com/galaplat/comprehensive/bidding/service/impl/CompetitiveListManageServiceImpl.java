@@ -620,6 +620,10 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         }
 
         ActivityDO ActivityDO = activityDao.getJbxtActivityByParam(JbxtActivityParam.builder().code(bidActivityCode).build());
+        if (null == ActivityDO) {
+            throw new BaseException("当前竞标活动不存在！", "当前竞标活动不存在！");
+        }
+
         if (ActivityStatusEnum.FINISH.getCode().equals(ActivityDO.getStatus())) {
             throw new BaseException("竞标活动已结束不能发送短信或者发送邮箱！", "竞标活动已结束不能发送短信或者发送邮箱！");
         }
