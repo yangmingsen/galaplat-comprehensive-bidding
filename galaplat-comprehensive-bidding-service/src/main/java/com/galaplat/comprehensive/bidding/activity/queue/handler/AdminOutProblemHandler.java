@@ -73,6 +73,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         final String goodsIdStr = takeQueuemsg.getData().get("goodsId");
         final Integer goodsId;
         final ActivityDO activityDO = activityService.findOneByCode(activityCode);
+        //获取当前竞价类型
         final Integer bidType = activityDO.getBidingType();
         if (bidType == null) {
             LOGGER.info("handler300Problem(ERROR): bidType数据为null，请检查数据activity表的bidType字段");
@@ -116,9 +117,17 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
             //从min_bid表中查找他的历史最小竞价记录
             final BiddingDO currentSupplierMinBid = biddingService.selectMinBidTableBy(supplier.getCode(), goodsId, activityCode);
             if (currentSupplierMinBid != null) {
-                res300t1.setMinBid(currentSupplierMinBid.getBid());
+                if (bidType == 1) {
+                    res300t1.setMinBid(currentSupplierMinBid.getBid());
+                } else if(bidType == 2) {
+                    res300t1.setMinBid(currentSupplierMinBid.getBidPercent());
+                }
             } else {
-                res300t1.setMinBid(new BigDecimal("0.000"));
+                if (bidType == 1) {
+                    res300t1.setMinBid(new BigDecimal("0.000"));
+                } else if (bidType == 2) {
+                    res300t1.setMinBid(new BigDecimal("0.00"));
+                }
             }
 
             //从bidding表查找当前供应商的所有竞价记录
@@ -133,7 +142,7 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
                     if (bidType == 1) {
                         supplierBidRecord.setBid(bidRecord.getBid());
                     } else if (bidType == 2) {
-                        supplierBidRecord.setBidPercent(bidRecord.getBidPercent());
+                        supplierBidRecord.setBid(bidRecord.getBidPercent());
                     }
                     supplierBidRecord.setBidTime(bidRecord.getBidTime());
                     supplierBidRecord.setIsDelay(bidRecord.getIsdelay());
@@ -147,7 +156,13 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         }
 
         //根据每个供应商的最小竞价 排序
-        final List<Res300t1> newSortSupplierBidInfos = supplierBidInfos.stream().sorted(Comparator.comparing(Res300t1::getMinBid)).collect(Collectors.toList());
+        List<Res300t1> newSortSupplierBidInfos = null;
+        if (bidType == 1) {
+            newSortSupplierBidInfos =  supplierBidInfos.stream().sorted(Comparator.comparing(Res300t1::getMinBid)).collect(Collectors.toList());
+        } else  if (bidType == 2) {
+            newSortSupplierBidInfos =  supplierBidInfos.stream().sorted(Comparator.comparing(Res300t1::getMinBid).reversed()).collect(Collectors.toList());
+        }
+
         //300返回对象
         final Res300 res300 = new Res300();
         res300.setGoodsId(goodsId);
@@ -163,13 +178,35 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         }
 
 
-        BigDecimal minPrice = new BigDecimal("0.000");
-        for (Res300t1 tres : newSortSupplierBidInfos) {
-            if (tres.getMinBid().compareTo(minPrice) > 0) { //如果当前 > minPrice
-                minPrice = tres.getMinBid();
-                break;
+        BigDecimal minPrice = null;
+
+        if (newSortSupplierBidInfos.size() > 0) {
+            minPrice = newSortSupplierBidInfos.get(0).getMinBid();
+        } else {
+            if (bidType == 1) {
+                minPrice = new BigDecimal("0.000");
+            } else if (bidType == 2) {
+                minPrice = new BigDecimal("0.00");
             }
         }
+
+//        if (bidType == 1) {
+
+//            for (Res300t1 supplierBidInfosRes : newSortSupplierBidInfos) {
+//                if (supplierBidInfosRes.getMinBid().compareTo(minPrice) > 0) { //如果当前 > minPrice
+//                    minPrice = supplierBidInfosRes.getMinBid();
+//                }
+//            }
+//        } else if (bidType ==2 ) {
+//
+//            for (Res300t1 supplierBidInfosRes : newSortSupplierBidInfos) {
+//                if (supplierBidInfosRes.getMinBid().compareTo(minPrice) < 0) { //如果当前 < minPrice
+//                    minPrice = supplierBidInfosRes.getMinBid();
+//                }
+//            }
+//        }
+
+
         res300.setMinPrice(minPrice);
         res300.setList(newSortSupplierBidInfos);
         res300.setBidingType(bidType); //默认为数值竞价
