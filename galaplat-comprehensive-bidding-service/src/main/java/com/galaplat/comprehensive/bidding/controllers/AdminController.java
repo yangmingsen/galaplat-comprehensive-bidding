@@ -275,7 +275,9 @@ public class AdminController extends BaseController {
                 boolean updateActivityStatus = false;
 
                 try {
+                    //设置当前活动状态为结束
                     activityService.updateByPrimaryKeySelective(tActivity);
+                    activityThreadManager.remove(activityCode);
                     updateActivityStatus = true;
                 } catch (Exception e) {
                     LOGGER.info("switchActivityGoods(ERROR): 更新活动("+activityCode+")结束结束失败");

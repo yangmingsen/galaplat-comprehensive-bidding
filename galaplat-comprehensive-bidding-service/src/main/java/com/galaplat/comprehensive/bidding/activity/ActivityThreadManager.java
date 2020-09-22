@@ -38,7 +38,7 @@ public class ActivityThreadManager {
         activityTaskMap.put(key, value);
     }
 
-    /***
+    /**
      * 根据 activityCode 获取关联的 ActivityTask
      * @param key
      * @return
@@ -46,5 +46,14 @@ public class ActivityThreadManager {
     public ActivityTask get(String key) {
         return activityTaskMap.get(key);
     }
+
+    /**
+     * 将当前活动从管理器中移除
+     * @param key
+     */
+    public void remove(String key) {
+        activityTaskMap.remove(key);
+    }
+
 
 }
