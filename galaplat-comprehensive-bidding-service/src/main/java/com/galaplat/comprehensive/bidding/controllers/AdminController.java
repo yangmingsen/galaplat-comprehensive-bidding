@@ -363,6 +363,7 @@ public class AdminController extends BaseController {
 
             ActivityTask newActivityTask = newActivityTaskBuiler.build();
             activityThreadManager.put(activityCode, newActivityTask);
+            LOGGER.info("startActivityTask(INFO): 准备启动活动("+activityCode+")------竞品("+goodsId+")");
             activityThreadManager.doTask(newActivityTask);
             //  newActivityThread.start();
 
