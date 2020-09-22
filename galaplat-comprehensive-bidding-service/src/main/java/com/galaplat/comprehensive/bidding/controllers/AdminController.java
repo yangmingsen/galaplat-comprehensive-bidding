@@ -131,7 +131,10 @@ public class AdminController extends BaseController {
      */
     private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityTask) {
         MyResult result = new MyResult(true,"更新成功");
-        if (status == 3) { //处理重置问题
+
+        if (status==1 || status == 2) {
+            activityTask.setStatus(status);
+        } else if (status == 3) { //处理重置问题
             Lock lock = this.lock;
             lock.lock();
             try {
@@ -161,6 +164,8 @@ public class AdminController extends BaseController {
             } finally {
                 lock.unlock();
             }
+        } else {
+            result.setInfo(false, "更新失败：更新状态不存在");
         }
 
         return result;
