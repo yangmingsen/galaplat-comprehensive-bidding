@@ -26,6 +26,15 @@ import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * <h3>一些简介和建议</h3>
+ * <p>1.这是竞品线程，用于控制竞品状态，剩余时间，排名，延时通知，榜首更新等...</p>
+ * <p>2.它使用构造模式进行实例创建，不可直接使用new来创建实例，这是必须要注意的</p>
+ * <p>3.这里面逻辑比较复杂的便是{@link ActivityTask#handleRank()} 这个方法，规则很多，需要着重理解</p>
+ * <p>4.你需要明白竞品线程有4个状态{@link ActivityTask#getStatus()}</p>
+ * <p>5.控制线程暂停采用的是锁机制，你可以看{@link java.util.concurrent.ArrayBlockingQueue}的offer 和 take 方法的源码来理解，就是这样的原理</p>
+ *
+ */
 public class ActivityTask implements Runnable {
 
     //---------v2.0

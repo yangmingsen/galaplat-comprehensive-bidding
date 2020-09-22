@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 组合admin和supplier 两边连接
+ */
 @Component
 public class ChannelComposite {
     protected final List<ChannelMap> channelMapList = new ArrayList<>();

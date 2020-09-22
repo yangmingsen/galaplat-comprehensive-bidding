@@ -11,6 +11,7 @@ import java.util.Map;
 
 /***
  * 队列处理单例线程
+ * <p>用于处理队列中的每一个消息</p>
  */
 public class QueueHandlerThreadSingleton extends Thread {
 
