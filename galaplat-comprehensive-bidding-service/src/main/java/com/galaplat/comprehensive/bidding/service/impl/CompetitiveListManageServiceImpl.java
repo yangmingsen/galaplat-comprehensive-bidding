@@ -904,13 +904,13 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
         StringBuilder mailContent = new StringBuilder("");
         if (!StringUtils.isAnyBlank(predictBidDatetime, supplierName, username, password)) {
             mailContent.append("致<B>").append(supplierName).append("</B>:</br>").append("您好！");
-            mailContent.append("<p>现邀请贵公司参与ESR举行的竞标活动，以下是本次竞标活动相关信息：").append("</br>");
-            mailContent.append("竞标单编号：").append(bidActivityCode).append("</br></p>");
+            mailContent.append("<p>现邀请贵公司参与ESR举行的竞标活动，以下是本次竞标活动相关信息：").append("</p>");
+            mailContent.append("<p>竞标单编号：").append(bidActivityCode).append("</p>");
             mailContent.append("<p>竞标描述：").append(StringUtils.isNotBlank(bidActivityInfo) ? bidActivityInfo : "").append("</p>");
             mailContent.append("<p>预计竞标日：<B>").append(predictBidDatetime).append("</B></p>");
-            mailContent.append("<p>账号：").append(username).append("</br>");
-            mailContent.append("密码：").append(password).append("</p>");
-            mailContent.append("<p>登录链接：https://www.esrcloud.com/jb/ ").append("（建议使用谷歌、火狐、360浏览器打开）</br>");
+            mailContent.append("<p>账号：<B>").append(username).append("</B></br>");
+            mailContent.append("密码：<B>").append(password).append("</B></p>");
+            mailContent.append("<p>登录链接：https://www.esrcloud.com/jb/").append("（建议使用谷歌、火狐、360浏览器打开）</br>");
             mailContent.append("温馨提示：请提前登录系统，熟悉系统操作与本次竞标的产品，如有疑问可联系对口业务人员；</p>");
             mailContent.append("<p>附件为竞标须知，请查收！</br>");
             mailContent.append(" 祝：竞标顺利！</br>");
