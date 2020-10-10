@@ -381,7 +381,8 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
                 e.printStackTrace();
             }
             List<UserDO> userDOList = userDao.getUser(JbxtUserParam.builder().username(userName).activityCode(bidActivityCode).codeName(codeName).build());
-            if (CollectionUtils.isEmpty(userDOList) && !addingCodeNameMap.containsKey(codeName)) {
+            List<UserDO> codeNameuserDOList = userDao.getUser(JbxtUserParam.builder().activityCode(bidActivityCode).codeName(codeName).build());
+            if (CollectionUtils.isEmpty(userDOList) && CollectionUtils.isEmpty(codeNameuserDOList) && !addingCodeNameMap.containsKey(codeName)) {
                 addingCodeNameMap.put(codeName, codeName);
                 break;
             }
