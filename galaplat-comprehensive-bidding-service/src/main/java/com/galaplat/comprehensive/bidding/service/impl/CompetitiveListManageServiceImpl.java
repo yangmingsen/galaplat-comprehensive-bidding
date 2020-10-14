@@ -1005,9 +1005,14 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                        "供应商名称或者竞标单编码或者竞标预计时间超过20个字符，短信发送将会失败，请删减字符！");
             }
 
+            String templateParamStr = "{\"supplierName\":\"" + supplierName
+                    + "\",\"bidActivityCode\":\""+ bidActivityCode
+                    + "\",\"bidActivityDateTime\":\""+ bidActivityDateTime
+                    + "\",\"bidActivityAccount\":\""+ bidActivityAccount
+                    + "\",\"bidActivityPassword\":\""+ bidActivityPassword + "\"}";
 
-            String result = fmi.sendBidMsg(phoneNumber, supplierName, bidActivityCode, "", bidActivityDateTime,
-                    bidActivityAccount, bidActivityPassword, tempcode, msgCode);
+            String result = fmi.sendShortMsg("ESRCloud", tempcode, templateParamStr,phoneNumber,
+                    "biddingSupplierPhone",  "BID_MSG", msgCode);
 
             if (StringUtils.isNotBlank(result) && result.equals("\"1\"")) {
                 userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(1).activityCode(bidActivityCode).build(),
