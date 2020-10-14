@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
@@ -31,10 +31,10 @@ public interface JbxtBiddingMapper {
             "#{creator,jdbcType=VARCHAR}, #{companyCode,jdbcType=VARCHAR}, ",
             "#{sysCode,jdbcType=VARCHAR},#{bidTime,jdbcType=VARCHAR},#{isdelay,jdbcType=INTEGER}, #{bidPercent,jdbcType=INTEGER})"
     })
-    int insert(JbxtBiddingDO record);
+    int insert(BiddingDO record);
 
     @InsertProvider(type=JbxtBiddingDOSqlProvider.class, method="insertSelective")
-    int insertSelective(JbxtBiddingDO record);
+    int insertSelective(BiddingDO record);
 
     @Select({
             "select",
@@ -59,10 +59,10 @@ public interface JbxtBiddingMapper {
             @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
     })
-    JbxtBiddingDO selectByPrimaryKey(String code);
+    BiddingDO selectByPrimaryKey(String code);
 
     @UpdateProvider(type=JbxtBiddingDOSqlProvider.class, method="updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(JbxtBiddingDO record);
+    int updateByPrimaryKeySelective(BiddingDO record);
 
     @Update({
             "update t_jbxt_bidding",
@@ -81,6 +81,6 @@ public interface JbxtBiddingMapper {
             "bid_percent = #{bidPercent,jdbcType=INTEGER}",
             "where code = #{code,jdbcType=VARCHAR}"
     })
-    int updateByPrimaryKey(JbxtBiddingDO record);
+    int updateByPrimaryKey(BiddingDO record);
 
 }

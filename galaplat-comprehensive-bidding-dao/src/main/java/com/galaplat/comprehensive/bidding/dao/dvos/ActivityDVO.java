@@ -9,7 +9,7 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
-public class JbxtActivityDVO implements Serializable {
+public class ActivityDVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
      /*活动名称*/
@@ -61,6 +61,17 @@ public class JbxtActivityDVO implements Serializable {
 
      /*承诺函内容*/
      private String promiseText;
+
+     /*预计竞标日*/
+     private Date practicalBidTime;
+
+     public Date getPracticalBidTime() {
+         return practicalBidTime;
+     }
+
+     public void setPracticalBidTime(Date practicalBidTime) {
+         this.practicalBidTime = practicalBidTime;
+     }
 
 
      public String getCode() {

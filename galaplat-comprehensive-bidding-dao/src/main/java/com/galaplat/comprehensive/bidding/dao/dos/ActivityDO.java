@@ -17,7 +17,7 @@ import java.util.List;
  @Builder
  @AllArgsConstructor
  @NoArgsConstructor
-public class JbxtActivityDO implements Serializable {
+public class ActivityDO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /*活动名称*/
@@ -69,6 +69,10 @@ public class JbxtActivityDO implements Serializable {
 
     /*承诺函内容*/
     private String promiseText;
+
+    /*预计竞标日*/
+    private Date practicalBidTime;
+
 
      public static long getSerialVersionUID() {
          return serialVersionUID;

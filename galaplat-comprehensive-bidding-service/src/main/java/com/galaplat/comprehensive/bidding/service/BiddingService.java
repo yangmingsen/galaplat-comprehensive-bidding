@@ -1,21 +1,17 @@
 package com.galaplat.comprehensive.bidding.service;
 
-import java.io.Serializable;
 import java.util.List;
 
-import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
-import com.galaplat.comprehensive.bidding.querys.JbxtBiddingQuery;
+import com.galaplat.comprehensive.bidding.dao.dvos.BiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
-import com.github.pagehelper.PageInfo;
 
- /**
+/**
  * 竞价表Service
  * @author esr
  * @date: 2020年06月17日
  */
-public interface IJbxtBiddingService{
+public interface BiddingService {
 
 	//---------------------
 	 /***
@@ -32,7 +28,7 @@ public interface IJbxtBiddingService{
 	  * @param activityCode
 	  * @return
 	  */
-	 JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode);
+	 BiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode);
 
 	 /***
 	  * 获取当前竞品所有用户最小竞价
@@ -40,7 +36,7 @@ public interface IJbxtBiddingService{
 	  * @param activityCode
 	  * @return
 	  */
-	 List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode);
+	 List<BiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode);
 
 	 /***
 	  * update
@@ -54,7 +50,7 @@ public interface IJbxtBiddingService{
 	//----------minBidTble opreation end-----------
 
 
-	 List<JbxtBiddingDVO> getTheTopBids(Integer goodsId, String activityCode);
+	 List<BiddingDVO> getTheTopBids(Integer goodsId, String activityCode);
 
 
 	 int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
@@ -70,7 +66,7 @@ public interface IJbxtBiddingService{
 	int updateJbxtBidding(JbxtBiddingVO jbxtbiddingVO);
 
 
-	 public JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
+	 public BiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 
 
 	 /**
@@ -79,7 +75,7 @@ public interface IJbxtBiddingService{
 	  * @param activityCode
 	  * @return
 	  */
-	 public JbxtBiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
+	 public BiddingDVO getCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
 
 	 /***
@@ -88,8 +84,8 @@ public interface IJbxtBiddingService{
 	  * @param activityCode
 	  * @return
 	  */
-	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
+	 public List<BiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
-	 List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
+	 List<BiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
 
 }

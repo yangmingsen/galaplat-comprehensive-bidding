@@ -10,7 +10,7 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
-public class JbxtBiddingDVO implements Serializable {
+public class BiddingDVO implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /*唯一编码*/
@@ -40,13 +40,13 @@ public class JbxtBiddingDVO implements Serializable {
 
      private Integer isdelay;
 
-     private Integer bidPercent;
+     private BigDecimal bidPercent;
 
-     public void setBidPercent(Integer bidPercent) {
+     public void setBidPercent(BigDecimal bidPercent) {
          this.bidPercent = bidPercent;
      }
 
-     public Integer getBidPercent() {
+     public BigDecimal getBidPercent() {
          return bidPercent;
      }
 

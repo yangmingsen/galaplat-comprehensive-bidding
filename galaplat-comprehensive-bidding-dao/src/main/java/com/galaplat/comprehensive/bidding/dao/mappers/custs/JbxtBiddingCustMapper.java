@@ -1,8 +1,8 @@
 package com.galaplat.comprehensive.bidding.dao.mappers.custs;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.mappers.JbxtBiddingDOSqlProvider;
 import com.galaplat.comprehensive.bidding.dao.mappers.JbxtBiddingMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
@@ -26,7 +26,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
     @InsertProvider(type= JbxtBiddingDOSqlProvider.class, method="insertMinBidTableSelective")
-    int insertMinBidTableSelective(JbxtBiddingDO record);
+    int insertMinBidTableSelective(BiddingDO record);
 
 
     //获取当前用户最小竞价
@@ -53,7 +53,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
     })
-    JbxtBiddingDO selectMinBidTableByOne(String userCode, Integer goodsId, String activityCode);
+    BiddingDO selectMinBidTableByOne(String userCode, Integer goodsId, String activityCode);
 
     //获取当前竞品所有用户最小竞价
     @Select({
@@ -79,11 +79,11 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
     })
-    List<JbxtBiddingDVO> selectMinBidTableByList(Integer goodsId, String activityCode);
+    List<BiddingDVO> selectMinBidTableByList(Integer goodsId, String activityCode);
 
 
     @UpdateProvider(type=JbxtBiddingDOSqlProvider.class, method="updateMinBidTableByPrimaryKeySelective")
-    int updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record);
+    int updateMinBidTableByPrimaryKeySelective(BiddingDO record);
 
     //end of  最低竞价表操作 code
 
@@ -93,7 +93,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
     })
     int deleteByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
-    List<JbxtBiddingDVO> getJbxtBiddingList(JbxtBiddingParam jbxtbiddingParam);
+    List<BiddingDVO> getJbxtBiddingList(JbxtBiddingParam jbxtbiddingParam);
 
 
     @Select({
@@ -119,7 +119,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
     })
-    List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId( Integer goodsId);
+    List<BiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId);
 
 
 
@@ -148,7 +148,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
     })
-    JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
+    BiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 
 
     //获取当前竞品的最小提交价
@@ -176,7 +176,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
 
     })
-    JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
+    BiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
 
 
@@ -204,7 +204,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="isdelay", property="isdelay", jdbcType=JdbcType.INTEGER),
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
     })
-    List<JbxtBiddingDVO> getAllBidUserInfo( Integer goodsId, String activityCode);
+    List<BiddingDVO> getAllBidUserInfo(Integer goodsId, String activityCode);
 
 
 
@@ -233,7 +233,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
 
     })
-    List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
+    List<BiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
 
     @Select({
@@ -261,7 +261,7 @@ public interface JbxtBiddingCustMapper extends JbxtBiddingMapper {
             @Result(column="bid_percent", property="bidPercent", jdbcType=JdbcType.INTEGER)
 
     })
-    List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
+    List<BiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
 
 
     @Select({

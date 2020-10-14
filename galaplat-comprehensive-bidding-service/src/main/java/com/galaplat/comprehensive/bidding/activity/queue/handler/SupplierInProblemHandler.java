@@ -2,11 +2,10 @@ package com.galaplat.comprehensive.bidding.activity.queue.handler;
 
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtBiddingVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -17,10 +16,10 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
     protected Logger LOGGER = LoggerFactory.getLogger(SupplierInProblemHandler.class);
 
     @Override
-    public void handlerProblem(int type, QueueMessage queuemsg) {
+    public void handlerProblem(int type, QueueMessage queueMessage) {
         switch (type) {
             case 213: {
-                handler213Problem(queuemsg);
+                handler213Problem(queueMessage);
             }
             break;
         }
@@ -51,11 +50,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         // business start
         final Integer goodsId = Integer.parseInt(goodsIdStr);
         final BigDecimal bid = new BigDecimal(bidPriceStr);
-        final JbxtBiddingDO curBidInfo =
-                iJbxtBiddingService. //获取当前用户最小竞价
+        final BiddingDO curBidInfo =
+                biddingService. //获取当前用户最小竞价
                         selectMinBidTableBy(userCode, goodsId, activityCode);
         String percentStr = takeQueuemsg.getData().get("bidPercent");
-        Integer bidPercent = percentStr == null ? 0 : Integer.parseInt(percentStr);
+        BigDecimal bidPercent = percentStr == null ? new BigDecimal("0.00") : new BigDecimal(percentStr);
         if (curBidInfo != null) {
             if (bid.compareTo(curBidInfo.getBid()) < 0) { //如果1 < 2 => -1
                 //处理提交
@@ -68,7 +67,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
     }
 
 
-    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, Integer bidPercent) {
+    void saveBidDataToDB(String activityCode, String userCode, BigDecimal bid, Integer goodsId, int status, BigDecimal bidPercent) {
 
         final ActivityTask currentActivity = activityManager.get(activityCode);
 
@@ -77,6 +76,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         //获取剩余时间类型
         final String bidTime = !timeType ? currentActivity.getRemainingTimeString() : currentActivity.getDelayRemainingTimeString();
         final boolean turnToDelayTime = currentActivity.isDelayedTime();
+        final int bidType = currentActivity.getBidType();
 
         final JbxtBiddingVO newBidVO = new JbxtBiddingVO();
         newBidVO.setBid(bid);
@@ -94,11 +94,11 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
 
         try {
             //add to db
-            iJbxtBiddingService.insertJbxtBidding(newBidVO);
+            biddingService.insertJbxtBidding(newBidVO);
             if (status == 1) { //插入
-                iJbxtBiddingService.insertMinBidTableSelective(newBidVO);
+                biddingService.insertMinBidTableSelective(newBidVO);
             } else if (status == 2) { //更新
-                final JbxtBiddingDO minbidE = iJbxtBiddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+                final BiddingDO minbidE = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
 
                 final JbxtBiddingVO updateBidVO = new JbxtBiddingVO();
                 updateBidVO.setCode(minbidE.getCode());
@@ -111,7 +111,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
                 } else {
                     updateBidVO.setIsdelay(2);
                 }
-                iJbxtBiddingService.updateMinBidTableByPrimaryKeySelective(updateBidVO);
+                biddingService.updateMinBidTableByPrimaryKeySelective(updateBidVO);
             }
         }catch (Exception e) {
             LOGGER.info("saveBidDataToDB(ERROR): 更新竞价数据失败-"+e.getMessage());
@@ -122,6 +122,8 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("activityCode", activityCode);
         map301.put("userCode", userCode);
         map301.put("goodsId", goodsId.toString());
+        map301.put("bidType", bidType+"");
+//        map301.put("bidPercent", bidPercent.toString());
         messageQueue.offer(new QueueMessage(301, map301));
 
 //        final Map<String, Object> map200 = new HashMap();
@@ -144,7 +146,7 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         messageQueue.offer(new QueueMessage(200,map200));
 
         //检查是否更新top提示
-        final List<JbxtBiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
+        final List<BiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
         activityManager.get(activityCode).updateTopMinBid(theTopBids);*/
     }
 

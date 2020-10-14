@@ -38,9 +38,9 @@ spring:
     redis:
       flush-mode: on_save
   mail:
-    host: smtp.yeqee.com
-    username: usercentre@yeqee.com
-    password: y72aNjEGC8LkfDkh
+    host: smtp.qiye.aliyun.com
+    username: bid@esrgear.com
+    password: Esr886688
     properties:
       mail:
         smtp:
@@ -78,6 +78,7 @@ datasource:
       transaction-query-timeout: 6000
       remove-abandoned-timeout: 1800
       filters: stat,config
+
 
 my:
   activityCode: 1

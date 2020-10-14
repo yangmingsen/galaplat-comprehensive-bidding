@@ -8,13 +8,18 @@ import static org.apache.ibatis.jdbc.SqlBuilder.UPDATE;
 import static org.apache.ibatis.jdbc.SqlBuilder.VALUES;
 import static org.apache.ibatis.jdbc.SqlBuilder.WHERE;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 
 public class JbxtActivityDOSqlProvider {
 
-    public String insertSelective(JbxtActivityDO record) {
+    public String insertSelective(ActivityDO record) {
         BEGIN();
         INSERT_INTO("t_jbxt_activity");
+
+
+        if (record.getPracticalBidTime() != null) {
+            VALUES("practical_bid_time", "#{practicalBidTime,jdbcType=TIMESTAMP}");
+        }
 
         if (record.getCode() != null) {
             VALUES("code", "#{code,jdbcType=VARCHAR}");
@@ -103,12 +108,17 @@ public class JbxtActivityDOSqlProvider {
         return SQL();
     }
 
-    public String updateByPrimaryKeySelective(JbxtActivityDO record) {
+    public String updateByPrimaryKeySelective(ActivityDO record) {
         BEGIN();
         UPDATE("t_jbxt_activity");
 
         if (record.getName() != null) {
             SET("name = #{name,jdbcType=VARCHAR}");
+        }
+
+
+        if (record.getPracticalBidTime() != null) {
+            SET("practical_bid_time = #{practicalBidTime,jdbcType=TIMESTAMP}");
         }
 
         if (record.getStartTime() != null) {

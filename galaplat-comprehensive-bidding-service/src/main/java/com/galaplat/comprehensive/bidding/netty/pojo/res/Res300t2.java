@@ -5,7 +5,16 @@ import java.math.BigDecimal;
 public class Res300t2 {
     private BigDecimal bid;
     private String bidTime;
+//    private BigDecimal bidPercent;
     private Integer isDelay;
+
+//    public BigDecimal getBidPercent() {
+//        return bidPercent;
+//    }
+//
+//    public void setBidPercent(BigDecimal bidPercent) {
+//        this.bidPercent = bidPercent;
+//    }
 
     public Integer getIsDelay() {
         return isDelay;

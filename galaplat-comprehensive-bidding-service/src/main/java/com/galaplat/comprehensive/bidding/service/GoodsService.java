@@ -1,25 +1,19 @@
 package com.galaplat.comprehensive.bidding.service;
 
-import java.io.Serializable;
 import java.util.List;
 
-import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.querys.JbxtGoodsQuery;
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
-import com.galaplat.comprehensive.bidding.vos.pojo.CustomGoodsVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
-import com.github.pagehelper.PageInfo;
 
- /**
+/**
  * 竞品表Service
  * @author esr
  * @date: 2020年06月17日
  */
-public interface IJbxtGoodsService{
+public interface GoodsService {
 
 
 
@@ -28,17 +22,25 @@ public interface IJbxtGoodsService{
 	  * @param activityCode
 	  * @return List SimpleGoodsVO
 	  */
-	 public List<SimpleGoodsVO> findAll(String activityCode);
+	  List<SimpleGoodsVO> findAll(String activityCode);
 
+
+	/**
+	 * 根据activityCode查找所有所有竞品
+	 * <p>Note: 注意这个方法与findAll方法区别是，findAll返回的类型是自定义的</p>
+	 * @param activityCode
+	 * @return
+	 */
+	List<GoodsDVO> findAllByActivityCode(String activityCode);
 
 
 
 	 /***
 	  * 获取所有的GoodsDVO
 	  * @param activityCode
-	  * @return List JbxtGoodsDVO
+	  * @return List GoodsDVO
 	  */
-	 public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
+	 public List<GoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
 
 
@@ -53,9 +55,9 @@ public interface IJbxtGoodsService{
 	int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO);
 
 
-	 public JbxtGoodsDO selectActiveGoods(String activityCode);
+	 public GoodsDO selectActiveGoods(String activityCode);
 
-	 public JbxtGoodsDO selectByGoodsId(Integer goodsId);
+	 public GoodsDO selectByGoodsId(Integer goodsId);
 
 
 	 /***

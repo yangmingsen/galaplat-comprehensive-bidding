@@ -3,15 +3,13 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-
- /**
+/**
  * 竞品表VO
  * @author esr
  * @date: 2020年06月17日
  */
 public class JbxtGoodsVO implements Serializable {
     private static final long serialVersionUID = 1L;
-
     /*唯一编码*/
     private String code;
     /*商品名称*/
@@ -24,7 +22,7 @@ public class JbxtGoodsVO implements Serializable {
     private Date createdTime;
     /*更新时间如果没有默认创建时间，修改数据必须更新*/
     private Date updatedTime;
-     private BigDecimal firstPrice;
+    private BigDecimal firstPrice;
     /*创建人*/
     private String creator;
     /*公司唯一编码*/
@@ -42,14 +40,14 @@ public class JbxtGoodsVO implements Serializable {
     /*每次延长的时长*/
     private Integer perDelayTime;
 
-   /*延长次数*/
-   private Integer delayTimes;
+    /*延长次数*/
+    private Integer delayTimes;
 
-   /*已经延长的次数*/
-   private Integer addDelayTimes;
+    /*已经延长的次数*/
+    private Integer addDelayTimes;
 
-   /*保留价*/
-   private BigDecimal retainPrice;
+    /*保留价*/
+    private BigDecimal retainPrice;
 
     public String getCode() {
         return code;
@@ -93,15 +91,15 @@ public class JbxtGoodsVO implements Serializable {
         this.updatedTime = updatedTime;
     }
 
-     public BigDecimal getFirstPrice() {
-         return firstPrice;
-     }
+    public BigDecimal getFirstPrice() {
+        return firstPrice;
+    }
 
-     public void setFirstPrice(BigDecimal firstPrice) {
-         this.firstPrice = firstPrice;
-     }
+    public void setFirstPrice(BigDecimal firstPrice) {
+        this.firstPrice = firstPrice;
+    }
 
-     public String getCreator() {
+    public String getCreator() {
         return creator;
     }
     public void setCreator(String creator) {
@@ -136,44 +134,46 @@ public class JbxtGoodsVO implements Serializable {
         this.status = status;
     }
 
-     public Integer getLastChangTime() {
-         return lastChangTime;
-     }
+    public Integer getLastChangTime() {
+        return lastChangTime;
+    }
 
-     public void setLastChangTime(Integer lastChangTime) {
-         this.lastChangTime = lastChangTime;
-     }
+    public void setLastChangTime(Integer lastChangTime) {
+        this.lastChangTime = lastChangTime;
+    }
 
-     public Integer getPerDelayTime() {
-         return perDelayTime;
-     }
+    public Integer getPerDelayTime() {
+        return perDelayTime;
+    }
 
-     public void setPerDelayTime(Integer perDelayTime) {
-         this.perDelayTime = perDelayTime;
-     }
+    public void setPerDelayTime(Integer perDelayTime) {
+        this.perDelayTime = perDelayTime;
+    }
 
-     public Integer getDelayTimes() {
-         return delayTimes;
-     }
+    public Integer getDelayTimes() {
+        return delayTimes;
+    }
 
-     public void setDelayTimes(Integer delayTimes) {
-         this.delayTimes = delayTimes;
-     }
+    public void setDelayTimes(Integer delayTimes) {
+        this.delayTimes = delayTimes;
+    }
 
-     public Integer getAddDelayTimes() {
-         return addDelayTimes;
-     }
+    public Integer getAddDelayTimes() {
+        return addDelayTimes;
+    }
 
-     public void setAddDelayTimes(Integer addDelayTimes) {
-         this.addDelayTimes = addDelayTimes;
-     }
+    public void setAddDelayTimes(Integer addDelayTimes) {
+        this.addDelayTimes = addDelayTimes;
+    }
 
-     public BigDecimal getRetainPrice() {
-         return retainPrice;
-     }
+    public BigDecimal getRetainPrice() {
+        return retainPrice;
+    }
 
-     public void setRetainPrice(BigDecimal retainPrice) {
-         this.retainPrice = retainPrice;
-     }
+    public void setRetainPrice(BigDecimal retainPrice) {
+        this.retainPrice = retainPrice;
+    }
 
 }
+
+

@@ -6,15 +6,17 @@ public class MyResult {
     private Object result; // 返回附件的对象
 
     public MyResult(boolean success, String message) {
-        this.success = success;
-        this.message = message;
+        setInfo(success,message);
         this.result = null;
     }
 
     public MyResult(boolean success, String message, Object result) {
-        this.success = success;
-        this.message = message;
+        setInfo(success,message);
         this.result = result;
+    }
+
+    public MyResult() {
+
     }
 
     public boolean isSuccess() {
@@ -30,6 +32,11 @@ public class MyResult {
     }
 
     public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setInfo(boolean success, String message) {
+        this.success = success;
         this.message = message;
     }
 

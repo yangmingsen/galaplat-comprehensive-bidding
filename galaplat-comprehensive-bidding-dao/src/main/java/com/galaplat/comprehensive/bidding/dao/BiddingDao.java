@@ -2,9 +2,9 @@ package com.galaplat.comprehensive.bidding.dao;
 
 import java.util.List;
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.dao.dvos.BidDVO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.dvos.BiddingDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtBiddingParam;
 import com.github.pagehelper.PageInfo;
 
@@ -13,7 +13,7 @@ import com.github.pagehelper.PageInfo;
  * @author esr
  * @date: 2020年06月17日
  */
-public interface IJbxtBiddingDao{
+public interface BiddingDao {
 
 	//---------v2.0 最小竞价表API-------
 
@@ -22,7 +22,7 @@ public interface IJbxtBiddingDao{
 	  * @param record
 	  * @return
 	  */
-	 int insertMinBidTableSelective(JbxtBiddingDO record);
+	 int insertMinBidTableSelective(BiddingDO record);
 
 	 /***
 	  * 获取当前用户对该竞品的最小竞价
@@ -31,7 +31,7 @@ public interface IJbxtBiddingDao{
 	  * @param activityCode
 	  * @return
 	  */
-	 JbxtBiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode);
+	 BiddingDO selectMinBidTableBy(String userCode, Integer goodsId, String activityCode);
 
 	 /***
 	  * 获取当前竞品所有用户最小竞价
@@ -39,14 +39,14 @@ public interface IJbxtBiddingDao{
 	  * @param activityCode
 	  * @return
 	  */
-	 List<JbxtBiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode);
+	 List<BiddingDVO> selectMinBidTableBy(Integer goodsId, String activityCode);
 
 	 /***
 	  * update
 	  * @param record
 	  * @return
 	  */
-	 int updateMinBidTableByPrimaryKeySelective(JbxtBiddingDO record);
+	 int updateMinBidTableByPrimaryKeySelective(BiddingDO record);
 
 	 public int deleteMinbidTableByGoodsIdAndActivityCode(Integer goodsId, String activityCode);
 
@@ -57,28 +57,28 @@ public interface IJbxtBiddingDao{
     /**
 	 * 添加竞价表
 	 */
-	int insertJbxtBidding(JbxtBiddingDO entity);
+	int insertJbxtBidding(BiddingDO entity);
 
 	/**
 	 * 更新竞价表信息
 	 */
-	int updateJbxtBidding(JbxtBiddingDO entity);
+	int updateJbxtBidding(BiddingDO entity);
 
 	/**
 	 * 分页获取竞价表列表
 	 *
 	 */
-	public PageInfo<JbxtBiddingDVO> getJbxtBiddingPage(JbxtBiddingParam jbxtbiddingParam) throws BaseException;
+	public PageInfo<BiddingDVO> getJbxtBiddingPage(JbxtBiddingParam jbxtbiddingParam) throws BaseException;
 	
     
-    JbxtBiddingDO getJbxtBidding(JbxtBiddingParam jbxtbiddingParam);
+    BiddingDO getJbxtBidding(JbxtBiddingParam jbxtbiddingParam);
 
 	 /***
 	  * 根据goodsId 获取所有相关联的竞价数据
 	  * @param goodsId
 	  * @return
 	  */
-	 public List<JbxtBiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId, String activityCode);
+	 public List<BiddingDVO> getJbxtListBiddingByGoodsId(Integer goodsId, String activityCode);
 
 
 	 /***
@@ -87,7 +87,7 @@ public interface IJbxtBiddingDao{
 	  * @param activityCode
 	  * @return
 	  */
-	 public List<JbxtBiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
+	 public List<BiddingDVO> findAllByUserCodeAndActivityCode(String userCode, String activityCode);
 
 
 	/***
@@ -97,7 +97,7 @@ public interface IJbxtBiddingDao{
 	 * @param activityCode
 	 * @return
 	 */
-	List<JbxtBiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
+	List<BiddingDVO> findAllByUserCodeAndGooodsIdAndActivityCode(String userCode, Integer goodsId, String activityCode);
 
 	 /***
 	  * 获取当前用户当前竞品最小竞价
@@ -106,7 +106,7 @@ public interface IJbxtBiddingDao{
 	  * @param activityCode
 	  * @return
 	  */
-	 JbxtBiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
+	 BiddingDVO getUserMinBid(String userCode, Integer goodsId, String activityCode);
 
 	 /**
 	  * 获取当前用户竞品的最小提交价
@@ -114,7 +114,7 @@ public interface IJbxtBiddingDao{
 	  * @param activityCode
 	  * @return
 	  */
-	 JbxtBiddingDVO gerCurrentGoodsMinSubmitPrice( String userCode,Integer goodsId, String activityCode);
+	 BiddingDVO gerCurrentGoodsMinSubmitPrice(String userCode, Integer goodsId, String activityCode);
 
 	 /**
 	  * 获取竞标活动的供应商

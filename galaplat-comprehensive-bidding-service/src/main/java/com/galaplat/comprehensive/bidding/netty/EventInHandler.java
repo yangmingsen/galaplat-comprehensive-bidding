@@ -5,18 +5,18 @@ import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 import com.galaplat.comprehensive.bidding.activity.queue.MessageQueue;
 import com.galaplat.comprehensive.bidding.activity.queue.msg.QueueMessage;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtBiddingDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
+import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminChannelMap;
 import com.galaplat.comprehensive.bidding.netty.channel.AdminInfo;
 import com.galaplat.comprehensive.bidding.netty.channel.UserChannelMap;
 import com.galaplat.comprehensive.bidding.netty.pojo.RequestMessage;
-import com.galaplat.comprehensive.bidding.service.IJbxtActivityService;
-import com.galaplat.comprehensive.bidding.service.IJbxtBiddingService;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
-import com.galaplat.comprehensive.bidding.service.IJbxtUserService;
+import com.galaplat.comprehensive.bidding.service.ActivityService;
+import com.galaplat.comprehensive.bidding.service.BiddingService;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
+import com.galaplat.comprehensive.bidding.service.UserService;
 import com.galaplat.comprehensive.bidding.utils.SpringUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
@@ -40,10 +39,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
 
     private final AdminChannelMap adminChannelMap = SpringUtil.getBean(AdminChannelMap.class);
     private final UserChannelMap userChannelMapBean = SpringUtil.getBean(UserChannelMap.class);
-    private final IJbxtUserService userService = SpringUtil.getBean(IJbxtUserService.class);
-    private final IJbxtBiddingService biddingService = SpringUtil.getBean(IJbxtBiddingService.class);
-    private final IJbxtActivityService activityService = SpringUtil.getBean(IJbxtActivityService.class);
-    private final IJbxtGoodsService goodsService = SpringUtil.getBean(IJbxtGoodsService.class);
+    private final UserService userService = SpringUtil.getBean(UserService.class);
+    private final BiddingService biddingService = SpringUtil.getBean(BiddingService.class);
+    private final ActivityService activityService = SpringUtil.getBean(ActivityService.class);
+    private final GoodsService goodsService = SpringUtil.getBean(GoodsService.class);
     private final ActivityThreadManager activityManager = SpringUtil.getBean(ActivityThreadManager.class);
     private final MessageQueue messageQueue = SpringUtil.getBean(MessageQueue.class);
 
@@ -71,9 +70,9 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             case 101: {
                 final String userCode = message.getData().get("userCode");
                 final String focusActivity = message.getData().get("activityCode");
-                final JbxtActivityDO activityEntity = activityService.findOneByCode(focusActivity);
+                final ActivityDO activityEntity = activityService.findOneByCode(focusActivity);
 
-                final JbxtUserDO jbxtUserDO = userService.selectByuserCodeAndActivityCode(userCode, focusActivity);
+                final UserDO jbxtUserDO = userService.selectByuserCodeAndActivityCode(userCode, focusActivity);
                 if (jbxtUserDO != null) { //验证该供应商是否存在
                     userChannelMapBean.put(userCode, ctx.channel());
                     userChannelMapBean.put(userCode, focusActivity);
@@ -161,12 +160,10 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         }
     }
 
-
-
     // 当Channel中有新的事件消息会自动调用
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
         // 当接收到数据后会自动调用
-
+        if (msg == null) return;
         try {
             handler(ctx, msg);
         } catch (Exception e) {
@@ -197,27 +194,30 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             return;
         }
 
-        final int bidPercent;
+        final double subPercent;
         try {
-            bidPercent = Integer.parseInt(tStr1);
+            subPercent =  Double.parseDouble(tStr1);
+            if (subPercent < 0.00D || subPercent > 100.00D) {
+                LOGGER.info("handler218Problem(Exception): 降幅数据异常,要求降幅区间在(0%,100%). 当前报价幅度="+subPercent+"%");
+                return;
+            }
         } catch (NumberFormatException e) {
             LOGGER.info("handler218Problem(ERROR): " + e.getMessage());
             return;
         }
 
-        JbxtGoodsDO goods = goodsService.selectByGoodsId(goodsId);
-        BigDecimal firstPrice = goods.getFirstPrice();
-        double y = (1d - (bidPercent /100d));
-        BigDecimal yy = new BigDecimal(y);
-        BigDecimal bidPrice = firstPrice.multiply(yy).
-                setScale(3,  BigDecimal.ROUND_HALF_UP); //保留3为小数
+        LOGGER.info("subPercent="+subPercent);
 
-        message.getData().put("bidPrice", bidPrice.toString());
-
+        GoodsDO goods = goodsService.selectByGoodsId(goodsId);
+        double firstPrice = goods.getFirstPrice().doubleValue();
+        message.getData().put("bidPrice", computeSubPercent(firstPrice, subPercent).toString());
         handler213Problem(message, ctx);
     }
 
-
+    private BigDecimal computeSubPercent(double firstPrice, double subPercent) {
+        double computePriceRes = firstPrice * (1d - subPercent/100d);
+        return new BigDecimal(computePriceRes).setScale(3,  BigDecimal.ROUND_HALF_UP);
+    }
 
     private void handler213Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String tStr1 = message.getData().get("bidPrice");
@@ -257,7 +257,7 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         message.getData().put("activityCode", activityCode);
 
         //验证当前用提交价格 是否大于自己的上一次提交竞价
-        final JbxtBiddingDO lastUserMinBid = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
+        final BiddingDO lastUserMinBid = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
         if (lastUserMinBid != null) {
             int compareRes = bidPrice.compareTo(lastUserMinBid.getBid());
             if (compareRes >= 0) {
@@ -271,7 +271,6 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         messageQueue.offer(queueMessage);
     }
 
-
     private void handler300Problem(RequestMessage message, ChannelHandlerContext ctx) {
         final String activityCode = message.getData().get("activityCode");
         final String adminCode = adminChannelMap.getAdminIdByChannelId(ctx.channel().id());
@@ -284,12 +283,15 @@ public class EventInHandler extends SimpleChannelInboundHandler<TextWebSocketFra
         map.put("adminCode", adminCode);
 
 
-        final ActivityTask currentActivity = activityManager.get(activityCode);
-        if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
-            //同步数据
-            QueueMessage queueMessage = new QueueMessage(300, map);
-            messageQueue.offer(queueMessage);
-        }
+        QueueMessage queueMessage = new QueueMessage(300, map);
+        messageQueue.offer(queueMessage);
+
+//        final ActivityTask currentActivity = activityManager.get(activityCode);
+//        if (currentActivity != null) { //如果当前管理端聚焦的竞品活动存在 则同步数据
+//            //同步数据
+//            QueueMessage queueMessage = new QueueMessage(300, map);
+//            messageQueue.offer(queueMessage);
+//        }
 
     }
 

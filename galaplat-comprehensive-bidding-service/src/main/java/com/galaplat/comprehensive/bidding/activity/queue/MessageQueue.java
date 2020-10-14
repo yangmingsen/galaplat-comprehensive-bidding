@@ -28,7 +28,7 @@ public class MessageQueue {
         try {
             return this.blockingQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.info("take(ERROR): 我在take数据报错,错误信息["+e.getMessage()+"]");
         }
         return null;
     }

@@ -1,7 +1,7 @@
 package com.galaplat.comprehensive.bidding.dao.mappers.custs;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
 import com.galaplat.comprehensive.bidding.dao.mappers.JbxtGoodsMapper;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import org.apache.ibatis.annotations.*;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface JbxtGoodsCustMapper extends JbxtGoodsMapper {
 
-    List<JbxtGoodsDVO> getJbxtGoodsList(JbxtGoodsParam jbxtgoodsParam);
+    List<GoodsDVO> getJbxtGoodsList(JbxtGoodsParam jbxtgoodsParam);
 
     @Select({
             "select",
@@ -40,7 +40,7 @@ public interface JbxtGoodsCustMapper extends JbxtGoodsMapper {
             @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
             @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
-    List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
+    List<GoodsDVO> getListJbxtGoodsByActivityCode(String activityCode);
 
 
 
@@ -71,7 +71,7 @@ public interface JbxtGoodsCustMapper extends JbxtGoodsMapper {
             @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
             @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
-    public JbxtGoodsDO selectActiveGoods(String activityCode);
+    public GoodsDO selectActiveGoods(String activityCode);
 
 
     @Insert({
@@ -137,7 +137,7 @@ public interface JbxtGoodsCustMapper extends JbxtGoodsMapper {
             @Result(column="add_delay_times", property="addDelayTimes", jdbcType=JdbcType.INTEGER),
             @Result(column="retain_price", property="retainPrice", jdbcType=JdbcType.DECIMAL)
     })
-    List<JbxtGoodsDO> listGoods(@Param("param") JbxtGoodsParam goodsParam);
+    List<GoodsDO> listGoods(@Param("param") JbxtGoodsParam goodsParam);
 
     @Delete({
             " <script>",

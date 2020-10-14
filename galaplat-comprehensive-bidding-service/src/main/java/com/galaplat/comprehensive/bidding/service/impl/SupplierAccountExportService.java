@@ -1,10 +1,9 @@
 package com.galaplat.comprehensive.bidding.service.impl;
 
 import com.galaplat.base.core.common.exception.BaseException;
-import com.galaplat.comprehensive.bidding.dao.IJbxtUserDao;
+import com.galaplat.comprehensive.bidding.dao.UserDao;
 import com.galaplat.comprehensive.bidding.dao.dvos.SupplierAccountExportDVO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtUserParam;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.galaplat.baseplatform.file.upload.service.IExportSubMethodService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ import java.util.Map;
 public class SupplierAccountExportService implements IExportSubMethodService<SupplierAccountExportDVO> {
 
     @Autowired
-    private IJbxtUserDao userDao;
+    private UserDao userDao;
 
     @Override
     public List<SupplierAccountExportDVO> getExportExcelDataList(HttpServletRequest request, String sysCode, String companyCode) throws BaseException {

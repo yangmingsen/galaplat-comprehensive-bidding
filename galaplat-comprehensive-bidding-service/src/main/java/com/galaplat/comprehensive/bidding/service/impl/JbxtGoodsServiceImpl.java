@@ -6,9 +6,10 @@ import java.util.*;
 import com.galaplat.comprehensive.bidding.activity.ActivityTask;
 import com.galaplat.comprehensive.bidding.activity.ActivityThreadManager;
 
-import com.galaplat.comprehensive.bidding.dao.IJbxtBiddingDao;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtBiddingDVO;
+import com.galaplat.comprehensive.bidding.dao.BiddingDao;
+import com.galaplat.comprehensive.bidding.dao.dvos.BiddingDVO;
 
+import com.galaplat.comprehensive.bidding.dao.dvos.GoodsDVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import com.galaplat.comprehensive.bidding.vos.pojo.SimpleGoodsVO;
 import org.slf4j.Logger;
@@ -19,10 +20,9 @@ import org.springframework.stereotype.Service;
 import com.galaplat.base.core.common.utils.BeanCopyUtils;
 
 
-import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
-import com.galaplat.comprehensive.bidding.dao.dvos.JbxtGoodsDVO;
-import com.galaplat.comprehensive.bidding.service.IJbxtGoodsService;
+import com.galaplat.comprehensive.bidding.dao.GoodsDao;
+import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
+import com.galaplat.comprehensive.bidding.service.GoodsService;
 import com.galaplat.comprehensive.bidding.vos.JbxtGoodsVO;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,23 +33,28 @@ import org.springframework.transaction.annotation.Transactional;
  * @date: 2020年06月17日
  */
 @Service
-public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
+public class JbxtGoodsServiceImpl implements GoodsService {
 
     Logger LOGGER = LoggerFactory.getLogger(JbxtGoodsServiceImpl.class);
 
     @Autowired
-	private IJbxtGoodsDao jbxtgoodsDao;
+	private GoodsDao goodsDao;
 
     @Autowired
-	private IJbxtBiddingDao jbxtBiddingDao;
+	private BiddingDao biddingDao;
 
 	@Autowired
 	private ActivityThreadManager activityManager;
 
+	public List<GoodsDVO> findAllByActivityCode(String activityCode) {
+		return goodsDao.getListJbxtGoodsByActivityCode(activityCode);
+	}
+
+
     public List<SimpleGoodsVO> findAll(String activityCode) {
 		LOGGER.info("findAll(msg); activityCode="+activityCode);
 
-        List<JbxtGoodsDVO> jgdList = jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+        List<GoodsDVO> jgdList = goodsDao.getListJbxtGoodsByActivityCode(activityCode);
         List<SimpleGoodsVO> sgvs = new ArrayList<>();
 		ActivityTask currentActivity = activityManager.get(activityCode);
 		jgdList.stream().forEach(goods -> {
@@ -63,11 +68,7 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 
 			if (currentActivity != null) {
-				LOGGER.info("findAll(msg): currentThreadStatus="+currentActivity.getStatus());
-				LOGGER.info("findAll(msg): currentThread1="+currentActivity);
 				if (currentActivity.getCurrentGoodsId().equals(goods.getGoodsId())) {
-					LOGGER.info("findAll(msg): currentThread2="+currentActivity);
-
 					int status = currentActivity.getStatus();
 					if (status == 2) {
 						sgv.setIsActive("3");
@@ -81,8 +82,6 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 				}
 			} else {
 				sgv.setIsActive(goods.getStatus());
-				LOGGER.info("findAll(msg): currentThread="+currentActivity);
-
 			}
 			
             sgvs.add(sgv);
@@ -90,6 +89,8 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
         return sgvs;
     }
+
+
 
 
 	static class ComputedRes{
@@ -116,14 +117,14 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 	 * @return
 	 */
 	private ComputedRes computedUserBidRankInfoByUserCodeAndActivity(String userCode, Integer goodsId, String activityCode) {
-		List<JbxtBiddingDVO> bidList = jbxtBiddingDao.selectMinBidTableBy(goodsId,activityCode);
+		List<BiddingDVO> bidList = biddingDao.selectMinBidTableBy(goodsId,activityCode);
 
 		Map<BigDecimal, Integer> map = new HashMap<>(); //bid->idx
 		BigDecimal curUserBid = new BigDecimal("0.000"); //记录当前用户的竞价
 		Integer rank = -1; //价格排名
 		boolean exsitUserRank = false;
 		for (int i = 0; i < bidList.size(); i++) {
-			JbxtBiddingDVO t1 = bidList.get(i);
+			BiddingDVO t1 = bidList.get(i);
 			if (t1.getUserCode().equals(userCode)) {
 				curUserBid = t1.getBid(); //获得当前竞价
 				exsitUserRank = true;
@@ -159,32 +160,32 @@ public class JbxtGoodsServiceImpl implements IJbxtGoodsService {
 
 
 
-    public JbxtGoodsDO selectActiveGoods(String activityCode) {
-        return jbxtgoodsDao.selectActiveGoods(activityCode);
+    public GoodsDO selectActiveGoods(String activityCode) {
+        return goodsDao.selectActiveGoods(activityCode);
     }
 
 
-	public JbxtGoodsDO selectByGoodsId(Integer goodsId) {
-		return jbxtgoodsDao.selectByGoodsId(goodsId);
+	public GoodsDO selectByGoodsId(Integer goodsId) {
+		return goodsDao.selectByGoodsId(goodsId);
 	}
 
-    public List<JbxtGoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
-        return jbxtgoodsDao.getListJbxtGoodsByActivityCode(activityCode);
+    public List<GoodsDVO> getListJbxtGoodsByActivityCode(String activityCode) {
+        return goodsDao.getListJbxtGoodsByActivityCode(activityCode);
     }
 
 
     @Override
     public int insertJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
-        JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class, jbxtgoodsVO);
-        return jbxtgoodsDao.insertJbxtGoods(jbxtgoodsDO);
+        GoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(GoodsDO.class, jbxtgoodsVO);
+        return goodsDao.insertJbxtGoods(jbxtgoodsDO);
     }
 
     @Override
 	@Transactional(rollbackFor = Exception.class)
     public int updateJbxtGoods(JbxtGoodsVO jbxtgoodsVO) {
-        JbxtGoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(JbxtGoodsDO.class, jbxtgoodsVO);
+        GoodsDO jbxtgoodsDO = BeanCopyUtils.copyProperties(GoodsDO.class, jbxtgoodsVO);
         jbxtgoodsDO.setUpdatedTime(new Date());
-        return jbxtgoodsDao.updateJbxtGoods(jbxtgoodsDO);
+        return goodsDao.updateJbxtGoods(jbxtgoodsDO);
     }
 
 }

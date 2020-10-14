@@ -6,15 +6,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.base.core.common.utils.JsonUtils;
 import com.galaplat.baseplatform.permissions.feign.IFeignPermissions;
-import com.galaplat.comprehensive.bidding.dao.IJbxtActivityDao;
-import com.galaplat.comprehensive.bidding.dao.IJbxtGoodsDao;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtActivityDO;
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtGoodsDO;
+import com.galaplat.comprehensive.bidding.dao.ActivityDao;
+import com.galaplat.comprehensive.bidding.dao.GoodsDao;
+import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtActivityParam;
 import com.galaplat.comprehensive.bidding.dao.params.JbxtGoodsParam;
 import com.galaplat.comprehensive.bidding.enums.ActivityStatusEnum;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelStrParam;
 import com.galaplat.comprehensive.bidding.param.JbxtGoodsExcelParam;
+import com.galaplat.comprehensive.bidding.service.ICompetitiveListManageService;
 import com.galaplat.comprehensive.bidding.utils.ImportExcelValidateMapUtil;
 import com.galaplat.comprehensive.bidding.utils.Tuple;
 import com.galaplat.platformdocking.base.core.utils.CopyUtil;
@@ -48,10 +48,13 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
     private IFeignPermissions feignPermissions;
 
     @Autowired
-    private IJbxtGoodsDao goodsDao;
+    private GoodsDao goodsDao;
 
     @Autowired
-    private IJbxtActivityDao  activityDao;
+    private ActivityDao activityDao;
+
+    @Autowired
+    private ICompetitiveListManageService manageService;
 
 
     @Override
@@ -71,7 +74,7 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
             });
             activityCode = (String) mapVO.get("bidActivityCode");
         }
-        JbxtActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
+        ActivityDO activityDO = activityDao.getJbxtActivity(JbxtActivityParam.builder().code(activityCode).build());
         // 如果竞标活动的状态时竞标中或者已结束时，不允许导入
         if (activityDO.getStatus().equals(ActivityStatusEnum.BIDING.getCode())
                 || activityDO.getStatus().equals(ActivityStatusEnum.FINISH.getCode())){
@@ -114,11 +117,12 @@ public class CompetitiveGoodsImportService implements IImportSubMethodWithParamS
                 goodsDao.delete(JbxtGoodsParam.builder().activityCode(activityCode).build());
                 insertCount = goodsDao.batchInsert(saveList);
             }
-            List<JbxtGoodsDO> activityGoodsDOList = goodsDao.listGoods(JbxtGoodsParam.builder().activityCode(activityCode).build());
-            if (activityDO.getStatus().equals(ActivityStatusEnum.UNEXPORT.getCode())
-                    && (CollectionUtils.isNotEmpty(activityGoodsDOList) || insertCount > 0)) {
-                activityDao.updateBidActivity(JbxtActivityDO.builder().code(activityCode).status(ActivityStatusEnum.EXPORT_NO_SATRT.getCode()).build());
+
+            // 检查竞标活动数据是否准备完整，完整则改变状态
+            if (manageService.checkActivityInfoComplete(activityCode)) {
+                activityDao.updateBidActivity(ActivityDO.builder().code(activityCode).status(ActivityStatusEnum.IMPORT_NO_SATRT.getCode()).build());
             }
+
             if (CollectionUtils.isNotEmpty(errorList)) {
 
                 rightList.stream().forEach(e ->{

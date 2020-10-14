@@ -1,6 +1,6 @@
 package com.galaplat.comprehensive.bidding.dao.mappers;
 
-import com.galaplat.comprehensive.bidding.dao.dos.JbxtUserDO;
+import com.galaplat.comprehensive.bidding.dao.dos.UserDO;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.type.JdbcType;
 
@@ -39,10 +39,10 @@ public interface JbxtUserMapper {
             "#{loginStatus,jdbcType=INTEGER}, #{sendSms,jdbcType=INTEGER}, ",
             "#{sendMail,jdbcType=INTEGER})"
     })
-    int insert(JbxtUserDO record);
+    int insert(UserDO record);
 
     @InsertProvider(type=JbxtUserDOSqlProvider.class, method="insertSelective")
-    int insertSelective(JbxtUserDO record);
+    int insertSelective(UserDO record);
 
     @Select({
             "select",
@@ -73,10 +73,10 @@ public interface JbxtUserMapper {
             @Result(column="send_sms", property="sendSms", jdbcType=JdbcType.INTEGER),
             @Result(column="send_mail", property="sendMail", jdbcType=JdbcType.INTEGER)
     })
-    JbxtUserDO selectByPrimaryKey(String code);
+    UserDO selectByPrimaryKey(String code);
 
     @UpdateProvider(type=JbxtUserDOSqlProvider.class, method="updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(JbxtUserDO record);
+    int updateByPrimaryKeySelective(UserDO record);
 
     @Update({
             "update t_jbxt_user",
@@ -100,5 +100,5 @@ public interface JbxtUserMapper {
             "send_mail = #{sendMail,jdbcType=INTEGER}",
             "where code = #{code,jdbcType=VARCHAR}"
     })
-    int updateByPrimaryKey(JbxtUserDO record);
+    int updateByPrimaryKey(UserDO record);
 }

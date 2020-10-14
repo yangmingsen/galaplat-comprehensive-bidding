@@ -1,4 +1,9 @@
 package com.galaplat.comprehensive.bidding.vos;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -8,9 +13,13 @@ import java.util.Date;
  * @author esr
  * @date: 2020年06月17日
  */
+ @Builder
+ @Data
+ @AllArgsConstructor
+ @NoArgsConstructor
 public class JbxtActivityVO implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     /*唯一编码*/
     private String code;
     /*活动名称*/
@@ -32,7 +41,25 @@ public class JbxtActivityVO implements Serializable {
     /*系统唯一编码*/
     private String sysCode;
 
-    public String getCode() {
+     /*出价方式(1-数值，2-降幅)*/
+     private Integer bidingType;
+
+     /*预计竞标日*/
+     private Date predictBidDatetime;
+
+     /*竞标描述*/
+     private String bidActivityInfo;
+
+     /*承诺函标题*/
+     private String promiseTitle;
+
+     /*附件路径*/
+     private String filePath;
+
+     /*承诺函内容*/
+     private String promiseText;
+
+     public String getCode() {
         return code;
     }
     public void setCode(String code) {
