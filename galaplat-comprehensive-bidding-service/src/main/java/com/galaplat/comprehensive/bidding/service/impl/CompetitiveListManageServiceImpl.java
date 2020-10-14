@@ -3,6 +3,7 @@ package com.galaplat.comprehensive.bidding.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.galaplat.base.core.common.exception.BaseException;
 import com.galaplat.baseplatform.messaging.plugin.feign.IFeiginMessageClient;
+import com.galaplat.baseplatform.messaging.plugin.vos.ShortMsgVO;
 import com.galaplat.comprehensive.bidding.dao.*;
 import com.galaplat.comprehensive.bidding.dao.dos.ActivityDO;
 import com.galaplat.comprehensive.bidding.dao.dos.GoodsDO;
@@ -1011,8 +1012,16 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                     + "\",\"bidActivityAccount\":\""+ bidActivityAccount
                     + "\",\"bidActivityPassword\":\""+ bidActivityPassword + "\"}";
 
-            String result = fmi.sendShortMsg("ESRCloud", tempcode, templateParamStr,phoneNumber,
-                    "biddingSupplierPhone",  "BID_MSG", msgCode);
+            ShortMsgVO vo = new ShortMsgVO();
+            vo.setSignName("ESRCloud");
+            vo.setTemplateCode(tempcode);
+            vo.setTemplateParamStr(templateParamStr);
+            vo.setPhoneNumber(phoneNumber);
+            vo.setFrom("biddingSupplierPhone");
+            vo.setMsgType("BID_MSG");
+            vo.setMsgCode(msgCode);
+
+            String result = fmi.sendShortMsg(vo);
 
             if (StringUtils.isNotBlank(result) && result.equals("\"1\"")) {
                 userDao.updateBySomeParam(JbxtUserParam.builder().sendSms(1).activityCode(bidActivityCode).build(),
