@@ -70,8 +70,11 @@ public class AdminController extends BaseController {
         final ActivityTask currentActivity = activityThreadManager.get(activityCode);
         MyResult myResult = null;
         if (currentActivity != null) { //下面是处理当活动线程存在的情况
+            LOGGER.info("updateCurrentActivityStatus(INFO): 当前活动线程("+activityCode+")状态[ 状态("+currentActivity.getStatus()+")--" +
+                    "--剩余时长("+currentActivity.getRemainingTime()+")---");
             myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
         } else {//不存在情况
+            LOGGER.info("updateCurrentActivityStatus(INFO): 当前活动线程("+activityCode+")不存在,重新启动...");
             myResult = this.handlerTheAcitvityThreadNotExistCondition(activityCode, goodsId);
         }
         return myResult;
