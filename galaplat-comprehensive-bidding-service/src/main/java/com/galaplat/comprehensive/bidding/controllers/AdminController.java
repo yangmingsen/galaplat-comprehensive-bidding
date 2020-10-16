@@ -27,6 +27,12 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 这个类为主要是用于管理端控制台的一些操作，哪些供应商生成，导出，竞标单设计... 请看{@link CompetitiveListManageController}
+ *
+ * @tel 1710644559@qq.com
+ * @author yangmingsen
+ */
 @RestController
 @RequestMapping("/jbxt/admin")
 public class AdminController extends BaseController {
@@ -43,13 +49,18 @@ public class AdminController extends BaseController {
     private ActivityService activityService;
 
     @Autowired
-    private BiddingService biddingService;
-
-    @Autowired
     private MessageQueue messageQueue;
 
-    private Lock lock = new ReentrantLock();
+    //用于并发控制
+    private final Lock lock = new ReentrantLock();
 
+    /**
+     * 用于控制活动线程状态
+     * @param activityCode
+     * @param goodsId
+     * @param status 主要看这个，具体值看{@link ActivityTask#getStatus()}
+     * @return
+     */
     @RequestMapping("/activity/goodsStatus")
     @RestfulResult
     public Object updateCurrentActivityStatus(String activityCode, Integer goodsId,  Integer status) {
@@ -58,9 +69,9 @@ public class AdminController extends BaseController {
 
         final ActivityTask currentActivity = activityThreadManager.get(activityCode);
         MyResult myResult = null;
-        if (currentActivity != null) {
+        if (currentActivity != null) { //下面是处理当活动线程存在的情况
             myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
-        } else {
+        } else {//不存在情况
             myResult = this.handlerTheAcitvityThreadNotExistCondition(activityCode, goodsId);
         }
         return myResult;
@@ -78,17 +89,23 @@ public class AdminController extends BaseController {
     }
 
 
+    /**
+     * 切换下一个活动线程
+     * @param activityCode
+     * @return
+     */
     @RequestMapping("/goods/next")
     @RestfulResult
     public Object next(String activityCode) {
         final MyResult checkNextRes = checkNextReq(activityCode);
         if (!checkNextRes.isSuccess()) return checkNextRes;
 
+        //先获取当前正在进行的竞品，目的是将当前正在进行的竞品设置为结束状态，然后再切换下一个竞品
         final GoodsDO jbxtGoodsDO = goodsService.selectActiveGoods(activityCode); //get 正在进行goods
         if (jbxtGoodsDO != null) {
             final JbxtGoodsVO tj = new JbxtGoodsVO();
             tj.setGoodsId(jbxtGoodsDO.getGoodsId());
-            tj.setStatus("2");
+            tj.setStatus("2");//设置当前竞品状态为结束
             try {
                 goodsService.updateJbxtGoods(tj);
             } catch (Exception e) {
@@ -98,28 +115,10 @@ public class AdminController extends BaseController {
             }
             LOGGER.info("next(msg): 修改goodsId("+tj.getGoodsId()+")为2");
         }
+        //当设置了当前竞品为结束状态后，就得考虑下一个竞品启动了
         return switchActivityGoods(activityCode);
     }
 
-
-    /**
-     * 删除竞品历史竞价数据
-     * @param activityCode
-     * @param goodsId
-     * @return
-     */
-    private boolean resetBidData(String activityCode, Integer goodsId) {
-        boolean delOk = true;
-        try {
-            biddingService.deleteByGoodsIdAndActivityCode(goodsId, activityCode);
-            biddingService.deleteMinbidTableByGoodsIdAndActivityCode(goodsId, activityCode);
-        } catch (Exception e) {
-            delOk = false;
-            LOGGER.info("resetBidData(ERROR): "+e.getMessage());
-        }
-
-        return delOk;
-    }
 
     /**
      * 处理存在活动线程情况
@@ -132,14 +131,17 @@ public class AdminController extends BaseController {
     private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityTask) {
         MyResult result = new MyResult(true,"更新成功");
 
-        if (status==1 || status == 2) {
+        if (status==1 || status == 2) { //如果状态为继续或者暂停 直接Update status
             activityTask.setStatus(status);
         } else if (status == 3) { //处理重置问题
             Lock lock = this.lock;
             lock.lock();
             try {
+                //先获取当前线程剩余时间
                 final int remainingTime = activityTask.getRemainingTime();
+                //先更新状态
                 activityTask.setStatus(status);
+               //如果发现剩余时间为0，再重置的话就重新开启一个线程替代上一个线程
                 if (remainingTime < 0) {
                     String gid = goodsId.toString();
                     int initTime = activityTask.getInitTime() / 60;
@@ -202,6 +204,11 @@ public class AdminController extends BaseController {
     }
 
 
+    /**
+     * 做一些校验
+     * @param activityCode
+     * @return
+     */
     private MyResult checkNextReq(String activityCode) {
         if (activityCode == null || activityCode.equals("")) {
             return new MyResult(false, "错误: activityCode不能为空哦(*￣︶￣)", null);
@@ -217,10 +224,18 @@ public class AdminController extends BaseController {
         return new MyResult(true, "");
     }
 
+    /**
+     * 切换下一个竞品
+     * @param activityCode
+     * @return
+     */
     private Object switchActivityGoods(String activityCode) {
         final List<GoodsDVO> goodsList = goodsService.getListJbxtGoodsByActivityCode(activityCode); //get all goods by activityCode
+
+        //循环遍历所有goods
         for (int i = 0; i < goodsList.size(); i++) {
             final GoodsDVO currentGoods = goodsList.get(i);
+            //如果发现当前竞品的状态为0 也就是未开始 那么启动它
             if ("0".equals(currentGoods.getStatus())) {
                 //更新当前竞品状态为 1
                 final JbxtGoodsVO newGoodsStatus = new JbxtGoodsVO();
@@ -228,15 +243,17 @@ public class AdminController extends BaseController {
                 newGoodsStatus.setStatus("1");
                 boolean switchOk = false;
                 try {
-                    if (i == 0) {
+                    if (i == 0) { //这里判断的目的是 如果发现列表中的第一个是未开始状态那么说明刚刚开始。需要先设置活动状态为进行中
                         //更新竞品单 当前竞品单状态为进行中
                         final ActivityDO tActivity = new ActivityDO();
                         tActivity.setCode(activityCode);
-                        tActivity.setStatus(3);
+                        tActivity.setStatus(3); //设置活动状态为进行中
                         tActivity.setPracticalBidTime(new Date());
 
+                        //do update
                         activityService.updateByPrimaryKeySelective(tActivity);
                     }
+                    //然后更新当前竞品状态
                     goodsService.updateJbxtGoods(newGoodsStatus);
                     LOGGER.info("switchActivityGoods(msg): 切换下一竞品goodsId("+newGoodsStatus.getGoodsId()+")为1");
                     switchOk = true;
@@ -244,6 +261,7 @@ public class AdminController extends BaseController {
                     LOGGER.info("next(ERROR): 更新状态为开始失败");
                 }
 
+                //如果切换成功后 那么是时候启动当前竞品线程了
                 if (switchOk) {
                     final int delayedCondition = currentGoods.getLastChangTime();
                     final int allowDelayedLength = currentGoods.getPerDelayTime();
@@ -256,6 +274,7 @@ public class AdminController extends BaseController {
                             currentGoods.getTimeNum(), delayedCondition,
                             allowDelayedLength,allowDelayedTime, supplierNum, bidType);
 
+                    //这个目的是为了通知所有供应商 你们关注的竞品活动开始了
                     notify214Event(activityCode, currentGoods.getGoodsId());
 
                     return new MyResult(true, "切换成功");
