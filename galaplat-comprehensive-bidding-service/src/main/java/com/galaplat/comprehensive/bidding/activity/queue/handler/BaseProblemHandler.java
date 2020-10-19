@@ -118,7 +118,7 @@ public abstract class BaseProblemHandler implements ProblemHandler {
      * @param userCode
      */
     protected void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
-       channelComposite.notifyAllSupplier(message,userCode);
+       channelComposite.notifyOptionSupplier(message,userCode);
     }
 
 }
