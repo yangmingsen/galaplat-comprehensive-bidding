@@ -145,8 +145,10 @@ public class AdminController extends BaseController {
                 lock.lock();
                 //先获取当前线程剩余时间
                 final int remainingTime = activityTask.getRemainingTime();
+                LOGGER.info("handlerTheAcitvityThreadExistCondition(INFO): 设置当前活动【"+activityCode+"】状态["+activityTask.getStatus()+"]=>["+status+"] ------剩余时间【"+remainingTime+"】----开始");
                 //先更新状态
                 activityTask.setStatus(status);
+                LOGGER.info("handlerTheAcitvityThreadExistCondition(INFO): 设置当前活动【"+activityCode+"】状态["+activityTask.getStatus()+"]=>["+status+"] 结束");
                 //如果发现剩余时间为0，再重置的话就重新开启一个线程替代上一个线程
                 if (remainingTime < 0) {
                     String gid = goodsId.toString();
@@ -165,6 +167,7 @@ public class AdminController extends BaseController {
                         LOGGER.info(info);
                         result.setInfo(false, info);
                     }
+                    LOGGER.info("handlerTheAcitvityThreadExistCondition(INFO): 重置活动【"+activityCode+"】成功");
                 }
             } catch (Exception e) {
                 LOGGER.info("handlerTheAcitvityThreadExistCondition(ERROR): " + e.getMessage());
