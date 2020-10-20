@@ -21,7 +21,7 @@
 	       <!-- rollover daily -->
 	       <fileNamePattern>/var/logs/${P_NAME}/log.%d{yyyy-MM-dd}.%i.bak.zip</fileNamePattern>
 	       <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
-	       <maxFileSize>1GB</maxFileSize>    
+	       <maxFileSize>1GB</maxFileSize>
 	       <maxHistory>30</maxHistory>
 	       <totalSizeCap>10GB</totalSizeCap>
     	</rollingPolicy>
@@ -29,7 +29,7 @@
 			class="net.logstash.logback.encoder.LogstashEncoder">
 			<customFields>{"application":"${P_NAME}"}</customFields>
 		</encoder>
-	</appender> 
+	</appender>
 	<!--myibatis log configure -->
 	<logger name="com.apache.ibatis" level="TRACE" />
 <!--	<logger name="com.galaplat.comprehensive.bidding.dao.mappers" level="TRACE" />-->

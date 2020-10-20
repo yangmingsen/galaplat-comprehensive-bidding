@@ -7,12 +7,17 @@ import com.galaplat.comprehensive.bidding.dao.dos.BiddingDO;
 import com.galaplat.comprehensive.bidding.netty.pojo.ResponseMessage;
 import com.galaplat.comprehensive.bidding.vos.pojo.CustomBidVO;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class SupplierOutProblemHandler extends BaseProblemHandler {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(SupplierOutProblemHandler.class);
+
     @Override
     public void handlerProblem(final int type, final QueueMessage queueMessage) {
         switch (type) {
@@ -46,7 +51,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         final String userCode = queuemsg.getData().get("userCode");
 
         if (userCode != null) { //发给指定的供应商
-            notifyOptionSupplier(message,activityCode,userCode);
+            notifyOptionSupplier(message, activityCode, userCode);
         } else {
             notifyAllSupplier(message, activityCode);
         }
@@ -75,6 +80,7 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
     private void handlerSendOneSupplier(final String activityCode, final Integer goodsId, final String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             final CustomBidVO info = goodsService.getUserBidRankInfoByUserCodeAndActivity(goodsId, userCode, activityCode); //issue sort
+
             ActivityTask activityTask = activityManager.get(activityCode);
             final Boolean parataxis = activityTask.isParataxis(userCode) ? Boolean.TRUE : Boolean.FALSE;
             final boolean needSendBidPercent = activityTask.getBidType() == 2;
@@ -85,13 +91,17 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
             map.put("parataxis", parataxis.toString());
             if (needSendBidPercent) {
                 BiddingDO minBidRecord = biddingService.selectMinBidTableBy(userCode, goodsId, activityCode);
-                map.put("bidPercent", minBidRecord.getBidPercent().toString());
+                if (minBidRecord != null) {
+                    map.put("bidPercent", minBidRecord.getBidPercent().toString());
+                } else {
+                    map.put("bidPercent", "0.00");
+                }
             }
-
 
             //推流到供应商客户端
             final ResponseMessage message = new ResponseMessage(200, map);
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
+
         }
     }
 
@@ -121,16 +131,16 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         takeQueuemsg.getData().put("userCode", null);
 
         final ResponseMessage message = new ResponseMessage(215, takeQueuemsg.getData());
-        notifyOptionSupplier(message ,activityCode, userCode);
+        notifyOptionSupplier(message, activityCode, userCode);
 
         //传递当前活动剩余时长
         final ActivityTask currentActivity = activityManager.get(activityCode);
         if (currentActivity != null) {
             if (currentActivity.getStatus() == 2) { //如果暂停为暂停状态
                 Map<String, String> t_map = new HashMap<>();
-                t_map.put("remainingTime",currentActivity.getRemainingTimeString());
+                t_map.put("remainingTime", currentActivity.getRemainingTimeString());
                 ResponseMessage remainingTimeMessage = new ResponseMessage(100, t_map);
-                notifyOptionSupplier(remainingTimeMessage ,activityCode, userCode);
+                notifyOptionSupplier(remainingTimeMessage, activityCode, userCode);
             }
         }
     }
@@ -142,21 +152,28 @@ public class SupplierOutProblemHandler extends BaseProblemHandler {
         takeQueuemsg.getData().put("goodsId", goodsId);
         final int status = activityManager.get(activityCode).getStatus();
         if (status == 2) {
-            takeQueuemsg.getData().put("status","3");
+            takeQueuemsg.getData().put("status", "3");
         } else {
-            takeQueuemsg.getData().put("status","1");
+            takeQueuemsg.getData().put("status", "1");
         }
 
-        handlerSendOneSupplier(activityCode, new Integer(goodsId), userCode);
-        sendStatusToSomeOne(takeQueuemsg);
+        try {
+            handlerSendOneSupplier(activityCode, new Integer(goodsId), userCode);
+        } catch (Exception e) {
+            LOGGER.info("handler211Problem(ERROR): 异常【" + e.getMessage() + "】");
+        }
+        try {
+            sendStatusToSomeOne(takeQueuemsg);
+        } catch (Exception e) {
+            LOGGER.info("handler211Problem(ERROR): 异常【" + e.getMessage() + "】");
+        }
     }
-
 
 
     private void handler212Problem(final QueueMessage takeQueuemsg) {
         final String activityCode = takeQueuemsg.getData().get("activityCode");
         final ResponseMessage message = new ResponseMessage(212, takeQueuemsg.getData());
-        notifyAllSupplier(message,activityCode);
+        notifyAllSupplier(message, activityCode);
     }
 
 }
