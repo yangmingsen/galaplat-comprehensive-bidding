@@ -30,8 +30,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * 这个类为主要是用于管理端控制台的一些操作，哪些供应商生成，导出，竞标单设计... 请看{@link CompetitiveListManageController}
  *
- * @tel 1710644559@qq.com
  * @author yangmingsen
+ * @tel 1710644559@qq.com
  */
 @RestController
 @RequestMapping("/jbxt/admin")
@@ -56,25 +56,26 @@ public class AdminController extends BaseController {
 
     /**
      * 用于控制活动线程状态
+     *
      * @param activityCode
      * @param goodsId
-     * @param status 主要看这个，具体值看{@link ActivityTask#getStatus()}
+     * @param status       主要看这个，具体值看{@link ActivityTask#getStatus()}
      * @return
      */
     @RequestMapping("/activity/goodsStatus")
     @RestfulResult
-    public Object updateCurrentActivityStatus(String activityCode, Integer goodsId,  Integer status) {
+    public Object updateCurrentActivityStatus(String activityCode, Integer goodsId, Integer status) {
         if (activityCode == null || "".equals(activityCode)) return new MyResult(false, "activityCode不能为空");
         if (status == null) return new MyResult(false, "status不能为null");
 
         final ActivityTask currentActivity = activityThreadManager.get(activityCode);
         MyResult myResult = null;
         if (currentActivity != null) { //下面是处理当活动线程存在的情况
-            LOGGER.info("updateCurrentActivityStatus(INFO): 当前活动线程("+activityCode+")状态[ 状态("+currentActivity.getStatus()+")--" +
-                    "--剩余时长("+currentActivity.getRemainingTime()+")---");
+            LOGGER.info("updateCurrentActivityStatus(INFO): 当前活动线程(" + activityCode + ")状态[ 状态(" + currentActivity.getStatus() + ")--" +
+                    "--剩余时长(" + currentActivity.getRemainingTime() + ")---");
             myResult = this.handlerTheAcitvityThreadExistCondition(activityCode, goodsId, status, currentActivity);
         } else {//不存在情况
-            LOGGER.info("updateCurrentActivityStatus(INFO): 当前活动线程("+activityCode+")不存在,重新启动...");
+            LOGGER.info("updateCurrentActivityStatus(INFO): 当前活动线程(" + activityCode + ")不存在,重新启动...");
             myResult = this.handlerTheAcitvityThreadNotExistCondition(activityCode, goodsId);
         }
         return myResult;
@@ -94,6 +95,7 @@ public class AdminController extends BaseController {
 
     /**
      * 切换下一个活动线程
+     *
      * @param activityCode
      * @return
      */
@@ -116,7 +118,7 @@ public class AdminController extends BaseController {
                 LOGGER.info(info);
                 return new MyResult(false, info);
             }
-            LOGGER.info("next(msg): 修改goodsId("+tj.getGoodsId()+")为2");
+            LOGGER.info("next(msg): 修改goodsId(" + tj.getGoodsId() + ")为2");
         }
         //当设置了当前竞品为结束状态后，就得考虑下一个竞品启动了
         return switchActivityGoods(activityCode);
@@ -125,6 +127,7 @@ public class AdminController extends BaseController {
 
     /**
      * 处理存在活动线程情况
+     *
      * @param activityCode
      * @param goodsId
      * @param status
@@ -132,19 +135,21 @@ public class AdminController extends BaseController {
      * @return
      */
     private MyResult handlerTheAcitvityThreadExistCondition(String activityCode, Integer goodsId, Integer status, ActivityTask activityTask) {
-        MyResult result = new MyResult(true,"更新成功");
+        MyResult result = new MyResult(true, "更新成功");
 
-        if (status==1 || status == 2) { //如果状态为继续或者暂停 直接Update status
+        if (status == 1 || status == 2) { //如果状态为继续或者暂停 直接Update status
             activityTask.setStatus(status);
         } else if (status == 3) { //处理重置问题
             Lock lock = this.lock;
-            lock.lock();
             try {
+                lock.lock();
                 //先获取当前线程剩余时间
                 final int remainingTime = activityTask.getRemainingTime();
+                LOGGER.info("handlerTheAcitvityThreadExistCondition(INFO): 设置当前活动【"+activityCode+"】状态["+activityTask.getStatus()+"]=>["+status+"] ------剩余时间【"+remainingTime+"】----开始");
                 //先更新状态
                 activityTask.setStatus(status);
-               //如果发现剩余时间为0，再重置的话就重新开启一个线程替代上一个线程
+                LOGGER.info("handlerTheAcitvityThreadExistCondition(INFO): 设置当前活动【"+activityCode+"】状态["+activityTask.getStatus()+"]=>["+status+"] 结束");
+                //如果发现剩余时间为0，再重置的话就重新开启一个线程替代上一个线程
                 if (remainingTime < 0) {
                     String gid = goodsId.toString();
                     int initTime = activityTask.getInitTime() / 60;
@@ -153,8 +158,8 @@ public class AdminController extends BaseController {
                     int allowDelayedTime = activityTask.getInitAllowDelayedTime();
                     int supplierNum = activityTask.getSupplierNum();
                     int bidType = activityTask.getBidType();
-                    boolean startOk = this.startActivityTask(activityCode, gid, initTime,delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum,
+                    boolean startOk = this.startActivityTask(activityCode, gid, initTime, delayedCondition,
+                            allowDelayedLength, allowDelayedTime, supplierNum,
                             bidType);
 
                     if (!startOk) {
@@ -162,10 +167,11 @@ public class AdminController extends BaseController {
                         LOGGER.info(info);
                         result.setInfo(false, info);
                     }
+                    LOGGER.info("handlerTheAcitvityThreadExistCondition(INFO): 重置活动【"+activityCode+"】成功");
                 }
             } catch (Exception e) {
-                LOGGER.info("handlerTheAcitvityThreadExistCondition(ERROR): "+e.getMessage());
-                result.setInfo(false, "更新失败："+e.getMessage());
+                LOGGER.info("handlerTheAcitvityThreadExistCondition(ERROR): " + e.getMessage());
+                result.setInfo(false, "更新失败：" + e.getMessage());
             } finally {
                 lock.unlock();
             }
@@ -178,6 +184,7 @@ public class AdminController extends BaseController {
 
     /**
      * 处理不存在活动线程情况
+     *
      * @param activityCode
      * @param goodsId
      * @return
@@ -196,7 +203,7 @@ public class AdminController extends BaseController {
 
                 this.startActivityTask(activityCode, goodsId.toString(), goods.getTimeNum(),
                         delayedCondition,
-                        allowDelayedLength,allowDelayedTime, supplierNum,
+                        allowDelayedLength, allowDelayedTime, supplierNum,
                         bidType);
             }
             return new MyResult(true, "更新成功");
@@ -209,6 +216,7 @@ public class AdminController extends BaseController {
 
     /**
      * 做一些校验
+     *
      * @param activityCode
      * @return
      */
@@ -229,6 +237,7 @@ public class AdminController extends BaseController {
 
     /**
      * 切换下一个竞品
+     *
      * @param activityCode
      * @return
      */
@@ -258,7 +267,7 @@ public class AdminController extends BaseController {
                     }
                     //然后更新当前竞品状态
                     goodsService.updateJbxtGoods(newGoodsStatus);
-                    LOGGER.info("switchActivityGoods(msg): 切换下一竞品goodsId("+newGoodsStatus.getGoodsId()+")为1");
+                    LOGGER.info("switchActivityGoods(msg): 切换下一竞品goodsId(" + newGoodsStatus.getGoodsId() + ")为1");
                     switchOk = true;
                 } catch (Exception e) {
                     LOGGER.info("next(ERROR): 更新状态为开始失败");
@@ -275,7 +284,7 @@ public class AdminController extends BaseController {
 
                     startActivityTask(activityCode, currentGoods.getGoodsId().toString(),
                             currentGoods.getTimeNum(), delayedCondition,
-                            allowDelayedLength,allowDelayedTime, supplierNum, bidType);
+                            allowDelayedLength, allowDelayedTime, supplierNum, bidType);
 
                     //这个目的是为了通知所有供应商 你们关注的竞品活动开始了
                     notify214Event(activityCode, currentGoods.getGoodsId());
@@ -302,7 +311,7 @@ public class AdminController extends BaseController {
                     activityThreadManager.remove(activityCode);
                     updateActivityStatus = true;
                 } catch (Exception e) {
-                    LOGGER.info("switchActivityGoods(ERROR): 更新活动("+activityCode+")结束结束失败");
+                    LOGGER.info("switchActivityGoods(ERROR): 更新活动(" + activityCode + ")结束结束失败");
                 }
 
                 if (updateActivityStatus) {
@@ -320,6 +329,7 @@ public class AdminController extends BaseController {
 
     /**
      * 消息事件：通知所有供应商端 退出登录
+     *
      * @param activityCode
      */
     private void notify216Event(String activityCode) {
@@ -330,6 +340,7 @@ public class AdminController extends BaseController {
 
     /**
      * 通知所有供应商端 更新下一个竞品活动
+     *
      * @param activityCode
      * @param goodsId
      */
@@ -343,6 +354,7 @@ public class AdminController extends BaseController {
 
     /**
      * 关闭上一个活动线程
+     *
      * @param activityCode
      */
     private void closeLastActivityThread(String activityCode) {
@@ -357,6 +369,7 @@ public class AdminController extends BaseController {
 
     /**
      * 启动一个活动线程
+     *
      * @param activityCode
      * @param goodsId
      * @param initTime
@@ -368,7 +381,7 @@ public class AdminController extends BaseController {
      * @return
      */
     private boolean startActivityTask(String activityCode, String goodsId, int initTime, int delayedCondition,
-                                      int allowDelayedLength,  int allowDelayedTime, int supplierNum, int bidType) {
+                                      int allowDelayedLength, int allowDelayedTime, int supplierNum, int bidType) {
         boolean startOK = true;
         try {
             closeLastActivityThread(activityCode);
@@ -376,7 +389,7 @@ public class AdminController extends BaseController {
             final ActivityTask.Builder newActivityTaskBuiler = new ActivityTask.Builder();
             newActivityTaskBuiler.activityCode(activityCode).
                     goodsId(Integer.parseInt(goodsId)).
-                    initTime(initTime*60).
+                    initTime(initTime * 60).
                     delayedCondition(delayedCondition).
                     allowDelayedLength(allowDelayedLength).
                     allowDelayedTime(allowDelayedTime).
@@ -385,7 +398,7 @@ public class AdminController extends BaseController {
 
             ActivityTask newActivityTask = newActivityTaskBuiler.build();
             activityThreadManager.put(activityCode, newActivityTask);
-            LOGGER.info("startActivityTask(INFO): 准备启动活动("+activityCode+")------竞品("+goodsId+")");
+            LOGGER.info("startActivityTask(INFO): 准备启动活动(" + activityCode + ")------竞品(" + goodsId + ")");
             activityThreadManager.doTask(newActivityTask);
             //  newActivityThread.start();
 

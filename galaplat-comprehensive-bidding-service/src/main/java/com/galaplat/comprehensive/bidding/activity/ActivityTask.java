@@ -214,8 +214,8 @@ public class ActivityTask implements Runnable {
         if (this.status != 2) {
 
             final ReentrantLock lock = this.lock;
-            lock.lock();
             try {
+                lock.lock();
                 this.continueRun.signal();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -225,6 +225,7 @@ public class ActivityTask implements Runnable {
 
             if (this.status == 3) {
                 this.resetActivity();
+                LOGGER.info("setStatus(INFO): 已重置活动【"+currentActivityCode+"】数据");
             }
 
             //通知供应商端 继续
