@@ -734,6 +734,7 @@ public class ActivityTask implements Runnable {
     }
 
     private void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
+        //#问题 如果当前userCode的Channel不存在 就会发生NPL
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
