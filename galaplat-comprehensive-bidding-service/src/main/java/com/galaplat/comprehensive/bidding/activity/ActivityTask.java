@@ -724,6 +724,9 @@ public class ActivityTask implements Runnable {
 
     private void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
+            if (message.getType() == 200) {
+                LOGGER.info("notifyOptionSupplier(INFO): 当前活动("+activityCode+") 向客户端("+userCode+"发送消息【"+message.getData()+"】");
+            }
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
     }
