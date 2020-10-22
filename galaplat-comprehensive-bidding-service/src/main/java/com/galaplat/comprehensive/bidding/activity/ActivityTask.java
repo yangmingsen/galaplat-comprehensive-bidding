@@ -546,9 +546,9 @@ public class ActivityTask implements Runnable {
 //                        put("bidPercent", minBidRecord.getBidPercent());
                     }
                 }});
-
-
+                LOGGER.info("handleRank(INFO): 【准备】推送最新排名数据到各个供应商端");
                 notifyOptionSupplier(responseMessage, activityCode, supplierCode);
+                LOGGER.info("handleRank(INFO): 【完成】推送最新排名数据到各个供应商端");
             }
         }
 
