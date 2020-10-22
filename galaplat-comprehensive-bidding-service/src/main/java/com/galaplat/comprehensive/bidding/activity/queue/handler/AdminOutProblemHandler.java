@@ -251,7 +251,9 @@ public class AdminOutProblemHandler extends BaseProblemHandler {
         }
         //推数据给管理端
         final ResponseMessage message = new ResponseMessage(301, res301);
+        LOGGER.info("handler301Problem(INFO): 准备推送竞价数据【"+message.getData()+"】到管理端");
         notifyAllAdmin(message, activityCode);
+        LOGGER.info("handler301Problem(INFO): 已经推送竞价数据【"+message.getData()+"】到管理端");
     }
 
 }

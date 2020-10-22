@@ -124,30 +124,18 @@ public class SupplierInProblemHandler extends BaseProblemHandler {
         map301.put("goodsId", goodsId.toString());
         map301.put("bidType", bidType+"");
 //        map301.put("bidPercent", bidPercent.toString());
-        messageQueue.offer(new QueueMessage(301, map301));
+        try {
+             messageQueue.offer(new QueueMessage(301, map301));
+        } catch (Exception e)  {
+            LOGGER.info("saveBidDataToDB(ERROR): 推送竞价数据至管理端异常【"+e.getMessage()+"】");
+        }
 
-//        final Map<String, Object> map200 = new HashMap();
-//        map200.put("activityCode", activityCode);
-//        map200.put("userCode", userCode);
-//        map200.put("goodsId", goodsId.toString());
-//        map200.put("bidPrice", bid);
-//        ObjectQueueMessage msg = new ObjectQueueMessage(200, map200);
+        try {
+            currentActivity.handleRank();
+        } catch (Exception e) {
+            LOGGER.info("saveBidDataToDB(ERROR): 计算竞价排名时异常【"+e.getMessage()+"】");
+        }
 
-        currentActivity.handleRank();
-
-       // currentActivity.recvBidMessage(msg);
-
-
-/*
-        //
-        final Map<String, String> map200 = new HashMap();
-        map200.put("activityCode", activityCode);
-        map200.put("goodsId", goodsId.toString());
-        messageQueue.offer(new QueueMessage(200,map200));
-
-        //检查是否更新top提示
-        final List<BiddingDVO> theTopBids = iJbxtBiddingService.getTheTopBids(goodsId, activityCode);
-        activityManager.get(activityCode).updateTopMinBid(theTopBids);*/
     }
 
 }

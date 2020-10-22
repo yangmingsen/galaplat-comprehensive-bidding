@@ -518,6 +518,7 @@ public class ActivityTask implements Runnable {
         }
 
 
+        LOGGER.info("handleRank(INFO): 【准备】推送最新排名数据到各个供应商端");
         //推送各个供应商排名信息
         for (Map.Entry<Double, Map<String, RankInfo>> priceGroup : rankInfoMap.entrySet()) {
             Map<String, RankInfo> supplierRankMap = priceGroup.getValue();
@@ -547,10 +548,15 @@ public class ActivityTask implements Runnable {
                     }
                 }});
 
+                try {
+                    notifyOptionSupplier(responseMessage, activityCode, supplierCode);
+                } catch (Exception e) {
+                    LOGGER.info("handleRank(ERROR): 当前活动("+activityCode+")--往供应商【"+supplierCode+"】发送数据【"+responseMessage.getData()+"】异常: "+e.getMessage());
+                }
 
-                notifyOptionSupplier(responseMessage, activityCode, supplierCode);
             }
         }
+        LOGGER.info("handleRank(INFO): 【完成】推送最新排名数据到各个供应商端");
 
     }
 
@@ -728,10 +734,8 @@ public class ActivityTask implements Runnable {
     }
 
     private void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
+        //#问题 如果当前userCode的Channel不存在 就会发生NPL
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            if (message.getType() == 200) {
-                LOGGER.info("notifyOptionSupplier(INFO): 当前活动("+activityCode+") 向客户端("+userCode+"发送消息【"+message.getData()+"】");
-            }
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
     }
