@@ -518,6 +518,7 @@ public class ActivityTask implements Runnable {
         }
 
 
+        LOGGER.info("handleRank(INFO): 【准备】推送最新排名数据到各个供应商端");
         //推送各个供应商排名信息
         for (Map.Entry<Double, Map<String, RankInfo>> priceGroup : rankInfoMap.entrySet()) {
             Map<String, RankInfo> supplierRankMap = priceGroup.getValue();
@@ -546,11 +547,12 @@ public class ActivityTask implements Runnable {
 //                        put("bidPercent", minBidRecord.getBidPercent());
                     }
                 }});
-                LOGGER.info("handleRank(INFO): 【准备】推送最新排名数据到各个供应商端");
+
                 notifyOptionSupplier(responseMessage, activityCode, supplierCode);
-                LOGGER.info("handleRank(INFO): 【完成】推送最新排名数据到各个供应商端");
+
             }
         }
+        LOGGER.info("handleRank(INFO): 【完成】推送最新排名数据到各个供应商端");
 
     }
 
