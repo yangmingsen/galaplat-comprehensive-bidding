@@ -538,7 +538,12 @@ public class ActivityTask implements Runnable {
                     put("parataxis", parataxis.toString());
                     if (needSendBidPercent) {
                         BiddingDO minBidRecord = biddingService.selectMinBidTableBy(supplierCode, new Integer(goodsId), activityCode);
-                        put("bidPercent", minBidRecord.getBidPercent());
+                        if (minBidRecord != null) {
+                            put("bidPercent", minBidRecord.getBidPercent());
+                        } else {
+                            put("bidPercent", "0.00");
+                        }
+//                        put("bidPercent", minBidRecord.getBidPercent());
                     }
                 }});
 
