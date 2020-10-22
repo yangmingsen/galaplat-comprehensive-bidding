@@ -548,7 +548,11 @@ public class ActivityTask implements Runnable {
                     }
                 }});
 
-                notifyOptionSupplier(responseMessage, activityCode, supplierCode);
+                try {
+                    notifyOptionSupplier(responseMessage, activityCode, supplierCode);
+                } catch (Exception e) {
+                    LOGGER.info("handleRank(ERROR): 当前活动("+activityCode+")--往供应商【"+supplierCode+"】发送数据【"+responseMessage.getData()+"】异常: "+e.getMessage());
+                }
 
             }
         }
@@ -731,9 +735,6 @@ public class ActivityTask implements Runnable {
 
     private void notifyOptionSupplier(ResponseMessage message, String activityCode, String userCode) {
         if (userChannelMap.getUserFocusActivity(userCode).equals(activityCode)) {
-            if (message.getType() == 200) {
-                LOGGER.info("notifyOptionSupplier(INFO): 当前活动("+activityCode+") 向客户端("+userCode+"发送消息【"+message.getData()+"】");
-            }
             userChannelMap.get(userCode).writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message)));
         }
     }
