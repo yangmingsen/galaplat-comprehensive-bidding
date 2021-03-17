@@ -474,7 +474,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
                     .code(e.getCode())
                     .goodsName(e.getName())
                     .firstPrice(e.getFirstPrice())
-                    .retainPrice(e.getFirstPrice())
+                    .retainPrice(e.getRetainPrice())
                     .yearPurchaseNum(e.getNum())
                     .bidTimeNum(e.getTimeNum())
                     .lastChangTime(e.getLastChangTime())
