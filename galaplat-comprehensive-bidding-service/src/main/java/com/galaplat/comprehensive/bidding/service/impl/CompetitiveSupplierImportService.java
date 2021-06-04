@@ -230,7 +230,8 @@ public class CompetitiveSupplierImportService implements IImportSubMethodWithPar
         }
 
         if (StringUtils.isNotBlank(emailAddress)) {
-            if (!RegexUtils.isEmail(emailAddress)) {
+            String emialPatten = "^([a-z0-9A-Z]+[_-|\\.|-]?)+[a-z0-9A-Z_]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$";
+            if (!emailAddress.matches(emialPatten)) {
                 error.append("邮箱地址格式错误！");
             } else {
                 if (!addingEmailMap.containsKey(emailAddress)) {
