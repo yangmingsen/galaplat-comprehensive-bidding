@@ -945,7 +945,7 @@ public class CompetitiveListManageServiceImpl implements ICompetitiveListManageS
 
         if (StringUtils.isNotBlank(emailAddress)) {
             // 发送邮件
-            mailSendResult = messageClient.sendfileWithCustomizeAddresser(emailAddress, "竞标活动通知", emailContent,
+            mailSendResult = messageClient.sendfileWithCustomizeAddresser(emailAddress, "竞标活动通知" + bidActivityCode, emailContent,
                     bidEmailHost, bidEmailAddress, bidEmailPassword , multipartFile);
         }
 
