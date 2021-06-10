@@ -5,19 +5,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class MessageQueue {
-    private final BlockingQueue<QueueMessage> blockingQueue = new ArrayBlockingQueue<>(6000);;
+    private final ConcurrentLinkedQueue<QueueMessage> queue = new ConcurrentLinkedQueue<>();;
     private final Logger LOGGER = LoggerFactory.getLogger(MessageQueue.class);
     /***
      * 如果试图的操作无法立即执行，返回一个特定的值(常常是 true / false)。
      */
     public boolean offer(QueueMessage queueMessage) {
         LOGGER.info("offer(ms): 消息队列收到消息"+queueMessage.toString());
-        return this.blockingQueue.offer(queueMessage);
+
+        //记录消息至DB
+
+        return this.queue.offer(queueMessage);
     }
 
     /***
@@ -26,8 +29,10 @@ public class MessageQueue {
      */
     public QueueMessage take() {
         try {
-            return this.blockingQueue.take();
-        } catch (InterruptedException e) {
+            //标记消费消息 sync至DB
+
+            return this.queue.poll();
+        } catch (Exception e) {
             LOGGER.info("take(ERROR): 我在take数据报错,错误信息["+e.getMessage()+"]");
         }
         return null;
@@ -40,7 +45,7 @@ public class MessageQueue {
      * @return the head of this queue, or {@code null} if this queue is empty
      */
     public QueueMessage poll() {
-        return this.blockingQueue.poll();
+        return this.queue.poll();
     }
 
     /**
@@ -50,7 +55,7 @@ public class MessageQueue {
      * @return the head of this queue, or {@code null} if this queue is empty
      */
     public QueueMessage peek() {
-        return this.blockingQueue.peek();
+        return this.queue.peek();
     }
 
 
